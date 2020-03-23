@@ -12,7 +12,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class ExampleEntity extends Entity {
+export class Pool extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -20,17 +20,48 @@ export class ExampleEntity extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save ExampleEntity entity without an ID");
+    assert(id !== null, "Cannot save Pool entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save ExampleEntity entity with non-string ID. " +
+      "Cannot save Pool entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("ExampleEntity", id.toString(), this);
+    store.set("Pool", id.toString(), this);
   }
 
-  static load(id: string): ExampleEntity | null {
-    return store.get("ExampleEntity", id) as ExampleEntity | null;
+  static load(id: string): Pool | null {
+    return store.get("Pool", id) as Pool | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+}
+
+export class Loan extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Loan entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Loan entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Loan", id.toString(), this);
+  }
+
+  static load(id: string): Loan | null {
+    return store.get("Loan", id) as Loan | null;
   }
 
   get id(): string {
@@ -42,30 +73,21 @@ export class ExampleEntity extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get count(): BigInt {
-    let value = this.get("count");
+  get idInPool(): string {
+    let value = this.get("idInPool");
+    return value.toString();
+  }
+
+  set idInPool(value: string) {
+    this.set("idInPool", Value.fromString(value));
+  }
+
+  get debt(): BigInt {
+    let value = this.get("debt");
     return value.toBigInt();
   }
 
-  set count(value: BigInt) {
-    this.set("count", Value.fromBigInt(value));
-  }
-
-  get sig(): Bytes {
-    let value = this.get("sig");
-    return value.toBytes();
-  }
-
-  set sig(value: Bytes) {
-    this.set("sig", Value.fromBytes(value));
-  }
-
-  get guy(): Bytes {
-    let value = this.get("guy");
-    return value.toBytes();
-  }
-
-  set guy(value: Bytes) {
-    this.set("guy", Value.fromBytes(value));
+  set debt(value: BigInt) {
+    this.set("debt", Value.fromBigInt(value));
   }
 }

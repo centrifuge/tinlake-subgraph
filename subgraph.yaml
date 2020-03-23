@@ -1,23 +1,25 @@
 specVersion: 0.0.2
+description: Tinlake
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Contract
+    name: Pile
     network: kovan
     source:
       address: "0x49984134aa0d66e82d94475e2a6bf69bd4398905"
-      abi: Contract
+      abi: Pile
+      startBlock: 17122162
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
-        - LogNote
+        - Pool
+        - Loan
       abis:
-        - name: Contract
-          file: ./abis/Contract.json
-      eventHandlers:
-        - event: LogNote(indexed bytes4,indexed address,indexed bytes32,indexed bytes32,uint256,bytes)
-          handler: handleLogNote
+        - name: Pile
+          file: ./abis/Pile.json
+      blockHandlers:
+        - handler: handleBlock
       file: ./src/mapping.ts

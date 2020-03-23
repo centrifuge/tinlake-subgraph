@@ -1,6 +1,9 @@
-type ExampleEntity @entity {
+type Pool @entity {
   id: ID!
-  count: BigInt!
-  sig: Bytes! # bytes4
-  guy: Bytes! # address
+}
+
+type Loan @entity {
+  id: ID!
+  idInPool: ID!
+  debt: BigInt!
 }

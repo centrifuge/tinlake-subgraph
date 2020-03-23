@@ -53,7 +53,7 @@ export class LogNote__Params {
   }
 }
 
-export class Contract__compoundingResult {
+export class Pile__compoundingResult {
   value0: BigInt;
   value1: BigInt;
 
@@ -70,7 +70,7 @@ export class Contract__compoundingResult {
   }
 }
 
-export class Contract__ratesResult {
+export class Pile__ratesResult {
   value0: BigInt;
   value1: BigInt;
   value2: BigInt;
@@ -93,9 +93,9 @@ export class Contract__ratesResult {
   }
 }
 
-export class Contract extends SmartContract {
-  static bind(address: Address): Contract {
-    return new Contract("Contract", address);
+export class Pile extends SmartContract {
+  static bind(address: Address): Pile {
+    return new Pile("Pile", address);
   }
 
   chargeInterest(
@@ -134,7 +134,7 @@ export class Contract extends SmartContract {
     ratePerSecond: BigInt,
     lastUpdated: BigInt,
     pie: BigInt
-  ): Contract__compoundingResult {
+  ): Pile__compoundingResult {
     let result = super.call("compounding", [
       EthereumValue.fromUnsignedBigInt(chi),
       EthereumValue.fromUnsignedBigInt(ratePerSecond),
@@ -142,7 +142,7 @@ export class Contract extends SmartContract {
       EthereumValue.fromUnsignedBigInt(pie)
     ]);
 
-    return new Contract__compoundingResult(
+    return new Pile__compoundingResult(
       result[0].toBigInt(),
       result[1].toBigInt()
     );
@@ -153,7 +153,7 @@ export class Contract extends SmartContract {
     ratePerSecond: BigInt,
     lastUpdated: BigInt,
     pie: BigInt
-  ): CallResult<Contract__compoundingResult> {
+  ): CallResult<Pile__compoundingResult> {
     let result = super.tryCall("compounding", [
       EthereumValue.fromUnsignedBigInt(chi),
       EthereumValue.fromUnsignedBigInt(ratePerSecond),
@@ -165,7 +165,7 @@ export class Contract extends SmartContract {
     }
     let value = result.value;
     return CallResult.fromValue(
-      new Contract__compoundingResult(value[0].toBigInt(), value[1].toBigInt())
+      new Pile__compoundingResult(value[0].toBigInt(), value[1].toBigInt())
     );
   }
 
@@ -241,12 +241,12 @@ export class Contract extends SmartContract {
     return CallResult.fromValue(value[0].toBigInt());
   }
 
-  rates(param0: BigInt): Contract__ratesResult {
+  rates(param0: BigInt): Pile__ratesResult {
     let result = super.call("rates", [
       EthereumValue.fromUnsignedBigInt(param0)
     ]);
 
-    return new Contract__ratesResult(
+    return new Pile__ratesResult(
       result[0].toBigInt(),
       result[1].toBigInt(),
       result[2].toBigInt(),
@@ -254,7 +254,7 @@ export class Contract extends SmartContract {
     );
   }
 
-  try_rates(param0: BigInt): CallResult<Contract__ratesResult> {
+  try_rates(param0: BigInt): CallResult<Pile__ratesResult> {
     let result = super.tryCall("rates", [
       EthereumValue.fromUnsignedBigInt(param0)
     ]);
@@ -263,7 +263,7 @@ export class Contract extends SmartContract {
     }
     let value = result.value;
     return CallResult.fromValue(
-      new Contract__ratesResult(
+      new Pile__ratesResult(
         value[0].toBigInt(),
         value[1].toBigInt(),
         value[2].toBigInt(),
