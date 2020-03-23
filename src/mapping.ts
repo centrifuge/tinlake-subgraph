@@ -1,68 +1,45 @@
-import { BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
+import { BigInt, EthereumBlock, Address, store, Bytes } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
+import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
+import { Loan, Pool } from "../generated/schema"
 
 export function handleBlock(block: EthereumBlock) {
-  let pile = Pile.bind(Address.fromHexString('0x49984134aa0d66e82d94475e2a6bf69bd4398905'))
+  const pile = Pile.bind(Address.fromHexString('0x49984134aa0d66e82d94475e2a6bf69bd4398905'))
+  const shelf = Shelf.bind(Address.fromHexString('0x49984134aa0d66e82d94475e2a6bf69bd4398905'))
 
-  // iterate through all loans and get the
-  // pile.debt()
+  // iterate through all loans and update all debts
+  const tbd = '0x...' // TODO figure out how to get all the loans
+  const pool = Pool.load(tbd)
+  for (const loanId of pool.loans) {
+    const debt = pile.debt(BigInt.fromUnsignedBytes(Bytes.fromHexString(loanId)))
+    const loan = Loan.load(loanId)
+    loan.debt = debt
+    loan.save()
+  }
 }
 
-// export function handleLogNote(event: LogNote): void {
-//   // Entities can be loaded from the store using a string ID; this ID
-//   // needs to be unique across all entities of the same type
-//   let entity = ExampleEntity.load(event.transaction.from.toHex())
+export function handleNewLoan(call: IssueCall) {
+  const loanId = call.inputs.token_.toHex()
+  const loanIdInPool = call.outputs.value0.toHex()
+  const poolId = call.inputs.registry_.toHex()
 
-//   // Entities only exist after they have been saved to the store;
-//   // `null` checks allow to create entities on demand
-//   if (entity == null) {
-//     entity = new ExampleEntity(event.transaction.from.toHex())
+  let pool = Pool.load(poolId)
+  let poolChanged = false
+  if (pool == null) {
+    pool = new Pool(poolId)
+    poolChanged = true
+  }
+  if (!pool.loans.includes(loanId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
+    pool.loans = [...pool.loans, loanId]
+    poolChanged = true
+  }
+  if (poolChanged) {
+    pool.save()
+  }
 
-//     // Entity fields can be set using simple assignments
-//     entity.count = BigInt.fromI32(0)
-//   }
+  const loan = new Loan(loanId)
+  loan.idInPool = loanIdInPool
+  loan.pool = poolId
 
-//   // BigInt and BigDecimal math are supported
-//   entity.count = entity.count + BigInt.fromI32(1)
-
-//   // Entity fields can be set based on event parameters
-//   entity.sig = event.params.sig
-//   entity.guy = event.params.guy
-
-//   // Entities can be written to the store with `.save()`
-//   entity.save()
-
-//   // Note: If a handler doesn't require existing field values, it is faster
-//   // _not_ to load the entity from the store. Instead, create it fresh with
-//   // `new Entity(...)`, set the fields that should be updated and save the
-//   // entity back to the store. Fields that were not set or unset remain
-//   // unchanged, allowing for partial updates to be applied.
-
-//   // It is also possible to access smart contracts from mappings. For
-//   // example, the contract that has emitted the event can be connected to
-//   // with:
-//   //
-//   // let contract = Contract.bind(event.address)
-//   //
-//   // The following functions can then be called on this contract to access
-//   // state variables and other data:
-//   //
-//   // - contract.chargeInterest(...)
-//   // - contract.compounding(...)
-//   // - contract.debt(...)
-//   // - contract.loanRates(...)
-//   // - contract.pie(...)
-//   // - contract.rateDebt(...)
-//   // - contract.rates(...)
-//   // - contract.rdiv(...)
-//   // - contract.rmul(...)
-//   // - contract.rpow(...)
-//   // - contract.safeAdd(...)
-//   // - contract.safeDiv(...)
-//   // - contract.safeMul(...)
-//   // - contract.safeSub(...)
-//   // - contract.toAmount(...)
-//   // - contract.toPie(...)
-//   // - contract.total(...)
-//   // - contract.wards(...)
-// }
+  loan.save()
+}

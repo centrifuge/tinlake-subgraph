@@ -1,9 +1,11 @@
 type Pool @entity {
   id: ID!
+  loans: [Loan!]! # TODO: maybe transform into a reverse lookup? https://thegraph.com/docs/define-a-subgraph#writing-mappings
 }
 
 type Loan @entity {
   id: ID!
   idInPool: ID!
   debt: BigInt!
+  pool: Pool!
 }

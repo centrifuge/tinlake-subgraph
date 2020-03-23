@@ -41,6 +41,15 @@ export class Pool extends Entity {
   set id(value: string) {
     this.set("id", Value.fromString(value));
   }
+
+  get loans(): Array<string> {
+    let value = this.get("loans");
+    return value.toStringArray();
+  }
+
+  set loans(value: Array<string>) {
+    this.set("loans", Value.fromStringArray(value));
+  }
 }
 
 export class Loan extends Entity {
@@ -89,5 +98,14 @@ export class Loan extends Entity {
 
   set debt(value: BigInt) {
     this.set("debt", Value.fromBigInt(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
   }
 }
