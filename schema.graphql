@@ -3,9 +3,25 @@ type Pool @entity {
   loans: [Loan!]! # TODO: maybe transform into a reverse lookup? https://thegraph.com/docs/define-a-subgraph#writing-mappings
 }
 
+type PoolTS @entity {
+  "Pool time series"
+  id: ID!
+  pool: Pool!
+  timestamp: BigInt!
+  totalDebt: BigInt!
+}
+
 type Loan @entity {
   id: ID!
   idInPool: ID!
   debt: BigInt!
   pool: Pool!
+}
+
+type LoanTS @entity {
+  "Loan time series"
+  id: ID!
+  loan: Loan!
+  timestamp: BigInt!
+  debt: BigInt!
 }

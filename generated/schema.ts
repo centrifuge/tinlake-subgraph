@@ -52,6 +52,64 @@ export class Pool extends Entity {
   }
 }
 
+export class PoolTS extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save PoolTS entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save PoolTS entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("PoolTS", id.toString(), this);
+  }
+
+  static load(id: string): PoolTS | null {
+    return store.get("PoolTS", id) as PoolTS | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get totalDebt(): BigInt {
+    let value = this.get("totalDebt");
+    return value.toBigInt();
+  }
+
+  set totalDebt(value: BigInt) {
+    this.set("totalDebt", Value.fromBigInt(value));
+  }
+}
+
 export class Loan extends Entity {
   constructor(id: string) {
     super();
@@ -107,5 +165,63 @@ export class Loan extends Entity {
 
   set pool(value: string) {
     this.set("pool", Value.fromString(value));
+  }
+}
+
+export class LoanTS extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save LoanTS entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save LoanTS entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("LoanTS", id.toString(), this);
+  }
+
+  static load(id: string): LoanTS | null {
+    return store.get("LoanTS", id) as LoanTS | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get loan(): string {
+    let value = this.get("loan");
+    return value.toString();
+  }
+
+  set loan(value: string) {
+    this.set("loan", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get debt(): BigInt {
+    let value = this.get("debt");
+    return value.toBigInt();
+  }
+
+  set debt(value: BigInt) {
+    this.set("debt", Value.fromBigInt(value));
   }
 }

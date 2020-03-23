@@ -1,20 +1,45 @@
 import { BigInt, EthereumBlock, Address, store, Bytes } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
 import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
-import { Loan, Pool } from "../generated/schema"
+import { Pool, PoolTS, Loan, LoanTS } from "../generated/schema"
 
 export function handleBlock(block: EthereumBlock) {
   const pile = Pile.bind(Address.fromHexString('0x49984134aa0d66e82d94475e2a6bf69bd4398905'))
   const shelf = Shelf.bind(Address.fromHexString('0x49984134aa0d66e82d94475e2a6bf69bd4398905'))
 
   // iterate through all loans and update all debts
-  const tbd = '0x...' // TODO figure out how to get all the loans
-  const pool = Pool.load(tbd)
-  for (const loanId of pool.loans) {
-    const debt = pile.debt(BigInt.fromUnsignedBytes(Bytes.fromHexString(loanId)))
-    const loan = Loan.load(loanId)
-    loan.debt = debt
-    loan.save()
+  const poolIds = [
+    '0x...', // TODO where to get those from?
+  ]
+
+  for (const poolId of poolIds) {
+    const pool = Pool.load(poolId)
+
+    let totalDebt = BigInt.fromI32(0)
+
+    for (const loanId of pool.loans) {
+      const debt = pile.debt(BigInt.fromUnsignedBytes(Bytes.fromHexString(loanId)))
+
+      // update loan
+      const loan = Loan.load(loanId)
+      loan.debt = debt
+      loan.save()
+
+      // add a new point to loan time series
+      let loanTS = new LoanTS(loanId + '-' + block.timestamp.toString())
+      loanTS.debt = debt
+      loanTS.timestamp = block.timestamp
+      loanTS.save()
+
+      // add to total debt for pool
+      totalDebt = totalDebt.plus(debt)
+    }
+
+    // add a new point to pool time series
+    let poolTS = new PoolTS(poolId + '-' + block.timestamp.toString())
+    poolTS.totalDebt = totalDebt
+    poolTS.timestamp = block.timestamp
+    poolTS.save()
   }
 }
 
