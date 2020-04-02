@@ -91,13 +91,13 @@ export class PoolTS extends Entity {
     this.set("pool", Value.fromString(value));
   }
 
-  get timestamp(): BigInt {
+  get timestamp(): i32 {
     let value = this.get("timestamp");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set timestamp(value: BigInt) {
-    this.set("timestamp", Value.fromBigInt(value));
+  set timestamp(value: i32) {
+    this.set("timestamp", Value.fromI32(value));
   }
 
   get totalDebt(): BigInt {
@@ -140,13 +140,49 @@ export class Loan extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get idInPool(): string {
-    let value = this.get("idInPool");
+  get pool(): string {
+    let value = this.get("pool");
     return value.toString();
   }
 
-  set idInPool(value: string) {
-    this.set("idInPool", Value.fromString(value));
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
+  }
+
+  get index(): i32 {
+    let value = this.get("index");
+    return value.toI32();
+  }
+
+  set index(value: i32) {
+    this.set("index", Value.fromI32(value));
+  }
+
+  get owner(): Bytes {
+    let value = this.get("owner");
+    return value.toBytes();
+  }
+
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
+  }
+
+  get opened(): i32 {
+    let value = this.get("opened");
+    return value.toI32();
+  }
+
+  set opened(value: i32) {
+    this.set("opened", Value.fromI32(value));
+  }
+
+  get closed(): i32 {
+    let value = this.get("closed");
+    return value.toI32();
+  }
+
+  set closed(value: i32) {
+    this.set("closed", Value.fromI32(value));
   }
 
   get debt(): BigInt {
@@ -158,13 +194,58 @@ export class Loan extends Entity {
     this.set("debt", Value.fromBigInt(value));
   }
 
-  get pool(): string {
-    let value = this.get("pool");
-    return value.toString();
+  get interestRate(): i32 {
+    let value = this.get("interestRate");
+    return value.toI32();
   }
 
-  set pool(value: string) {
-    this.set("pool", Value.fromString(value));
+  set interestRate(value: i32) {
+    this.set("interestRate", Value.fromI32(value));
+  }
+
+  get threshold(): BigInt {
+    let value = this.get("threshold");
+    return value.toBigInt();
+  }
+
+  set threshold(value: BigInt) {
+    this.set("threshold", Value.fromBigInt(value));
+  }
+
+  get borrowedAmount(): BigInt {
+    let value = this.get("borrowedAmount");
+    return value.toBigInt();
+  }
+
+  set borrowedAmount(value: BigInt) {
+    this.set("borrowedAmount", Value.fromBigInt(value));
+  }
+
+  get borrowedCount(): i32 {
+    let value = this.get("borrowedCount");
+    return value.toI32();
+  }
+
+  set borrowedCount(value: i32) {
+    this.set("borrowedCount", Value.fromI32(value));
+  }
+
+  get repaidAmount(): BigInt {
+    let value = this.get("repaidAmount");
+    return value.toBigInt();
+  }
+
+  set repaidAmount(value: BigInt) {
+    this.set("repaidAmount", Value.fromBigInt(value));
+  }
+
+  get repaidCount(): i32 {
+    let value = this.get("repaidCount");
+    return value.toI32();
+  }
+
+  set repaidCount(value: i32) {
+    this.set("repaidCount", Value.fromI32(value));
   }
 }
 
@@ -207,13 +288,13 @@ export class LoanTS extends Entity {
     this.set("loan", Value.fromString(value));
   }
 
-  get timestamp(): BigInt {
+  get timestamp(): i32 {
     let value = this.get("timestamp");
-    return value.toBigInt();
+    return value.toI32();
   }
 
-  set timestamp(value: BigInt) {
-    this.set("timestamp", Value.fromBigInt(value));
+  set timestamp(value: i32) {
+    this.set("timestamp", Value.fromI32(value));
   }
 
   get debt(): BigInt {
@@ -223,5 +304,59 @@ export class LoanTS extends Entity {
 
   set debt(value: BigInt) {
     this.set("debt", Value.fromBigInt(value));
+  }
+
+  get interestRate(): i32 {
+    let value = this.get("interestRate");
+    return value.toI32();
+  }
+
+  set interestRate(value: i32) {
+    this.set("interestRate", Value.fromI32(value));
+  }
+
+  get threshold(): BigInt {
+    let value = this.get("threshold");
+    return value.toBigInt();
+  }
+
+  set threshold(value: BigInt) {
+    this.set("threshold", Value.fromBigInt(value));
+  }
+
+  get borrowedAmount(): BigInt {
+    let value = this.get("borrowedAmount");
+    return value.toBigInt();
+  }
+
+  set borrowedAmount(value: BigInt) {
+    this.set("borrowedAmount", Value.fromBigInt(value));
+  }
+
+  get borrowedCount(): i32 {
+    let value = this.get("borrowedCount");
+    return value.toI32();
+  }
+
+  set borrowedCount(value: i32) {
+    this.set("borrowedCount", Value.fromI32(value));
+  }
+
+  get repaidAmount(): BigInt {
+    let value = this.get("repaidAmount");
+    return value.toBigInt();
+  }
+
+  set repaidAmount(value: BigInt) {
+    this.set("repaidAmount", Value.fromBigInt(value));
+  }
+
+  get repaidCount(): i32 {
+    let value = this.get("repaidCount");
+    return value.toI32();
+  }
+
+  set repaidCount(value: i32) {
+    this.set("repaidCount", Value.fromI32(value));
   }
 }

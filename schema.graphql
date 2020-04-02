@@ -7,21 +7,69 @@ type PoolTS @entity {
   "Pool time series"
   id: ID!
   pool: Pool!
-  timestamp: BigInt!
+  timestamp: Int!
   totalDebt: BigInt!
 }
 
 type Loan @entity {
   id: ID!
-  idInPool: ID!
-  debt: BigInt!
   pool: Pool!
+  index: Int!
+  owner: Bytes!
+  opened: Int!
+  closed: Int
 }
 
-type LoanTS @entity {
-  "Loan time series"
+type LoanDebtTS @entity {
+  "Loan debt time series"
   id: ID!
   loan: Loan!
-  timestamp: BigInt!
+  timestamp: Int!
   debt: BigInt!
+}
+
+type LoanInterestRateTS @entity {
+  "Loan interest rate time series"
+  id: ID!
+  loan: Loan!
+  timestamp: Int!
+  interestRate: Int!
+}
+
+type LoanThresholdTS @entity {
+  "Loan threshold time series"
+  id: ID!
+  loan: Loan!
+  timestamp: Int!
+  threshold: BigInt!
+}
+
+type BorrowTS @entity {
+  "Borrow time series"
+  id: ID!
+  loan: Loan!
+  timestamp: Int!
+  amountAgg: BigInt!
+  countAgg: Int!
+}
+
+type RepaymentTS @entity {
+  "Repayment time series"
+  id: ID!
+  loan: Loan!
+  timestamp: Int!
+  amountAgg: BigInt!
+  countAgg: Int!
+}
+
+type Loan @entity {
+  id: ID!
+  pool: Pool!
+  index: Int!
+  owner: Bytes!
+  opened: Int!
+  closed: Int
+  debt: BigInt!
+  interestRate: Int!
+  threshold: BigInt!
 }
