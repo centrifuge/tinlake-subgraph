@@ -50,55 +50,6 @@ export class Pool extends Entity {
   set loans(value: Array<string>) {
     this.set("loans", Value.fromStringArray(value));
   }
-}
-
-export class PoolTS extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save PoolTS entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save PoolTS entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("PoolTS", id.toString(), this);
-  }
-
-  static load(id: string): PoolTS | null {
-    return store.get("PoolTS", id) as PoolTS | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get pool(): string {
-    let value = this.get("pool");
-    return value.toString();
-  }
-
-  set pool(value: string) {
-    this.set("pool", Value.fromString(value));
-  }
-
-  get timestamp(): i32 {
-    let value = this.get("timestamp");
-    return value.toI32();
-  }
-
-  set timestamp(value: i32) {
-    this.set("timestamp", Value.fromI32(value));
-  }
 
   get totalDebt(): BigInt {
     let value = this.get("totalDebt");
@@ -203,116 +154,13 @@ export class Loan extends Entity {
     this.set("interestRate", Value.fromI32(value));
   }
 
-  get threshold(): BigInt {
-    let value = this.get("threshold");
+  get ceiling(): BigInt {
+    let value = this.get("ceiling");
     return value.toBigInt();
   }
 
-  set threshold(value: BigInt) {
-    this.set("threshold", Value.fromBigInt(value));
-  }
-
-  get borrowedAmount(): BigInt {
-    let value = this.get("borrowedAmount");
-    return value.toBigInt();
-  }
-
-  set borrowedAmount(value: BigInt) {
-    this.set("borrowedAmount", Value.fromBigInt(value));
-  }
-
-  get borrowedCount(): i32 {
-    let value = this.get("borrowedCount");
-    return value.toI32();
-  }
-
-  set borrowedCount(value: i32) {
-    this.set("borrowedCount", Value.fromI32(value));
-  }
-
-  get repaidAmount(): BigInt {
-    let value = this.get("repaidAmount");
-    return value.toBigInt();
-  }
-
-  set repaidAmount(value: BigInt) {
-    this.set("repaidAmount", Value.fromBigInt(value));
-  }
-
-  get repaidCount(): i32 {
-    let value = this.get("repaidCount");
-    return value.toI32();
-  }
-
-  set repaidCount(value: i32) {
-    this.set("repaidCount", Value.fromI32(value));
-  }
-}
-
-export class LoanTS extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save LoanTS entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save LoanTS entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("LoanTS", id.toString(), this);
-  }
-
-  static load(id: string): LoanTS | null {
-    return store.get("LoanTS", id) as LoanTS | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get loan(): string {
-    let value = this.get("loan");
-    return value.toString();
-  }
-
-  set loan(value: string) {
-    this.set("loan", Value.fromString(value));
-  }
-
-  get timestamp(): i32 {
-    let value = this.get("timestamp");
-    return value.toI32();
-  }
-
-  set timestamp(value: i32) {
-    this.set("timestamp", Value.fromI32(value));
-  }
-
-  get debt(): BigInt {
-    let value = this.get("debt");
-    return value.toBigInt();
-  }
-
-  set debt(value: BigInt) {
-    this.set("debt", Value.fromBigInt(value));
-  }
-
-  get interestRate(): i32 {
-    let value = this.get("interestRate");
-    return value.toI32();
-  }
-
-  set interestRate(value: i32) {
-    this.set("interestRate", Value.fromI32(value));
+  set ceiling(value: BigInt) {
+    this.set("ceiling", Value.fromBigInt(value));
   }
 
   get threshold(): BigInt {
@@ -324,39 +172,39 @@ export class LoanTS extends Entity {
     this.set("threshold", Value.fromBigInt(value));
   }
 
-  get borrowedAmount(): BigInt {
-    let value = this.get("borrowedAmount");
-    return value.toBigInt();
-  }
-
-  set borrowedAmount(value: BigInt) {
-    this.set("borrowedAmount", Value.fromBigInt(value));
-  }
-
-  get borrowedCount(): i32 {
-    let value = this.get("borrowedCount");
+  get borrowsCount(): i32 {
+    let value = this.get("borrowsCount");
     return value.toI32();
   }
 
-  set borrowedCount(value: i32) {
-    this.set("borrowedCount", Value.fromI32(value));
+  set borrowsCount(value: i32) {
+    this.set("borrowsCount", Value.fromI32(value));
   }
 
-  get repaidAmount(): BigInt {
-    let value = this.get("repaidAmount");
+  get borrowsAggregatedAmount(): BigInt {
+    let value = this.get("borrowsAggregatedAmount");
     return value.toBigInt();
   }
 
-  set repaidAmount(value: BigInt) {
-    this.set("repaidAmount", Value.fromBigInt(value));
+  set borrowsAggregatedAmount(value: BigInt) {
+    this.set("borrowsAggregatedAmount", Value.fromBigInt(value));
   }
 
-  get repaidCount(): i32 {
-    let value = this.get("repaidCount");
+  get repaysCount(): i32 {
+    let value = this.get("repaysCount");
     return value.toI32();
   }
 
-  set repaidCount(value: i32) {
-    this.set("repaidCount", Value.fromI32(value));
+  set repaysCount(value: i32) {
+    this.set("repaysCount", Value.fromI32(value));
+  }
+
+  get repaysAggregatedAmount(): BigInt {
+    let value = this.get("repaysAggregatedAmount");
+    return value.toBigInt();
+  }
+
+  set repaysAggregatedAmount(value: BigInt) {
+    this.set("repaysAggregatedAmount", Value.fromBigInt(value));
   }
 }

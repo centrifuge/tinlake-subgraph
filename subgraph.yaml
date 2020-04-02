@@ -23,22 +23,24 @@ dataSources:
       blockHandlers:
         - handler: handleBlock
       file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: Shelf
-    network: kovan
-    source:
-      address: "0x6d30460f33e2d8266105a9523e028fd66c6ad296"
-      abi: Shelf
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Loan
-      abis:
-        - name: Shelf
-          file: ./abis/Shelf.json
-      callHandlers:
-        - function: issue(address,uint256)
-          handler: handleNewLoan
-      file: ./src/mapping.ts
+  # - kind: ethereum/contract
+  #   name: Shelf
+  #   network: kovan
+  #   source:
+  #     address: "0x6d30460f33e2d8266105a9523e028fd66c6ad296"
+  #     abi: Shelf
+  #     startBlock: 17122162
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.3
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - Pool
+  #       - Loan
+  #     abis:
+  #       - name: Shelf
+  #         file: ./abis/Shelf.json
+  #     callHandlers:
+  #       - function: issue(address,uint256)
+  #         handler: handleNewLoan
+  #     file: ./src/mapping.ts

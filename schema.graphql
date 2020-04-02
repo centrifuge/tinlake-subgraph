@@ -1,13 +1,6 @@
 type Pool @entity {
   id: ID!
   loans: [Loan!]! # TODO: maybe transform into a reverse lookup? https://thegraph.com/docs/define-a-subgraph#writing-mappings
-}
-
-type PoolTS @entity {
-  "Pool time series"
-  id: ID!
-  pool: Pool!
-  timestamp: Int!
   totalDebt: BigInt!
 }
 
@@ -18,58 +11,12 @@ type Loan @entity {
   owner: Bytes!
   opened: Int!
   closed: Int
-}
-
-type LoanDebtTS @entity {
-  "Loan debt time series"
-  id: ID!
-  loan: Loan!
-  timestamp: Int!
-  debt: BigInt!
-}
-
-type LoanInterestRateTS @entity {
-  "Loan interest rate time series"
-  id: ID!
-  loan: Loan!
-  timestamp: Int!
-  interestRate: Int!
-}
-
-type LoanThresholdTS @entity {
-  "Loan threshold time series"
-  id: ID!
-  loan: Loan!
-  timestamp: Int!
-  threshold: BigInt!
-}
-
-type BorrowTS @entity {
-  "Borrow time series"
-  id: ID!
-  loan: Loan!
-  timestamp: Int!
-  amountAgg: BigInt!
-  countAgg: Int!
-}
-
-type RepaymentTS @entity {
-  "Repayment time series"
-  id: ID!
-  loan: Loan!
-  timestamp: Int!
-  amountAgg: BigInt!
-  countAgg: Int!
-}
-
-type Loan @entity {
-  id: ID!
-  pool: Pool!
-  index: Int!
-  owner: Bytes!
-  opened: Int!
-  closed: Int
   debt: BigInt!
   interestRate: Int!
+  ceiling: BigInt!
   threshold: BigInt!
+  borrowsCount: Int!
+  borrowsAggregatedAmount: BigInt!
+  repaysCount: Int!
+  repaysAggregatedAmount: BigInt!
 }
