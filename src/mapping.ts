@@ -1,44 +1,54 @@
-import { BigInt, EthereumBlock, Address, store, Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
 import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
 import { Pool, Loan } from "../generated/schema"
 import { idToBigInt } from "./util"
 
-interface PoolMeta {
-  id: string // root conract address
-  pile: string // pile contract address
-  shelf: string // shelf contract address
-  networkId: 'kovan' | 'mainnet'
+enum network {
+  mainnet,
+  kovan,
 }
 
-const poolMetas: PoolMeta[] = [
+class PoolMeta {
+  id: string // root contract address
+  pile: string // pile contract address
+  shelf: string // shelf contract address
+  networkId: network
+}
+
+let poolMetas: PoolMeta[] = [
   {
     id: '0x31738b2b0d8864822ce2db48dbc5c6521a9af260',
     pile: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
     shelf: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
-    networkId: 'kovan'
+    networkId: network.kovan,
   },
 ]
 
 // lookup that contains the pool indexed by shelf
-const poolMetaByShelf: { [shelf: string]: PoolMeta } = poolMetas.reduce((prev, curr) => prev[curr.shelf] = curr, {})
+// const poolMetaByShelf: { [shelf: string]: PoolMeta } = poolMetas.reduce((prev, curr) => prev[curr.shelf] = curr, {})
 
-export function handleBlock(block: EthereumBlock) {
+export function handleBlock(block: EthereumBlock): void {
   // iterate through all pools
-  for (const poolMeta of poolMetas) {
-    const pile = Pile.bind(Address.fromHexString(poolMeta.pile))
-    const shelf = Shelf.bind(Address.fromHexString(poolMeta.shelf))
+  for (let i = 0; i < poolMetas.length; i++) {
+    let poolMeta = poolMetas[i]
 
-    const pool = Pool.load(poolMeta.id)
+    let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
+    // const shelf = Shelf.bind(Address.fromHexString(poolMeta.shelf))
+
+    let pool = Pool.load(poolMeta.id)
 
     let totalDebt = BigInt.fromI32(0)
 
     // iterate through all loans of the pool
-    for (const loanId of pool.loans) {
-      const debt = pile.debt(idToBigInt(loanId))
+    for (let j = 0; j < pool.loans.length; j++) {
+      let loans = pool.loans
+      let loanId = loans[j]
+
+      let debt = pile.debt(idToBigInt(loanId))
 
       // update loan
-      const loan = Loan.load(loanId)
+      let loan = Loan.load(<string>loanId)
       loan.debt = debt
       loan.save()
 
