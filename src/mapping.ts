@@ -1,42 +1,27 @@
-import { BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
+import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
 import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
 import { Pool, Loan } from "../generated/schema"
 import { idToBigInt } from "./util"
-
-enum network {
-  mainnet,
-  kovan,
-}
-
-class PoolMeta {
-  id: string // root contract address
-  pile: string // pile contract address
-  shelf: string // shelf contract address
-  networkId: network
-}
-
-let poolMetas: PoolMeta[] = [
-  {
-    id: '0x31738b2b0d8864822ce2db48dbc5c6521a9af260',
-    pile: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
-    shelf: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
-    networkId: network.kovan,
-  },
-]
-
-// lookup that contains the pool indexed by shelf
-// const poolMetaByShelf: { [shelf: string]: PoolMeta } = poolMetas.reduce((prev, curr) => prev[curr.shelf] = curr, {})
+import { poolMetas, poolMetaByShelf } from "./poolMetas"
 
 export function handleBlock(block: EthereumBlock): void {
+  log.info("handleBlock number {}", [block.number.toString()])
+
   // iterate through all pools
   for (let i = 0; i < poolMetas.length; i++) {
     let poolMeta = poolMetas[i]
 
+    let pool = Pool.load(poolMeta.id)
+
+    if (pool == null) {
+      log.info("pool {} not found", [poolMeta.id.toString()])
+      return
+    }
+    log.info("pool {} loaded", [poolMeta.id.toString()])
+
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
     // const shelf = Shelf.bind(Address.fromHexString(poolMeta.shelf))
-
-    let pool = Pool.load(poolMeta.id)
 
     let totalDebt = BigInt.fromI32(0)
 
@@ -47,8 +32,14 @@ export function handleBlock(block: EthereumBlock): void {
 
       let debt = pile.debt(idToBigInt(loanId))
 
+      log.info("will update loan {}: debt {}", [loanId, debt.toString()])
+
       // update loan
-      let loan = Loan.load(<string>loanId)
+      let loan = Loan.load(loanId)
+      if (loan == null) {
+        log.error("loan {} not found", [loanId])
+        throw new Error(`loan ${loanId} not found`)
+      }
       loan.debt = debt
       loan.save()
 
@@ -56,44 +47,62 @@ export function handleBlock(block: EthereumBlock): void {
       totalDebt = totalDebt.plus(debt)
     }
 
+    log.info("will update pool {}: totalDebt {}", [poolMeta.id, totalDebt.toString()])
+
     // save the pool
     pool.totalDebt = totalDebt
     pool.save()
   }
 }
 
-// export function handleNewLoan(call: IssueCall) {
-//   const loanOwner = call.from
-//   const shelf = call.to
-//   const collatoralRegistryId = call.inputs.registry_.toHex()
-//   const collateralTokenId = call.inputs.token_.toHex() // unique across all tinlake pools
-//   const loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
+export function handleNewLoan(call: IssueCall): void {
+  let loanOwner = call.from
+  let shelf = call.to
+  // let collatoralRegistryId = call.inputs.registry_.toHex()
+  // let collateralTokenId = call.inputs.token_.toHex() // unique across all tinlake pools
+  let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-//   const poolId = poolMetaByShelf[shelf.toHex()].id
-//   const loanId = `${poolId}-${loanIndex.toHex()}`
+  log.info("handleNewLoan, shelf: {}", [shelf.toHex()])
 
-//   let pool = Pool.load(poolId)
-//   let poolChanged = false
-//   if (pool == null) {
-//     pool = new Pool(poolId)
-//     poolChanged = true
-//   }
-//   if (!pool.loans.includes(loanId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
-//     pool.loans = [...pool.loans, loanId]
-//     poolChanged = true
-//   }
-//   if (poolChanged) {
-//     pool.save()
-//   }
+  if (!poolMetaByShelf.has(shelf.toHex())) {
+    log.error("poolMeta not found for shelf {}", [shelf.toHex()])
+    throw new Error(`poolMeta not found for shelf ${shelf.toHex()}`) // NOTE: error message is not used for now
+  }
+  let poolMeta = poolMetaByShelf.get(shelf.toHex())
 
-//   const loan = new Loan(loanId)
-//   loan.pool = poolId
-//   loan.index = loanIndex.toI32()
-//   loan.owner = loanOwner
-//   loan.opened = call.block.timestamp.toI32()
-//   loan.borrowedAmount = BigInt.fromI32(0)
-//   loan.borrowedCount = BigInt.fromI32(0)
-//   loan.repaidAmount = BigInt.fromI32(0)
-//   loan.repaidCount = BigInt.fromI32(0)
-//   loan.save()
-// }
+  let poolId = poolMeta.id
+  let loanId = `${poolId}-${loanIndex.toHex()}`
+
+  log.info("generated poolId {}, loanId", [poolId, loanId])
+
+  let pool = Pool.load(poolId)
+  let poolChanged = false
+  if (pool == null) {
+    log.info("will create new pool poolId {}", [poolId])
+    pool = new Pool(poolId)
+    poolChanged = true
+  }
+  if (!pool.loans.includes(loanId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
+    log.info("will add loan {} to pool {}", [loanId, poolId])
+    pool.loans.push(loanId)
+    poolChanged = true
+  }
+  if (poolChanged) {
+    log.info("will save pool {}", [pool.id])
+    pool.save()
+  }
+
+  let loan = new Loan(loanId)
+  loan.pool = poolId
+  loan.index = loanIndex.toI32()
+  loan.owner = loanOwner
+  loan.opened = call.block.timestamp.toI32()
+  // loan.borrowedAmount = BigInt.fromI32(0)
+  // loan.borrowedCount = BigInt.fromI32(0)
+  // loan.repaidAmount = BigInt.fromI32(0)
+  // loan.repaidCount = BigInt.fromI32(0)
+
+  log.info("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
+    loan.owner.toHex(), call.block.timestamp.toString()])
+  loan.save()
+}
