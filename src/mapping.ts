@@ -6,7 +6,7 @@ import { idToBigInt } from "./util"
 import { poolMetas, poolMetaByShelf } from "./poolMetas"
 
 export function handleBlock(block: EthereumBlock): void {
-  log.info("handleBlock number {}", [block.number.toString()])
+  log.debug("handleBlock number {}", [block.number.toString()])
 
   // iterate through all pools
   for (let i = 0; i < poolMetas.length; i++) {
@@ -15,10 +15,10 @@ export function handleBlock(block: EthereumBlock): void {
     let pool = Pool.load(poolMeta.id)
 
     if (pool == null) {
-      log.info("pool {} not found", [poolMeta.id.toString()])
+      log.debug("pool {} not found", [poolMeta.id.toString()])
       return
     }
-    log.info("pool {} loaded", [poolMeta.id.toString()])
+    log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
     // const shelf = Shelf.bind(Address.fromHexString(poolMeta.shelf))
@@ -32,7 +32,7 @@ export function handleBlock(block: EthereumBlock): void {
 
       let debt = pile.debt(idToBigInt(loanId))
 
-      log.info("will update loan {}: debt {}", [loanId, debt.toString()])
+      log.debug("will update loan {}: debt {}", [loanId, debt.toString()])
 
       // update loan
       let loan = Loan.load(loanId)
@@ -46,7 +46,7 @@ export function handleBlock(block: EthereumBlock): void {
       totalDebt = totalDebt.plus(debt)
     }
 
-    log.info("will update pool {}: totalDebt {}", [poolMeta.id, totalDebt.toString()])
+    log.debug("will update pool {}: totalDebt {}", [poolMeta.id, totalDebt.toString()])
 
     // save the pool
     pool.totalDebt = totalDebt
@@ -61,7 +61,7 @@ export function handleNewLoan(call: IssueCall): void {
   // let collateralTokenId = call.inputs.token_.toHex() // unique across all tinlake pools
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.info("handleNewLoan, shelf: {}", [shelf.toHex()])
+  log.debug("handleNewLoan, shelf: {}", [shelf.toHex()])
 
   if (!poolMetaByShelf.has(shelf.toHex())) {
     log.critical("poolMeta not found for shelf {}", [shelf.toHex()])
@@ -71,12 +71,12 @@ export function handleNewLoan(call: IssueCall): void {
   let poolId = poolMeta.id
   let loanId = poolId + "-" + loanIndex.toString() // NOTE: template strings are not supported by AssemblyScript
 
-  log.info("generated poolId {}, loanId {}", [poolId, loanId])
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
 
   let pool = Pool.load(poolId)
   let poolChanged = false
   if (pool == null) {
-    log.info("will create new pool poolId {}", [poolId])
+    log.debug("will create new pool poolId {}", [poolId])
     pool = new Pool(poolId)
     // NOTE: need to initialize non-null values
     pool.loans = []
@@ -84,14 +84,14 @@ export function handleNewLoan(call: IssueCall): void {
     poolChanged = true
   }
   if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
-    log.info("will add loan {} to pool {}", [loanId, poolId])
+    log.debug("will add loan {} to pool {}", [loanId, poolId])
     let loans = pool.loans
     loans.push(loanId)
     pool.loans = loans // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
     poolChanged = true
   }
   if (poolChanged) {
-    log.info("will save pool {}", [pool.id])
+    log.debug("will save pool {}", [pool.id])
     pool.save()
   }
 
@@ -106,7 +106,7 @@ export function handleNewLoan(call: IssueCall): void {
   loan.repaysCount = 0
   loan.repaysAggregatedAmount = BigInt.fromI32(0)
 
-  log.info("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
+  log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])
   loan.save()
 }
