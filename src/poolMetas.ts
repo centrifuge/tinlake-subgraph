@@ -3,6 +3,7 @@ export enum network {
   kovan,
 }
 
+// NOTE: interfaces are not supported by AssemblyScript
 class PoolMeta {
   id: string // root contract address
   pile: string // pile contract address

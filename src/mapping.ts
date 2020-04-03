@@ -37,8 +37,7 @@ export function handleBlock(block: EthereumBlock): void {
       // update loan
       let loan = Loan.load(loanId)
       if (loan == null) {
-        log.error("loan {} not found", [loanId])
-        throw new Error(`loan ${loanId} not found`)
+        log.critical("loan {} not found", [loanId])
       }
       loan.debt = debt
       loan.save()
@@ -65,26 +64,30 @@ export function handleNewLoan(call: IssueCall): void {
   log.info("handleNewLoan, shelf: {}", [shelf.toHex()])
 
   if (!poolMetaByShelf.has(shelf.toHex())) {
-    log.error("poolMeta not found for shelf {}", [shelf.toHex()])
-    throw new Error(`poolMeta not found for shelf ${shelf.toHex()}`) // NOTE: error message is not used for now
+    log.critical("poolMeta not found for shelf {}", [shelf.toHex()])
   }
   let poolMeta = poolMetaByShelf.get(shelf.toHex())
 
   let poolId = poolMeta.id
-  let loanId = `${poolId}-${loanIndex.toHex()}`
+  let loanId = poolId + "-" + loanIndex.toString() // NOTE: template strings are not supported by AssemblyScript
 
-  log.info("generated poolId {}, loanId", [poolId, loanId])
+  log.info("generated poolId {}, loanId {}", [poolId, loanId])
 
   let pool = Pool.load(poolId)
   let poolChanged = false
   if (pool == null) {
     log.info("will create new pool poolId {}", [poolId])
     pool = new Pool(poolId)
+    // NOTE: need to initialize non-null values
+    pool.loans = []
+    pool.totalDebt = BigInt.fromI32(0)
     poolChanged = true
   }
-  if (!pool.loans.includes(loanId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
+  if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
     log.info("will add loan {} to pool {}", [loanId, poolId])
-    pool.loans.push(loanId)
+    let loans = pool.loans
+    loans.push(loanId)
+    pool.loans = loans // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
     poolChanged = true
   }
   if (poolChanged) {
@@ -97,10 +100,11 @@ export function handleNewLoan(call: IssueCall): void {
   loan.index = loanIndex.toI32()
   loan.owner = loanOwner
   loan.opened = call.block.timestamp.toI32()
-  // loan.borrowedAmount = BigInt.fromI32(0)
-  // loan.borrowedCount = BigInt.fromI32(0)
-  // loan.repaidAmount = BigInt.fromI32(0)
-  // loan.repaidCount = BigInt.fromI32(0)
+  loan.debt = BigInt.fromI32(0)
+  loan.borrowsCount = 0
+  loan.borrowsAggregatedAmount = BigInt.fromI32(0)
+  loan.repaysCount = 0
+  loan.repaysAggregatedAmount = BigInt.fromI32(0)
 
   log.info("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])

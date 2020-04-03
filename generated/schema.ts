@@ -154,22 +154,38 @@ export class Loan extends Entity {
     this.set("interestRate", Value.fromI32(value));
   }
 
-  get ceiling(): BigInt {
+  get ceiling(): BigInt | null {
     let value = this.get("ceiling");
-    return value.toBigInt();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set ceiling(value: BigInt) {
-    this.set("ceiling", Value.fromBigInt(value));
+  set ceiling(value: BigInt | null) {
+    if (value === null) {
+      this.unset("ceiling");
+    } else {
+      this.set("ceiling", Value.fromBigInt(value as BigInt));
+    }
   }
 
-  get threshold(): BigInt {
+  get threshold(): BigInt | null {
     let value = this.get("threshold");
-    return value.toBigInt();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set threshold(value: BigInt) {
-    this.set("threshold", Value.fromBigInt(value));
+  set threshold(value: BigInt | null) {
+    if (value === null) {
+      this.unset("threshold");
+    } else {
+      this.set("threshold", Value.fromBigInt(value as BigInt));
+    }
   }
 
   get borrowsCount(): i32 {
