@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0x49984134aa0d66e82d94475e2a6bf69bd4398905"
       abi: Pile
-      startBlock: 17122162
+      startBlock: 17277142 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122162
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -29,7 +29,7 @@ dataSources:
     source:
       address: "0x6d30460f33e2d8266105a9523e028fd66c6ad296"
       abi: Shelf
-      startBlock: 17122166
+      startBlock: 17277142 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
