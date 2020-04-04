@@ -20,6 +20,11 @@ dataSources:
       abis:
         - name: Pile
           file: ./abis/Pile.json
+      callHandlers:
+        - function: setRate(uint256,uint256)
+          handler: handlePileSetRate
+        - function: changeRate(uint256,uint256)
+          handler: handlePileChangeRate
       blockHandlers:
         - handler: handleBlock
       file: ./src/mapping.ts
