@@ -1,10 +1,12 @@
 import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile, SetRateCall, ChangeRateCall } from '../generated/Pile/Pile'
 import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
+import { FileCall } from "../generated/Ceiling/Principal"
+import { SetCall } from "../generated/Threshold/ThresholdLike"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolIdFromPile, poolIdFromShelf } from "./poolMetasUtil"
+import { poolIdFromPile, poolIdFromShelf, poolIdFromCeiling, poolIdFromThreshold } from "./poolMetasUtil"
 
 export function handleBlock(block: EthereumBlock): void {
   log.debug("handleBlock number {}", [block.number.toString()])
@@ -249,5 +251,59 @@ export function handlePileChangeRate(call: ChangeRateCall): void {
     return
   }
   loan.interestRate = rate.toI32()
+  loan.save()
+}
+
+// handleCeilingFile handles changing the ceiling of a loan
+export function handleCeilingFile(call: FileCall): void {
+  // TODO check whether call succeeded ?
+
+  // let loanOwner = call.from
+  let ceilingContract = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let ceiling = call.inputs.principal // TODO how to handle credit line?
+
+  log.debug("handleCeilingFile, ceilingContract: {}, loanIndex: {}, ceiling: {}", [ceilingContract.toHex(),
+    loanIndex.toString(), ceiling.toString()])
+
+  let poolId = poolIdFromCeiling(ceilingContract)
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.ceiling = ceiling
+  loan.save()
+}
+
+// handleThresholdSet handles changing the threshold of a loan
+export function handleThresholdSet(call: SetCall): void {
+  // TODO check whether call succeeded ?
+
+  // let loanOwner = call.from
+  let thresholdContract = call.to
+  let loanIndex = call.inputs.value0 // incremental value, not unique across all tinlake pools
+  let threshold = call.inputs.value1
+
+  log.debug("handleThresholdSet, thresholdContract: {}, loanIndex: {}, threshold: {}", [thresholdContract.toHex(),
+    loanIndex.toString(), threshold.toString()])
+
+  let poolId = poolIdFromThreshold(thresholdContract)
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.threshold = threshold
   loan.save()
 }

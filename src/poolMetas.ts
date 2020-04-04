@@ -37,3 +37,15 @@ export let poolMetaByPile = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByPile.set(poolMetas[i].pile, poolMetas[i])
 }
+
+// lookup that contains the pool indexed by ceiling
+export let poolMetaByCeiling = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaByCeiling.set(poolMetas[i].ceiling, poolMetas[i])
+}
+
+// lookup that contains the pool indexed by threshold
+export let poolMetaByThreshold = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaByThreshold.set(poolMetas[i].threshold, poolMetas[i])
+}
