@@ -1,6 +1,6 @@
 import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
-import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
+import { IssueCall, Shelf, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId, hexToBigInt } from "./typecasts"
 import { poolMetas, poolMetaByShelf } from "./poolMetas"
@@ -56,21 +56,21 @@ export function handleBlock(block: EthereumBlock): void {
   }
 }
 
-export function handleNewLoan(call: IssueCall): void {
+// handleShelfIssue handles creating a new/opening a loan
+export function handleShelfIssue(call: IssueCall): void {
+  // TODO check whether call succeeded ?
+
   let loanOwner = call.from
   let shelf = call.to
   // let collatoralRegistryId = call.inputs.registry_.toHex()
   // let collateralTokenId = call.inputs.token_.toHex() // unique across all tinlake pools
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.debug("handleNewLoan, shelf: {}", [shelf.toHex()])
+  log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString()])
 
-  if (!poolMetaByShelf.has(shelf.toHex())) {
-    log.critical("poolMeta not found for shelf {}", [shelf.toHex()])
-  }
-  let poolMeta = poolMetaByShelf.get(shelf.toHex())
 
-  let poolId = poolMeta.id
+  let poolId = poolIdFromShelf(shelf)
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -111,4 +111,95 @@ export function handleNewLoan(call: IssueCall): void {
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])
   loan.save()
+}
+
+// handleShelfClose handles closing of a loan
+export function handleShelfClose(call: CloseCall): void {
+  // TODO check whether call succeeded ?
+
+  let loanOwner = call.from
+  let shelf = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+
+  log.debug("handleShelfClose, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString()])
+
+  let poolId = poolIdFromShelf(shelf)
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.closed = call.block.timestamp.toI32()
+  loan.save()
+}
+
+// handleShelfBorrow handles borrowing of a loan
+export function handleShelfBorrow(call: BorrowCall): void {
+  // TODO check whether call succeeded ?
+
+  let loanOwner = call.from
+  let shelf = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let amount = call.inputs.currencyAmount
+
+  log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString(), amount.toString()])
+
+  let poolId = poolIdFromShelf(shelf)
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.borrowsAggregatedAmount = loan.borrowsAggregatedAmount.plus(amount)
+  loan.borrowsCount = loan.borrowsCount + 1
+  loan.save()
+}
+
+// handleShelfRepay handles repaying a loan
+export function handleShelfRepay(call: BorrowCall): void {
+  // TODO check whether call succeeded ?
+
+  let loanOwner = call.from
+  let shelf = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let amount = call.inputs.currencyAmount
+
+  log.debug("handleShelfRepay, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString(), amount.toString()])
+
+  let poolId = poolIdFromShelf(shelf)
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.repaysAggregatedAmount = loan.repaysAggregatedAmount.plus(amount)
+  loan.repaysCount = loan.repaysCount + 1
+  loan.save()
+}
+
+function poolIdFromShelf(shelf: Address): string {
+  if (!poolMetaByShelf.has(shelf.toHex())) {
+    log.critical("poolMeta not found for shelf {}", [shelf.toHex()])
+  }
+  let poolMeta = poolMetaByShelf.get(shelf.toHex())
+
+  return poolMeta.id
 }
