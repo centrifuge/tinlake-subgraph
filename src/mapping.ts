@@ -2,7 +2,7 @@ import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Pile/Pile'
 import { IssueCall, Shelf } from "../generated/Shelf/Shelf"
 import { Pool, Loan } from "../generated/schema"
-import { idToBigInt } from "./util"
+import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId, hexToBigInt } from "./typecasts"
 import { poolMetas, poolMetaByShelf } from "./poolMetas"
 
 export function handleBlock(block: EthereumBlock): void {
@@ -30,7 +30,9 @@ export function handleBlock(block: EthereumBlock): void {
       let loans = pool.loans
       let loanId = loans[j]
 
-      let debt = pile.debt(idToBigInt(loanId))
+      log.debug("will query debt for loanId {}, loanIndex {}", [loanId, loanIndexFromLoanId(loanId).toString()])
+
+      let debt = pile.debt(loanIndexFromLoanId(loanId))
 
       log.debug("will update loan {}: debt {}", [loanId, debt.toString()])
 
@@ -69,7 +71,7 @@ export function handleNewLoan(call: IssueCall): void {
   let poolMeta = poolMetaByShelf.get(shelf.toHex())
 
   let poolId = poolMeta.id
-  let loanId = poolId + "-" + loanIndex.toString() // NOTE: template strings are not supported by AssemblyScript
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
 
