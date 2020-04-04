@@ -3,7 +3,8 @@ import { Pile, SetRateCall, ChangeRateCall } from '../generated/Pile/Pile'
 import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas, poolIdFromPile, poolIdFromShelf } from "./poolMetas"
+import { poolMetas } from "./poolMetas"
+import { poolIdFromPile, poolIdFromShelf } from "./poolMetasUtil"
 
 export function handleBlock(block: EthereumBlock): void {
   log.debug("handleBlock number {}", [block.number.toString()])
