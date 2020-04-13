@@ -61,8 +61,8 @@ export function handleBlock(block: EthereumBlock): void {
 
 // handleShelfIssue handles creating a new/opening a loan
 export function handleShelfIssue(call: IssueCall): void {
-  // TODO check whether call succeeded ?
-
+  log.debug(`handle shelf issue`, [call.to.toString()]);
+ 
   let loanOwner = call.from
   let shelf = call.to
   // let collatoralRegistryId = call.inputs.registry_.toHex()
@@ -118,6 +118,7 @@ export function handleShelfIssue(call: IssueCall): void {
 
 // handleShelfClose handles closing of a loan
 export function handleShelfClose(call: CloseCall): void {
+  log.debug(`handle shelf close`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   let loanOwner = call.from
@@ -144,6 +145,7 @@ export function handleShelfClose(call: CloseCall): void {
 
 // handleShelfBorrow handles borrowing of a loan
 export function handleShelfBorrow(call: BorrowCall): void {
+  log.debug(`handle shelf borrow`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   let loanOwner = call.from
@@ -172,6 +174,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
 // handleShelfRepay handles repaying a loan
 export function handleShelfRepay(call: BorrowCall): void {
+  log.debug(`handle shelf repay`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   let loanOwner = call.from
@@ -200,6 +203,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
 // handlePileSetRate handles setting the interest rate of a loan
 export function handlePileSetRate(call: SetRateCall): void {
+  log.debug(`pile set rate`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   // let loanOwner = call.from
@@ -228,6 +232,7 @@ export function handlePileSetRate(call: SetRateCall): void {
 
 // handlePileChangeRate handles changing the interest rate of a loan
 export function handlePileChangeRate(call: ChangeRateCall): void {
+  log.debug(`handle pile change rate`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   // let loanOwner = call.from
@@ -256,6 +261,7 @@ export function handlePileChangeRate(call: ChangeRateCall): void {
 
 // handleCeilingFile handles changing the ceiling of a loan
 export function handleCeilingFile(call: FileCall): void {
+  log.debug(`handle ceiling set`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   // let loanOwner = call.from
@@ -283,6 +289,7 @@ export function handleCeilingFile(call: FileCall): void {
 
 // handleThresholdSet handles changing the threshold of a loan
 export function handleThresholdSet(call: SetCall): void {
+  log.debug(`handle threshold set`, [call.to.toString()]);
   // TODO check whether call succeeded ?
 
   // let loanOwner = call.from
