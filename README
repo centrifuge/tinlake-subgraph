@@ -14,7 +14,7 @@ yarn run deploy
 ```
 
 ## Query data
-
+kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
 ### get all loans
 ```
 { loans(first: 5) {
@@ -24,7 +24,18 @@ yarn run deploy
     }
     index
     owner
+    opened
+    closed
+    debt
+    interestRate    
+    ceiling
+    threshold
+    borrowsCount
+    borrowsAggregatedAmount
+    repaysCount
+    repaysAggregatedAmount
   }
+
 }
 ```
 
