@@ -65,6 +65,8 @@ export function handleShelfIssue(call: IssueCall): void {
  
   let loanOwner = call.from
   let shelf = call.to
+  let nftId = call.inputs.token_
+  let nftRegistry = call.inputs.registry_
   // let collatoralRegistryId = call.inputs.registry_.toHex()
   // let collateralTokenId = call.inputs.token_.toHex() // unique across all tinlake pools
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
@@ -110,6 +112,8 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.borrowsAggregatedAmount = BigInt.fromI32(0)
   loan.repaysCount = 0
   loan.repaysAggregatedAmount = BigInt.fromI32(0)
+  loan.nftId = nftId
+  loan.nftRegistry = nftRegistry
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])

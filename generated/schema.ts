@@ -118,6 +118,24 @@ export class Loan extends Entity {
     this.set("owner", Value.fromBytes(value));
   }
 
+  get nftId(): BigInt {
+    let value = this.get("nftId");
+    return value.toBigInt();
+  }
+
+  set nftId(value: BigInt) {
+    this.set("nftId", Value.fromBigInt(value));
+  }
+
+  get nftRegistry(): Bytes {
+    let value = this.get("nftRegistry");
+    return value.toBytes();
+  }
+
+  set nftRegistry(value: Bytes) {
+    this.set("nftRegistry", Value.fromBytes(value));
+  }
+
   get opened(): i32 {
     let value = this.get("opened");
     return value.toI32();
@@ -159,8 +177,7 @@ export class Loan extends Entity {
       this.unset("interestRate");
     } else {
       this.set("interestRate", Value.fromBigInt(value as BigInt));
-    }
-   
+    }  
   }
 
   get ceiling(): BigInt | null {
