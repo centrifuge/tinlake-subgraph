@@ -2,6 +2,13 @@ type Pool @entity {
   id: ID!
   loans: [Loan!]! # TODO: maybe transform into a reverse lookup? https://thegraph.com/docs/define-a-subgraph#writing-mappings
   totalDebt: BigInt!
+  totalBorrowsCount: Int!
+  totalBorrowsAggregatedAmount: BigInt!
+  totalRepaysCount: Int!
+  totalRepaysAggregatedAmount: BigInt!
+  weightedInterestRate: BigInt!
+  seniorDebt: BigInt!
+  minJuniorRatio: BigInt!
 }
 
 type Loan @entity {

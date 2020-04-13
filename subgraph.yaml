@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395"
       abi: Shelf
-      startBlock: 17438204 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+      startBlock: 17438000 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -36,7 +36,7 @@ dataSources:
     source:
       address: "0x1119F08aD829B2AaBE7b05E782BE61bdD7E0B835"
       abi: Pile
-      startBlock: 17438204 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122162
+      startBlock: 17438208 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122162
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -60,8 +60,8 @@ dataSources:
     network: kovan
     source:
       address: "0x5fD12CfD3a335B0e336cD9aD633C46C7a2c948cf"
-      abi: CeilingLike
-      startBlock: 17438204 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+      abi: Ceiling
+      startBlock: 17438208 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -69,8 +69,8 @@ dataSources:
       entities:
         - Loan
       abis:
-        - name: CeilingLike
-          file: ./abis/CeilingLike.json # TODO is that correct?
+        - name: Ceiling
+          file: ./abis/Ceiling.json
       callHandlers:
         - function: file(uint256,uint256)
           handler: handleCeilingFile
@@ -81,7 +81,7 @@ dataSources:
     source:
       address: "0xe6E48Cbe96e70E9f4B8dF2FF0706aA8346daBB5d"
       abi: ThresholdLike
-      startBlock: 17438204 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+      startBlock: 17438208 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -90,8 +90,46 @@ dataSources:
         - Loan
       abis:
         - name: ThresholdLike
-          file: ./abis/ThresholdLike.json # TODO is that correct?
+          file: ./abis/ThresholdLike.json
       callHandlers:
         - function: set(uint256,uint256)
           handler: handleThresholdSet
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: SeniorTranche
+    network: kovan
+    source:
+      address: "0x0000000000000000000000000000000000000000"
+      abi: SeniorTranche
+      startBlock: 17438208 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Assessor
+    network: kovan
+    source:
+      address: "0xea2790111a372c8414253039021c7a29a535f88b"
+      abi: Assessor
+      startBlock: 17438208 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Assessor
+          file: ./abis/Assessor.json
+      blockHandlers:
+        - handler: handleBlock
       file: ./src/mapping.ts

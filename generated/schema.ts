@@ -59,6 +59,69 @@ export class Pool extends Entity {
   set totalDebt(value: BigInt) {
     this.set("totalDebt", Value.fromBigInt(value));
   }
+
+  get totalBorrowsCount(): i32 {
+    let value = this.get("totalBorrowsCount");
+    return value.toI32();
+  }
+
+  set totalBorrowsCount(value: i32) {
+    this.set("totalBorrowsCount", Value.fromI32(value));
+  }
+
+  get totalBorrowsAggregatedAmount(): BigInt {
+    let value = this.get("totalBorrowsAggregatedAmount");
+    return value.toBigInt();
+  }
+
+  set totalBorrowsAggregatedAmount(value: BigInt) {
+    this.set("totalBorrowsAggregatedAmount", Value.fromBigInt(value));
+  }
+
+  get totalRepaysCount(): i32 {
+    let value = this.get("totalRepaysCount");
+    return value.toI32();
+  }
+
+  set totalRepaysCount(value: i32) {
+    this.set("totalRepaysCount", Value.fromI32(value));
+  }
+
+  get totalRepaysAggregatedAmount(): BigInt {
+    let value = this.get("totalRepaysAggregatedAmount");
+    return value.toBigInt();
+  }
+
+  set totalRepaysAggregatedAmount(value: BigInt) {
+    this.set("totalRepaysAggregatedAmount", Value.fromBigInt(value));
+  }
+
+  get weightedInterestRate(): BigInt {
+    let value = this.get("weightedInterestRate");
+    return value.toBigInt();
+  }
+
+  set weightedInterestRate(value: BigInt) {
+    this.set("weightedInterestRate", Value.fromBigInt(value));
+  }
+
+  get seniorDebt(): BigInt {
+    let value = this.get("seniorDebt");
+    return value.toBigInt();
+  }
+
+  set seniorDebt(value: BigInt) {
+    this.set("seniorDebt", Value.fromBigInt(value));
+  }
+
+  get minJuniorRatio(): BigInt {
+    let value = this.get("minJuniorRatio");
+    return value.toBigInt();
+  }
+
+  set minJuniorRatio(value: BigInt) {
+    this.set("minJuniorRatio", Value.fromBigInt(value));
+  }
 }
 
 export class Loan extends Entity {

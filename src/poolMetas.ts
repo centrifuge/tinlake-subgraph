@@ -12,6 +12,8 @@ class PoolMeta {
   pile: string // pile contract address
   ceiling: string // ceiling contract address
   threshold: string // threshold contract address
+  assessor: string // assessor contract address
+  senior: string // senior contract address
   networkId: network
 }
 
@@ -22,10 +24,11 @@ export let poolMetas: PoolMeta[] = [
     pile: ('0x1119f08ad829b2aabe7b05e782be61bdd7e0b835'),
     ceiling: ('0x5fd12cfd3a335b0e336cd9ad633c46c7a2c948cf'),
     threshold: ('0xe6e48cbe96e70e9f4b8df2ff0706aa8346dabb5d'),
+    assessor: ('0xea2790111a372c8414253039021c7a29a535f88b'),
+    senior: ('0x0000000000000000000000000000000000000000'),
     networkId: network.kovan,
   },
 ]
-
 
 // lookup that contains the pool indexed by shelf
 export let poolMetaByShelf = new Map<string, PoolMeta>()

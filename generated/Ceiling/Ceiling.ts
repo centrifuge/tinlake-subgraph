@@ -53,9 +53,9 @@ export class LogNote__Params {
   }
 }
 
-export class CeilingLike extends SmartContract {
-  static bind(address: Address): CeilingLike {
-    return new CeilingLike("CeilingLike", address);
+export class Ceiling extends SmartContract {
+  static bind(address: Address): Ceiling {
+    return new Ceiling("Ceiling", address);
   }
 
   ceiling(param0: BigInt): BigInt {
@@ -69,132 +69,6 @@ export class CeilingLike extends SmartContract {
   try_ceiling(param0: BigInt): CallResult<BigInt> {
     let result = super.tryCall("ceiling", [
       EthereumValue.fromUnsignedBigInt(param0)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  rdiv(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("rdiv", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_rdiv(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("rdiv", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  rmul(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("rmul", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_rmul(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("rmul", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  safeAdd(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("safeAdd", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_safeAdd(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("safeAdd", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  safeDiv(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("safeDiv", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_safeDiv(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("safeDiv", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  safeMul(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("safeMul", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_safeMul(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("safeMul", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
-
-  safeSub(x: BigInt, y: BigInt): BigInt {
-    let result = super.call("safeSub", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
-    ]);
-
-    return result[0].toBigInt();
-  }
-
-  try_safeSub(x: BigInt, y: BigInt): CallResult<BigInt> {
-    let result = super.tryCall("safeSub", [
-      EthereumValue.fromUnsignedBigInt(x),
-      EthereumValue.fromUnsignedBigInt(y)
     ]);
     if (result.reverted) {
       return new CallResult();
@@ -339,36 +213,6 @@ export class FileCall__Outputs {
   _call: FileCall;
 
   constructor(call: FileCall) {
-    this._call = call;
-  }
-}
-
-export class RelyCall extends EthereumCall {
-  get inputs(): RelyCall__Inputs {
-    return new RelyCall__Inputs(this);
-  }
-
-  get outputs(): RelyCall__Outputs {
-    return new RelyCall__Outputs(this);
-  }
-}
-
-export class RelyCall__Inputs {
-  _call: RelyCall;
-
-  constructor(call: RelyCall) {
-    this._call = call;
-  }
-
-  get usr(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class RelyCall__Outputs {
-  _call: RelyCall;
-
-  constructor(call: RelyCall) {
     this._call = call;
   }
 }
