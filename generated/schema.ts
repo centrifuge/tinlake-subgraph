@@ -109,15 +109,6 @@ export class Loan extends Entity {
     this.set("index", Value.fromI32(value));
   }
 
-  get owner(): Bytes {
-    let value = this.get("owner");
-    return value.toBytes();
-  }
-
-  set owner(value: Bytes) {
-    this.set("owner", Value.fromBytes(value));
-  }
-
   get nftId(): BigInt {
     let value = this.get("nftId");
     return value.toBigInt();
@@ -134,6 +125,15 @@ export class Loan extends Entity {
 
   set nftRegistry(value: Bytes) {
     this.set("nftRegistry", Value.fromBytes(value));
+  }
+
+  get owner(): Bytes {
+    let value = this.get("owner");
+    return value.toBytes();
+  }
+
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
   }
 
   get opened(): i32 {
@@ -177,7 +177,7 @@ export class Loan extends Entity {
       this.unset("interestRate");
     } else {
       this.set("interestRate", Value.fromBigInt(value as BigInt));
-    }  
+    }
   }
 
   get ceiling(): BigInt | null {

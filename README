@@ -15,9 +15,9 @@ yarn run deploy
 
 ## Query data
 kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
-### get all loans
+### get all loans 
 ```
-{ loans(first: 5) {
+{ loans {
     id
     pool {
       id
@@ -34,10 +34,15 @@ kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
     borrowsAggregatedAmount
     repaysCount
     repaysAggregatedAmount
+    nftId, 
+    nftRegistry
   }
-
 }
 ```
 
+### get all pools
+```
+
+```
 
 

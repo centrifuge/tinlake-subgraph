@@ -53,9 +53,9 @@ export class LogNote__Params {
   }
 }
 
-export class Principal extends SmartContract {
-  static bind(address: Address): Principal {
-    return new Principal("Principal", address);
+export class CeilingLike extends SmartContract {
+  static bind(address: Address): CeilingLike {
+    return new CeilingLike("CeilingLike", address);
   }
 
   ceiling(param0: BigInt): BigInt {
@@ -330,7 +330,7 @@ export class FileCall__Inputs {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get principal(): BigInt {
+  get ceiling(): BigInt {
     return this._call.inputValues[1].value.toBigInt();
   }
 }

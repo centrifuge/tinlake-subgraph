@@ -60,7 +60,7 @@ dataSources:
     network: kovan
     source:
       address: "0x5fD12CfD3a335B0e336cD9aD633C46C7a2c948cf"
-      abi: Principal
+      abi: CeilingLike
       startBlock: 17438204 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
     mapping:
       kind: ethereum/events
@@ -69,8 +69,8 @@ dataSources:
       entities:
         - Loan
       abis:
-        - name: Principal
-          file: ./abis/Principal.json # TODO is that correct?
+        - name: CeilingLike
+          file: ./abis/CeilingLike.json # TODO is that correct?
       callHandlers:
         - function: file(uint256,uint256)
           handler: handleCeilingFile
