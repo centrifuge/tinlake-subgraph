@@ -1,0 +1,11 @@
+## Deployment
+### centrifuge/tinlake
+```
+graph auth https://api.thegraph.com/deploy/ TINLAKE_GRAPH_ID
+yarn run deploy
+```
+## testgraph/tinlake
+```
+graph auth https://api.thegraph.com/deploy/ TEST_GRAPH_ID
+yarn run deploy
+```
