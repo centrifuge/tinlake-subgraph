@@ -1,11 +1,14 @@
 ## Deployment
+override the name of the graph you want to deploy in the deploy script in package.json
+default: centrifuge/tinlake
+
 ### centrifuge/tinlake
 ```
-graph auth https://api.thegraph.com/deploy/ TINLAKE_GRAPH_ID
+graph auth https://api.thegraph.com/deploy/ YOUR_ACCESS_TOKEN
 yarn run deploy
 ```
 ## testgraph/tinlake
 ```
-graph auth https://api.thegraph.com/deploy/ TEST_GRAPH_ID
+graph auth https://api.thegraph.com/deploy/ YOUR_ACCESS_TOKEN
 yarn run deploy
 ```
