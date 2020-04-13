@@ -205,44 +205,32 @@ export function handleShelfRepay(call: BorrowCall): void {
 export function handlePileSetRate(call: SetRateCall): void {
   log.debug(`pile {} set rate`, [call.to.toHex()]);
 
-  // let loanOwner = call.from
-  let pile = call.to
+  let pileAddress = call.to
   let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
-  // TODO: rate seems to be just an index/identifier of the interest rate, not the actual interest rate. Verify...
-  let rate = call.inputs.rate
-  log.debug("handlePileSetRate, pile: {}, loanIndex: {}, rate: {}", [pile.toHex(), loanIndex.toString(),
-  rate.toString()])
-
-  let poolId = poolIdFromPile(pile)
-  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
-  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
-
-  // update loan
-  let loan = Loan.load(loanId)
-  if (loan == null) {
-    log.error("loan {} not found", [loanId])
-    return
-  }
-  loan.interestRate = rate.toI32()
-  loan.save()
+  let rateIndex = call.inputs.rate
+  updateInterestRate(pileAddress, loanIndex, rateIndex);
 }
 
 // handlePileChangeRate handles changing the interest rate of a loan
 export function handlePileChangeRate(call: ChangeRateCall): void {
-  log.debug(`handle pile {} change rate`, [call.to.toHex()]);
-
-  let pile = call.to
+  log.debug(`pile {} change rate`, [call.to.toHex()]);
+  // let loanOwner = call.from
+  let pileAddress = call.to
   let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
-  // TODO: rate seems to be just an index/identifier of the interest rate, not the actual interest rate. Verify...
-  let rate = call.inputs.newRate
+  let rateIndex = call.inputs.newRate
+  updateInterestRate(pileAddress, loanIndex, rateIndex);
+}
 
-  log.debug("handlePileChangeRate, pile: {}, loanIndex: {}, rate: {}", [pile.toHex(), loanIndex.toString(),
-    rate.toString()])
+function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: BigInt) : void {
+  let pile = Pile.bind(pileAddress)
+  // get ratePerSecond for rate group
+  let ratePerSecond = pile.rates(rateIndex).value3
 
-  let poolId = poolIdFromPile(pile)
-  log.debug("generated poolId", [poolId])
+  log.debug("handlePileSetRate, pile: {}, loanIndex: {}, rate: {}", [pileAddress.toHex(), loanIndex.toString(),
+  ratePerSecond.toString()])
+
+  let poolId = poolIdFromPile(pileAddress)
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
-
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
 
   // update loan
@@ -251,7 +239,7 @@ export function handlePileChangeRate(call: ChangeRateCall): void {
     log.error("loan {} not found", [loanId])
     return
   }
-  loan.interestRate = rate.toI32()
+  loan.interestRate = ratePerSecond
   loan.save()
 }
 

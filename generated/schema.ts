@@ -145,13 +145,22 @@ export class Loan extends Entity {
     this.set("debt", Value.fromBigInt(value));
   }
 
-  get interestRate(): i32 {
+  get interestRate(): BigInt | null {
     let value = this.get("interestRate");
-    return value.toI32();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
   }
 
-  set interestRate(value: i32) {
-    this.set("interestRate", Value.fromI32(value));
+  set interestRate(value: BigInt | null) {
+    if (value === null) {
+      this.unset("interestRate");
+    } else {
+      this.set("interestRate", Value.fromBigInt(value as BigInt));
+    }
+   
   }
 
   get ceiling(): BigInt | null {

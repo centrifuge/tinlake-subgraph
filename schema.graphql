@@ -12,7 +12,7 @@ type Loan @entity {
   opened: Int!
   closed: Int
   debt: BigInt!
-  interestRate: Int
+  interestRate: BigInt
   ceiling: BigInt
   threshold: BigInt
   borrowsCount: Int!
