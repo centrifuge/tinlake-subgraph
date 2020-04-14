@@ -76,21 +76,6 @@ export class Ceiling extends SmartContract {
     let value = result.value;
     return CallResult.fromValue(value[0].toBigInt());
   }
-
-  wards(param0: Address): BigInt {
-    let result = super.call("wards", [EthereumValue.fromAddress(param0)]);
-
-    return result[0].toBigInt();
-  }
-
-  try_wards(param0: Address): CallResult<BigInt> {
-    let result = super.tryCall("wards", [EthereumValue.fromAddress(param0)]);
-    if (result.reverted) {
-      return new CallResult();
-    }
-    let value = result.value;
-    return CallResult.fromValue(value[0].toBigInt());
-  }
 }
 
 export class ConstructorCall extends EthereumCall {

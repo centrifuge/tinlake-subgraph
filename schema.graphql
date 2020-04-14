@@ -9,6 +9,7 @@ type Pool @entity {
   weightedInterestRate: BigInt!
   seniorDebt: BigInt!
   minJuniorRatio: BigInt!
+  currentJuniorRatio: BigInt!
 }
 
 type Loan @entity {
@@ -21,7 +22,7 @@ type Loan @entity {
   opened: Int!
   closed: Int
   debt: BigInt!
-  interestRate: BigInt
+  interestRatePerSecond: BigInt
   ceiling: BigInt
   threshold: BigInt
   borrowsCount: Int!

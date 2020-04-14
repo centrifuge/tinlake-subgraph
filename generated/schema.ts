@@ -122,6 +122,15 @@ export class Pool extends Entity {
   set minJuniorRatio(value: BigInt) {
     this.set("minJuniorRatio", Value.fromBigInt(value));
   }
+
+  get currentJuniorRatio(): BigInt {
+    let value = this.get("currentJuniorRatio");
+    return value.toBigInt();
+  }
+
+  set currentJuniorRatio(value: BigInt) {
+    this.set("currentJuniorRatio", Value.fromBigInt(value));
+  }
 }
 
 export class Loan extends Entity {
@@ -226,8 +235,8 @@ export class Loan extends Entity {
     this.set("debt", Value.fromBigInt(value));
   }
 
-  get interestRate(): BigInt | null {
-    let value = this.get("interestRate");
+  get interestRatePerSecond(): BigInt | null {
+    let value = this.get("interestRatePerSecond");
     if (value === null) {
       return null;
     } else {
@@ -235,11 +244,11 @@ export class Loan extends Entity {
     }
   }
 
-  set interestRate(value: BigInt | null) {
+  set interestRatePerSecond(value: BigInt | null) {
     if (value === null) {
-      this.unset("interestRate");
+      this.unset("interestRatePerSecond");
     } else {
-      this.set("interestRate", Value.fromBigInt(value as BigInt));
+      this.set("interestRatePerSecond", Value.fromBigInt(value as BigInt));
     }
   }
 

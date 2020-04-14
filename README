@@ -1,6 +1,11 @@
 ## Deployment
 override the name of the graph you want to deploy in the deploy script in package.json
-default: centrifuge/tinlake
+default: centrifuge/tinlake.
+In case you have made changes to the abi files or entities run
+
+```
+yarn run codegen
+```
 
 ### centrifuge/tinlake
 ```
@@ -27,7 +32,7 @@ kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
     opened
     closed
     debt
-    interestRate    
+    interestRatePerSecond   
     ceiling
     threshold
     borrowsCount
@@ -54,6 +59,7 @@ kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
     weightedInterestRate
     seniorDebt
     minJuniorRatio
+    currentJuniorRatio
   }
 ```
 
