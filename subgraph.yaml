@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395"
       abi: Shelf
-      startBlock: 17438000 # TODO just usedfor development so we have faster feedback loop, contract deployed at 17122166
+      startBlock: 17438000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
