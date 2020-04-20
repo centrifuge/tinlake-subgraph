@@ -12,16 +12,20 @@ class PoolMeta {
   pile: string // pile contract address
   ceiling: string // ceiling contract address
   threshold: string // threshold contract address
+  assessor: string // assessor contract address
+  senior: string // senior contract address
   networkId: network
 }
 
 export let poolMetas: PoolMeta[] = [
   {
-    id: '0x31738b2b0d8864822ce2db48dbc5c6521a9af260',
-    shelf: '0x6d30460f33e2d8266105a9523e028fd66c6ad296',
-    pile: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
-    ceiling: '0x77e7d3f0a1126689f5989d33dde6741d1d3f9cad',
-    threshold: '0x65fb4cd704e71ef3c78cb885e8683ff696c1a04e',
+    id: ('0xde1b98d083db90a00dee656ccc50a84597312c8d'),
+    shelf: ('0x2f79f0acccb29767496bcc5aa95c8aff109b2395'),
+    pile: ('0x1119f08ad829b2aabe7b05e782be61bdd7e0b835'),
+    ceiling: ('0x5fd12cfd3a335b0e336cd9ad633c46c7a2c948cf'),
+    threshold: ('0xe6e48cbe96e70e9f4b8df2ff0706aa8346dabb5d'),
+    assessor: ('0xea2790111a372c8414253039021c7a29a535f88b'),
+    senior: ('0x0000000000000000000000000000000000000000'),
     networkId: network.kovan,
   },
 ]

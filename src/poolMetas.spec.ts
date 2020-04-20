@@ -3,13 +3,13 @@ import { poolMetaByShelf, network } from './poolMetas'
 describe('poolMeta', () => {
   test('should retreive poolMeta by shelf', () => {
     expect(
-      poolMetaByShelf.get("0x6d30460f33e2d8266105a9523e028fd66c6ad296")
+      poolMetaByShelf.get("0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395")
     ).toStrictEqual({
-      id: '0x31738b2b0d8864822ce2db48dbc5c6521a9af260',
-      shelf: '0x6d30460f33e2d8266105a9523e028fd66c6ad296',
-      pile: '0x49984134aa0d66e82d94475e2a6bf69bd4398905',
-      ceiling: '0x77e7d3f0a1126689f5989d33dde6741d1d3f9cad',
-      threshold: '0x65fb4cd704e71ef3c78cb885e8683ff696c1a04e',
+      id: '0xde1b98d083db90a00dee656ccc50a84597312c8d',
+      shelf: '0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395',
+      pile: '0x1119F08aD829B2AaBE7b05E782BE61bdD7E0B835',
+      ceiling: '0x5fD12CfD3a335B0e336cD9aD633C46C7a2c948cf',
+      threshold: '0xe6E48Cbe96e70E9f4B8dF2FF0706aA8346daBB5d',
       networkId: network.kovan,
     })
 

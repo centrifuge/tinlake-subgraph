@@ -2,17 +2,27 @@ type Pool @entity {
   id: ID!
   loans: [Loan!]! # TODO: maybe transform into a reverse lookup? https://thegraph.com/docs/define-a-subgraph#writing-mappings
   totalDebt: BigInt!
+  totalBorrowsCount: Int!
+  totalBorrowsAggregatedAmount: BigInt!
+  totalRepaysCount: Int!
+  totalRepaysAggregatedAmount: BigInt!
+  weightedInterestRate: BigInt!
+  seniorDebt: BigInt!
+  minJuniorRatio: BigInt!
+  currentJuniorRatio: BigInt!
 }
 
 type Loan @entity {
   id: ID!
   pool: Pool!
   index: Int!
+  nftId: BigInt!
+  nftRegistry: Bytes!
   owner: Bytes!
   opened: Int!
   closed: Int
   debt: BigInt!
-  interestRate: Int
+  interestRatePerSecond: BigInt
   ceiling: BigInt
   threshold: BigInt
   borrowsCount: Int!
