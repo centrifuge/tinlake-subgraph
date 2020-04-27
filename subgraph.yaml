@@ -76,3 +76,76 @@ dataSources:
         - function: set(uint256,uint256)
           handler: handleThresholdSet
       file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf2
+    network: kovan
+    source:
+      address: "0x7c1e657f79b98409c54756b11aad016d040701d2"
+      abi: Shelf
+      startBlock: 17937615
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Block2
+    network: kovan
+    source:
+      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      abi: Pile
+      startBlock: 17937615
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Ceiling
+          file: ./abis/Ceiling.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Threshold2
+    network: kovan
+    source:
+      address: "0xeb4cd994597345d167770523cfbf7d31a5697ac1"
+      abi: ThresholdLike
+      startBlock: 17937615
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: ThresholdLike
+          file: ./abis/ThresholdLike.json
+      callHandlers:
+        - function: set(uint256,uint256)
+          handler: handleThresholdSet
+      file: ./src/mapping.ts
