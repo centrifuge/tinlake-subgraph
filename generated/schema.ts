@@ -181,13 +181,21 @@ export class Loan extends Entity {
     this.set("index", Value.fromI32(value));
   }
 
-  get nftId(): BigInt {
+  get nftId(): string | null {
     let value = this.get("nftId");
-    return value.toBigInt();
+    if (value === null) {
+      return null;
+    } else {
+      return value.toString();
+    }
   }
 
-  set nftId(value: BigInt) {
-    this.set("nftId", Value.fromBigInt(value));
+  set nftId(value: string | null) {
+    if (value === null) {
+      this.unset("nftId");
+    } else {
+      this.set("nftId", Value.fromString(value as string));
+    }
   }
 
   get nftRegistry(): Bytes {
