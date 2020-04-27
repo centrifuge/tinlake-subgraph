@@ -3,7 +3,60 @@ description: Tinlake
 schema:
   file: ./schema.graphql
 dataSources:
- 
+  - kind: ethereum/contract
+    name: Shelf
+    network: kovan
+    source:
+      address: "0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395"
+      abi: Shelf
+      startBlock: 17438000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Block
+    network: kovan
+    source:
+      address: "0x1119F08aD829B2AaBE7b05E782BE61bdD7E0B835"
+      abi: Pile
+      startBlock: 17438108 
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Ceiling
+          file: ./abis/Ceiling.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
     name: Threshold
     network: kovan
     source:
