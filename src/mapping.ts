@@ -10,7 +10,24 @@ import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
 import { poolIdFromShelf, poolIdFromThreshold } from "./poolMetasUtil"
 
+const handleBlockFrequencyMinutes = 5
+const blockTimeSeconds = 15
+
 export function handleBlock(block: EthereumBlock): void {
+  // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
+  // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect
+  // that the Graph won't be able to keep up with block production on Ethereum. Executing this handler only every x
+  // minutes is a workaround for now, but we should change the architecture to fix the scalability at a later point as
+  // described in the following:
+  // TODO: change the logic in handleBlock to solely use call/event handlers. The idea is to only track changes to the
+  // debt (borrowing/repaying) and interest rate through calls/events, and then run the block handler without actual
+  // calls to just calculate the current debt off-chain using the same logic that is used on-chain (without calls into
+  // the current debt value)
+  if (block.number.mod(BigInt.fromI32(handleBlockFrequencyMinutes*60/blockTimeSeconds)).notEqual(BigInt.fromI32(0))) {
+    log.debug("skip handleBlock at number {}", [block.number.toString()])
+    return
+  }
+
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools
   for (let i = 0; i < poolMetas.length; i++) {
@@ -19,7 +36,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     if (pool == null) {
       log.debug("pool {} not found", [poolMeta.id.toString()])
-      return
+      continue
     }
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
@@ -62,7 +79,7 @@ export function handleBlock(block: EthereumBlock): void {
     let currentJuniorRatio = assessor.currentJuniorRatio()
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
-    // update pool values 
+    // update pool values
     pool.totalDebt = totalDebt
     pool.minJuniorRatio = minJuniorRatio
     pool.currentJuniorRatio = currentJuniorRatio
@@ -81,7 +98,7 @@ export function handleBlock(block: EthereumBlock): void {
 // handleShelfIssue handles creating a new/opening a loan
 export function handleShelfIssue(call: IssueCall): void {
   log.debug(`handle shelf {} issue`, [call.to.toHex()]);
- 
+
   let loanOwner = call.from
   let shelf = call.to
   let nftId = call.inputs.token_
