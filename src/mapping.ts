@@ -1,14 +1,14 @@
 import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile, SetRateCall, ChangeRateCall } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
-import { Ceiling } from "../generated/Block/Ceiling"
+import { Ceiling, FileCall } from "../generated/Block/Ceiling"
 import { Assessor } from "../generated/Block/Assessor"
 import { SeniorTranche } from "../generated/Block/SeniorTranche"
 import { SetCall } from "../generated/Threshold/ThresholdLike"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolMetaByShelf } from "./poolMetas"
-import { poolFromShelf, poolFromThreshold, poolFromPile } from "./poolMetasUtil"
+import { poolFromShelf, poolFromThreshold, poolFromPile, poolFromCeiling } from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -41,7 +41,6 @@ export function handleBlock(block: EthereumBlock): void {
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
-    let ceiling = Ceiling.bind(<Address>Address.fromHexString(poolMeta.ceiling))
     let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
     let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
 
@@ -56,8 +55,7 @@ export function handleBlock(block: EthereumBlock): void {
       log.debug("will query debt for loanId {}, loanIndex {}", [loanId, loanIndexFromLoanId(loanId).toString()])
 
       let debt = pile.debt(loanIndexFromLoanId(loanId))
-      let ceil = ceiling.ceiling(loanIndexFromLoanId(loanId))
-      log.debug("will update loan {}: debt {} ceiling {} ", [loanId, debt.toString(), ceil.toString()])
+      log.debug("will update loan {}: debt {}", [loanId, debt.toString()])
 
       // update loan
       let loan = Loan.load(loanId)
@@ -66,7 +64,6 @@ export function handleBlock(block: EthereumBlock): void {
       }
 
       loan.debt = debt
-      loan.ceiling = ceil
       loan.save()
 
       totalDebt = totalDebt.plus(debt)
@@ -224,6 +221,8 @@ export function handleShelfBorrow(call: BorrowCall): void {
   // increase debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
   // the UI
   loan.debt = loan.debt.plus(amount)
+  // TODO  add support for pools using creditLine ceilings – the following only supports principal, not creditLine
+  loan.ceiling = loan.ceiling.minus(amount)
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -269,6 +268,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   // decrease debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
   // the UI
   loan.debt = loan.debt.minus(amount)
+  // TODO adjust ceiling for pools that use creditLine ceiling
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -354,5 +354,32 @@ function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: 
     return
   }
   loan.interestRatePerSecond = ratePerSecond
+  loan.save()
+}
+
+// handleCeilingFile handles changing the ceiling of a loan
+export function handleCeilingFile(call: FileCall): void {
+  log.debug(`handle ceiling set`, [call.to.toHex()]);
+
+  // let loanOwner = call.from
+  let ceilingContract = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let ceiling = call.inputs.ceiling
+
+  log.debug("handleCeilingFile, ceilingContract: {}, loanIndex: {}, ceiling: {}", [ceilingContract.toHex(),
+    loanIndex.toString(), ceiling.toString()])
+
+  let poolId = poolFromCeiling(ceilingContract).id
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.ceiling = ceiling
   loan.save()
 }
