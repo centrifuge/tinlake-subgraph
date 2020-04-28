@@ -7,11 +7,8 @@ In case you have made changes to the abi files or entities run
 yarn run codegen
 ```
 
-### centrifuge/tinlake
-```
-graph auth https://api.thegraph.com/deploy/ YOUR_ACCESS_TOKEN
-yarn run deploy
-```
+### auth for deployment
+
 ### testgraph/tinlake
 ```
 graph auth https://api.thegraph.com/deploy/ YOUR_ACCESS_TOKEN
