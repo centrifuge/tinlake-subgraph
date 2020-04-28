@@ -6,7 +6,7 @@ export enum network {
 }
 
 // NOTE: interfaces are not supported by AssemblyScript
-class PoolMeta {
+export class PoolMeta {
   id: string // root contract address
   shelf: string // shelf contract address
   pile: string // pile contract address

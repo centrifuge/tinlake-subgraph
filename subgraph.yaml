@@ -4,39 +4,12 @@ schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: Shelf
-    network: kovan
-    source:
-      address: "0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395"
-      abi: Shelf
-      startBlock: 17438000
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Loan
-      abis:
-        - name: Shelf
-          file: ./abis/Shelf.json
-      callHandlers:
-        - function: issue(address,uint256)
-          handler: handleShelfIssue
-        - function: close(uint256)
-          handler: handleShelfClose
-        - function: borrow(uint256,uint256)
-          handler: handleShelfBorrow
-        - function: repay(uint256,uint256)
-          handler: handleShelfRepay
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
     name: Block
     network: kovan
     source:
       address: "0x1119F08aD829B2AaBE7b05E782BE61bdD7E0B835"
       abi: Pile
-      startBlock: 17438108 
+      startBlock: 17438108
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -57,12 +30,41 @@ dataSources:
         - handler: handleBlock
       file: ./src/mapping.ts
   - kind: ethereum/contract
+    name: Shelf
+    network: kovan
+    source:
+      address: "0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395"
+      abi: Shelf
+      startBlock: 17438000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
     name: Threshold
     network: kovan
     source:
       address: "0xe6E48Cbe96e70E9f4B8dF2FF0706aA8346daBB5d"
       abi: ThresholdLike
-      startBlock: 17438108 
+      startBlock: 17438108
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -75,6 +77,28 @@ dataSources:
       callHandlers:
         - function: set(uint256,uint256)
           handler: handleThresholdSet
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Pile
+    network: kovan
+    source:
+      address: "0x1119f08ad829b2aabe7b05e782be61bdd7e0b835"
+      abi: Pile
+      startBlock: 17438108
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: setRate(uint256,uint256)
+          handler: handlePileSetRate
+        - function: changeRate(uint256,uint256)
+          handler: handlePileChangeRate
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Shelf2
@@ -93,6 +117,8 @@ dataSources:
       abis:
         - name: Shelf
           file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue
@@ -122,4 +148,26 @@ dataSources:
       callHandlers:
         - function: set(uint256,uint256)
           handler: handleThresholdSet
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Pile2
+    network: kovan
+    source:
+      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      abi: Pile
+      startBlock: 17937615
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: setRate(uint256,uint256)
+          handler: handlePileSetRate
+        - function: changeRate(uint256,uint256)
+          handler: handlePileChangeRate
       file: ./src/mapping.ts

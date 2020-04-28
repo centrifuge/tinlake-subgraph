@@ -1,5 +1,5 @@
 import { Address, log } from "@graphprotocol/graph-ts"
-import { poolMetaByShelf, poolMetaByPile, poolMetaByCeiling, poolMetaByThreshold } from "./poolMetas"
+import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByCeiling, poolMetaByThreshold } from "./poolMetas"
 
 export function poolFromShelf(shelf: Address): PoolMeta {
   if (!poolMetaByShelf.has(shelf.toHex())) {
