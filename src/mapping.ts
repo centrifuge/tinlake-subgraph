@@ -10,8 +10,30 @@ import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
 import { poolIdFromShelf, poolIdFromThreshold } from "./poolMetasUtil"
 
+class Profile {
+  pools: i64
+  loans: i64
+  loanMs: i64[]
+  pileDebtCallsMs: i64[]
+  pileLoanRatesCallsMs: i64[]
+  ceilingCeilingCallsMs: i64[]
+  assessorMinJuniorRatioCallsMs: i64[]
+  assessorCurrentJuniorRatioCallsMs: i64[]
+  seniorDebtCallsMs: i64[]
+}
+
+function avgString(n: i64[]): string {
+  let avg = n.reduce<f64>((p, c) => p + f64(c), 0)/f64(n.length)
+  return avg.toString()
+}
+
 export function handleBlock(block: EthereumBlock): void {
   log.debug("handleBlock number {}", [block.number.toString()])
+
+  let profile = new Profile()
+  profile.pools = poolMetas.length
+  profile.loans = 0
+
   // iterate through all pools
   for (let i = 0; i < poolMetas.length; i++) {
     let poolMeta = poolMetas[i]
@@ -31,16 +53,29 @@ export function handleBlock(block: EthereumBlock): void {
     let totalDebt = BigInt.fromI32(0)
     let totalWeightedDebt = BigInt.fromI32(0)
 
+    profile.loans += pool.loans.length
+
     // iterate through all loans of the pool
     for (let j = 0; j < pool.loans.length; j++) {
+      let loanStart = Date.now()
+
       let loans = pool.loans
       let loanId = loans[j]
 
       log.debug("will query debt for loanId {}, loanIndex {}", [loanId, loanIndexFromLoanId(loanId).toString()])
 
+      let start = Date.now()
       let debt = pile.debt(loanIndexFromLoanId(loanId))
+      profile.pileDebtCallsMs.push(Date.now() - start)
+
+      start = Date.now()
       let interest = pile.loanRates(loanIndexFromLoanId(loanId))
+      profile.pileLoanRatesCallsMs.push(Date.now() - start)
+
+      start = Date.now()
       let ceil = ceiling.ceiling(loanIndexFromLoanId(loanId))
+      profile.ceilingCeilingCallsMs.push(Date.now() - start)
+
       log.debug("will update loan {}: debt {} ceiling {} ", [loanId, debt.toString(), ceil.toString()])
 
       // update loan
@@ -56,32 +91,48 @@ export function handleBlock(block: EthereumBlock): void {
 
       totalDebt = totalDebt.plus(debt)
       totalWeightedDebt = debt.times(interest)
+
+      profile.loanMs.push(Date.now() - loanStart)
     }
 
+    let start = Date.now()
     let minJuniorRatio = assessor.minJuniorRatio()
+    profile.assessorMinJuniorRatioCallsMs.push(Date.now() - start)
+
+    start = Date.now()
     let currentJuniorRatio = assessor.currentJuniorRatio()
+    profile.assessorCurrentJuniorRatioCallsMs.push(Date.now() - start)
+
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
-    // update pool values 
+    // update pool values
     pool.totalDebt = totalDebt
     pool.minJuniorRatio = minJuniorRatio
     pool.currentJuniorRatio = currentJuniorRatio
     pool.weightedInterestRate = weightedInterestRate
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
+
+      start = Date.now()
       let seniorDebt = senior.debt();
+      profile.seniorDebtCallsMs.push(Date.now() - start)
+
       pool.seniorDebt = seniorDebt
       log.debug("will update seniorDebt {}", [seniorDebt.toString()])
     }
     log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), currentJuniorRatio.toString(), weightedInterestRate.toString()])
     pool.save()
   }
+
+  log.info("*** profile *** {} pools, {} loans *** avg call ms: {} full loan ({} debt, {} loanRates, {} ceiling, {} minJuniorRatio, {} currentJuniorRatio, {} senior.debt)", [
+    profile.pools.toString(), profile.loans.toString(), avgString(profile.loanMs), avgString(profile.pileDebtCallsMs), avgString(profile.pileLoanRatesCallsMs), avgString(profile.ceilingCeilingCallsMs), avgString(profile.assessorMinJuniorRatioCallsMs), avgString(profile.assessorCurrentJuniorRatioCallsMs), avgString(profile.seniorDebtCallsMs),
+  ])
 }
 
 // handleShelfIssue handles creating a new/opening a loan
 export function handleShelfIssue(call: IssueCall): void {
   log.debug(`handle shelf {} issue`, [call.to.toHex()]);
- 
+
   let loanOwner = call.from
   let shelf = call.to
   let nftId = call.inputs.token_
