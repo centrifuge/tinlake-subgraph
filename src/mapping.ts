@@ -7,8 +7,8 @@ import { SeniorTranche } from "../generated/Block/SeniorTranche"
 import { SetCall } from "../generated/Threshold/ThresholdLike"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas } from "./poolMetas"
-import { poolIdFromShelf, poolIdFromThreshold } from "./poolMetasUtil"
+import { poolMetas, poolMetaByShelf } from "./poolMetas"
+import { poolFromShelf, poolFromThreshold } from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -109,7 +109,7 @@ export function handleShelfIssue(call: IssueCall): void {
     loanIndex.toString()])
 
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -173,7 +173,7 @@ export function handleShelfClose(call: CloseCall): void {
   log.debug("handleShelfClose, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).poolId
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -200,7 +200,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -213,6 +213,9 @@ export function handleShelfBorrow(call: BorrowCall): void {
   }
   loan.borrowsAggregatedAmount = loan.borrowsAggregatedAmount.plus(amount)
   loan.borrowsCount = loan.borrowsCount + 1
+  // increase debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
+  // the UI
+  loan.debt = loan.debt.plus(amount)
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -223,6 +226,10 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   pool.totalBorrowsCount = pool.totalBorrowsCount + 1
   pool.totalBorrowsAggregatedAmount = pool.totalBorrowsAggregatedAmount.plus(amount)
+  pool.totalDebt = pool.totalDebt.plus(amount)
+  if (poolFromShelf(shelf).senior !== '0x0000000000000000000000000000000000000000') {
+    pool.seniorDebt = pool.seniorDebt.plus(amount)
+  }
   pool.save()
 }
 
@@ -238,7 +245,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   log.debug("handleShelfRepay, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -251,6 +258,9 @@ export function handleShelfRepay(call: BorrowCall): void {
   }
   loan.repaysAggregatedAmount = loan.repaysAggregatedAmount.plus(amount)
   loan.repaysCount = loan.repaysCount + 1
+  // decrease debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
+  // the UI
+  loan.debt = loan.debt.minus(amount)
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -261,6 +271,10 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   pool.totalRepaysCount = pool.totalRepaysCount + 1
   pool.totalRepaysAggregatedAmount = pool.totalRepaysAggregatedAmount.plus(amount)
+  pool.totalDebt = pool.totalDebt.minus(amount)
+  if (poolFromShelf(shelf).senior !== '0x0000000000000000000000000000000000000000') {
+    pool.seniorDebt = pool.seniorDebt.minus(amount)
+  }
   pool.save()
 }
 
@@ -276,7 +290,7 @@ export function handleThresholdSet(call: SetCall): void {
   log.debug("handleThresholdSet, thresholdContract: {}, loanIndex: {}, threshold: {}", [thresholdContract.toHex(),
     loanIndex.toString(), threshold.toString()])
 
-  let poolId = poolIdFromThreshold(thresholdContract)
+  let poolId = poolFromThreshold(thresholdContract).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
