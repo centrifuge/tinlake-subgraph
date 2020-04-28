@@ -16,7 +16,7 @@ type Loan @entity {
   id: ID!
   pool: Pool!
   index: Int!
-  nftId: BigInt!
+  nftId: String
   nftRegistry: Bytes!
   owner: Bytes!
   opened: Int!

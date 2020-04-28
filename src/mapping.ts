@@ -12,7 +12,6 @@ import { poolIdFromShelf, poolIdFromThreshold } from "./poolMetasUtil"
 
 export function handleBlock(block: EthereumBlock): void {
   log.debug("handleBlock number {}", [block.number.toString()])
-
   // iterate through all pools
   for (let i = 0; i < poolMetas.length; i++) {
     let poolMeta = poolMetas[i]
@@ -74,8 +73,6 @@ export function handleBlock(block: EthereumBlock): void {
       pool.seniorDebt = seniorDebt
       log.debug("will update seniorDebt {}", [seniorDebt.toString()])
     }
-    
-
     log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), currentJuniorRatio.toString(), weightedInterestRate.toString()])
     pool.save()
   }
@@ -140,7 +137,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.borrowsAggregatedAmount = BigInt.fromI32(0)
   loan.repaysCount = 0
   loan.repaysAggregatedAmount = BigInt.fromI32(0)
-  loan.nftId = nftId
+  loan.nftId = nftId.toString()
   loan.nftRegistry = nftRegistry
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
