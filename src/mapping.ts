@@ -36,7 +36,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     if (pool == null) {
       log.debug("pool {} not found", [poolMeta.id.toString()])
-      return
+      continue
     }
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
