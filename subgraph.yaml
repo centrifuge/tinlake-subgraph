@@ -28,6 +28,27 @@ dataSources:
         - handler: handleBlock
       file: ./src/mapping.ts
   - kind: ethereum/contract
+    name: ProxyRegistry
+    network: kovan
+    source:
+      address: "0x8dd618d764c7094a2b959f665d44ae47ab8fa4e0"
+      abi: ProxyRegistry
+      startBlock: 17937615
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
     name: ShelfStaging
     network: kovan
     source:
