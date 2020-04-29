@@ -1,14 +1,14 @@
 import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
-import { Pile } from '../generated/Block/Pile'
+import { Pile, SetRateCall, ChangeRateCall } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
-import { Ceiling } from "../generated/Block/Ceiling"
+import { Ceiling, FileCall } from "../generated/Block/Ceiling"
 import { Assessor } from "../generated/Block/Assessor"
 import { SeniorTranche } from "../generated/Block/SeniorTranche"
 import { SetCall } from "../generated/Threshold/ThresholdLike"
 import { Pool, Loan } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas } from "./poolMetas"
-import { poolIdFromShelf, poolIdFromThreshold } from "./poolMetasUtil"
+import { poolMetas, poolMetaByShelf } from "./poolMetas"
+import { poolFromShelf, poolFromThreshold, poolFromPile, poolFromCeiling } from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -41,7 +41,6 @@ export function handleBlock(block: EthereumBlock): void {
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
-    let ceiling = Ceiling.bind(<Address>Address.fromHexString(poolMeta.ceiling))
     let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
     let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
 
@@ -56,9 +55,7 @@ export function handleBlock(block: EthereumBlock): void {
       log.debug("will query debt for loanId {}, loanIndex {}", [loanId, loanIndexFromLoanId(loanId).toString()])
 
       let debt = pile.debt(loanIndexFromLoanId(loanId))
-      let interest = pile.loanRates(loanIndexFromLoanId(loanId))
-      let ceil = ceiling.ceiling(loanIndexFromLoanId(loanId))
-      log.debug("will update loan {}: debt {} ceiling {} ", [loanId, debt.toString(), ceil.toString()])
+      log.debug("will update loan {}: debt {}", [loanId, debt.toString()])
 
       // update loan
       let loan = Loan.load(loanId)
@@ -67,12 +64,14 @@ export function handleBlock(block: EthereumBlock): void {
       }
 
       loan.debt = debt
-      loan.interestRatePerSecond = interest
-      loan.ceiling = ceil
       loan.save()
 
       totalDebt = totalDebt.plus(debt)
-      totalWeightedDebt = debt.times(interest)
+      if (loan.interestRatePerSecond == null) {
+        log.warning("interestRatePerSecond on loan {} is null", [loanId])
+        continue
+      }
+      totalWeightedDebt = debt.times(loan.interestRatePerSecond as BigInt)
     }
 
     let minJuniorRatio = assessor.minJuniorRatio()
@@ -90,7 +89,9 @@ export function handleBlock(block: EthereumBlock): void {
       pool.seniorDebt = seniorDebt
       log.debug("will update seniorDebt {}", [seniorDebt.toString()])
     }
-    log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), currentJuniorRatio.toString(), weightedInterestRate.toString()])
+    log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [
+      poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), currentJuniorRatio.toString(),
+      weightedInterestRate.toString()])
     pool.save()
   }
 }
@@ -109,7 +110,7 @@ export function handleShelfIssue(call: IssueCall): void {
     loanIndex.toString()])
 
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -157,6 +158,10 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftId = nftId.toString()
   loan.nftRegistry = nftRegistry
 
+  // get interest rate
+  let pile = Pile.bind(<Address>Address.fromHexString(poolFromShelf(shelf).pile))
+  loan.interestRatePerSecond = pile.rates(BigInt.fromI32(0)).value3
+
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])
   loan.save()
@@ -173,7 +178,7 @@ export function handleShelfClose(call: CloseCall): void {
   log.debug("handleShelfClose, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -200,7 +205,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -213,6 +218,11 @@ export function handleShelfBorrow(call: BorrowCall): void {
   }
   loan.borrowsAggregatedAmount = loan.borrowsAggregatedAmount.plus(amount)
   loan.borrowsCount = loan.borrowsCount + 1
+  // increase debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
+  // the UI
+  loan.debt = loan.debt.plus(amount)
+  // TODO add support for pools using creditLine ceilings – the following only supports principal, not creditLine
+  loan.ceiling = loan.ceiling.minus(amount)
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -223,6 +233,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   pool.totalBorrowsCount = pool.totalBorrowsCount + 1
   pool.totalBorrowsAggregatedAmount = pool.totalBorrowsAggregatedAmount.plus(amount)
+  pool.totalDebt = pool.totalDebt.plus(amount)
   pool.save()
 }
 
@@ -238,7 +249,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   log.debug("handleShelfRepay, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolIdFromShelf(shelf)
+  let poolId = poolFromShelf(shelf).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -251,6 +262,10 @@ export function handleShelfRepay(call: BorrowCall): void {
   }
   loan.repaysAggregatedAmount = loan.repaysAggregatedAmount.plus(amount)
   loan.repaysCount = loan.repaysCount + 1
+  // decrease debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
+  // the UI
+  loan.debt = loan.debt.minus(amount)
+  // TODO adjust ceiling for pools that use creditLine ceiling
   loan.save()
 
   let pool = Pool.load(poolId)
@@ -261,6 +276,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   pool.totalRepaysCount = pool.totalRepaysCount + 1
   pool.totalRepaysAggregatedAmount = pool.totalRepaysAggregatedAmount.plus(amount)
+  pool.totalDebt = pool.totalDebt.minus(amount)
   pool.save()
 }
 
@@ -276,7 +292,7 @@ export function handleThresholdSet(call: SetCall): void {
   log.debug("handleThresholdSet, thresholdContract: {}, loanIndex: {}, threshold: {}", [thresholdContract.toHex(),
     loanIndex.toString(), threshold.toString()])
 
-  let poolId = poolIdFromThreshold(thresholdContract)
+  let poolId = poolFromThreshold(thresholdContract).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -288,5 +304,76 @@ export function handleThresholdSet(call: SetCall): void {
     return
   }
   loan.threshold = threshold
+  loan.save()
+}
+
+// handlePileSetRate handles setting the interest rate of a loan
+export function handlePileSetRate(call: SetRateCall): void {
+  log.debug(`pile {} set rate`, [call.to.toHex()]);
+
+  let pileAddress = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let rateIndex = call.inputs.rate
+  updateInterestRate(pileAddress, loanIndex, rateIndex);
+}
+
+// handlePileChangeRate handles changing the interest rate of a loan
+export function handlePileChangeRate(call: ChangeRateCall): void {
+  log.debug(`pile {} change rate`, [call.to.toHex()]);
+
+  let pileAddress = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let rateIndex = call.inputs.newRate
+
+  updateInterestRate(pileAddress, loanIndex, rateIndex);
+}
+
+function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: BigInt) : void {
+  let pile = Pile.bind(pileAddress)
+
+  // get ratePerSecond for rate group
+  let ratePerSecond = pile.rates(rateIndex).value3
+
+  log.debug("updateInterestRate, pile: {}, loanIndex: {}, ratePerSecond: {}", [pileAddress.toHex(),
+    loanIndex.toString(), ratePerSecond.toString()])
+
+  let poolId = poolFromPile(pileAddress).id
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.interestRatePerSecond = ratePerSecond
+  loan.save()
+}
+
+// handleCeilingFile handles changing the ceiling of a loan
+export function handleCeilingFile(call: FileCall): void {
+  log.debug(`handle ceiling set`, [call.to.toHex()]);
+
+  // let loanOwner = call.from
+  let ceilingContract = call.to
+  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
+  let ceiling = call.inputs.ceiling
+
+  log.debug("handleCeilingFile, ceilingContract: {}, loanIndex: {}, ceiling: {}", [ceilingContract.toHex(),
+    loanIndex.toString(), ceiling.toString()])
+
+  let poolId = poolFromCeiling(ceilingContract).id
+  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+
+  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+
+  // update loan
+  let loan = Loan.load(loanId)
+  if (loan == null) {
+    log.error("loan {} not found", [loanId])
+    return
+  }
+  loan.ceiling = ceiling
   loan.save()
 }
