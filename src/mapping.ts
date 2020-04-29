@@ -221,7 +221,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   // increase debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
   // the UI
   loan.debt = loan.debt.plus(amount)
-  // TODO  add support for pools using creditLine ceilings – the following only supports principal, not creditLine
+  // TODO add support for pools using creditLine ceilings – the following only supports principal, not creditLine
   loan.ceiling = loan.ceiling.minus(amount)
   loan.save()
 
@@ -234,9 +234,6 @@ export function handleShelfBorrow(call: BorrowCall): void {
   pool.totalBorrowsCount = pool.totalBorrowsCount + 1
   pool.totalBorrowsAggregatedAmount = pool.totalBorrowsAggregatedAmount.plus(amount)
   pool.totalDebt = pool.totalDebt.plus(amount)
-  if (poolFromShelf(shelf).senior !== '0x0000000000000000000000000000000000000000') {
-    pool.seniorDebt = pool.seniorDebt.plus(amount)
-  }
   pool.save()
 }
 
@@ -280,9 +277,6 @@ export function handleShelfRepay(call: BorrowCall): void {
   pool.totalRepaysCount = pool.totalRepaysCount + 1
   pool.totalRepaysAggregatedAmount = pool.totalRepaysAggregatedAmount.plus(amount)
   pool.totalDebt = pool.totalDebt.minus(amount)
-  if (poolFromShelf(shelf).senior !== '0x0000000000000000000000000000000000000000') {
-    pool.seniorDebt = pool.seniorDebt.minus(amount)
-  }
   pool.save()
 }
 
