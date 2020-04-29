@@ -330,3 +330,43 @@ export class Loan extends Entity {
     this.set("repaysAggregatedAmount", Value.fromBigInt(value));
   }
 }
+
+export class Proxy extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Proxy entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Proxy entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Proxy", id.toString(), this);
+  }
+
+  static load(id: string): Proxy | null {
+    return store.get("Proxy", id) as Proxy | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get owner(): Bytes {
+    let value = this.get("owner");
+    return value.toBytes();
+  }
+
+  set owner(value: Bytes) {
+    this.set("owner", Value.fromBytes(value));
+  }
+}

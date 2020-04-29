@@ -5,8 +5,8 @@ import { Ceiling, FileCall } from "../generated/Block/Ceiling"
 import { Assessor } from "../generated/Block/Assessor"
 import { SeniorTranche } from "../generated/Block/SeniorTranche"
 import { SetCall } from "../generated/Threshold/ThresholdLike"
-import { Create} from '../generated/ProxyRegistry/ProxyRegistry'
-import { Pool, Loan } from "../generated/schema"
+import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
+import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolMetaByShelf } from "./poolMetas"
 import { poolFromShelf, poolFromThreshold, poolFromPile, poolFromCeiling } from "./poolMetasUtil"
@@ -14,9 +14,12 @@ import { poolFromShelf, poolFromThreshold, poolFromPile, poolFromCeiling } from 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 
-export function handleCreateProxy(event: Create): void {
-
+export function handleCreateProxy(event: Created): void {
+  let proxy = new Proxy(event.params.proxy.toHex())
+  proxy.owner = event.params.proxy
+  proxy.save()
 }
+
 export function handleBlock(block: EthereumBlock): void {
   // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
   // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect

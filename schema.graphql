@@ -30,3 +30,8 @@ type Loan @entity {
   repaysCount: Int!
   repaysAggregatedAmount: BigInt!
 }
+
+type Proxy @entity {
+  id: ID!
+  owner: Bytes!
+}
