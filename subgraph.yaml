@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
       abi: Pile
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -33,7 +33,7 @@ dataSources:
     source:
       address: "0x8dd618d764c7094a2b959f665d44ae47ab8fa4e0"
       abi: ProxyRegistry
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -49,12 +49,12 @@ dataSources:
           handler: handleCreateProxy
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: ShelfStaging
+    name: Shelf
     network: kovan
     source:
       address: "0x7c1e657f79b98409c54756b11aad016d040701d2"
       abi: Shelf
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -78,12 +78,12 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: ThresholdStaging
+    name: Threshold
     network: kovan
     source:
       address: "0xeb4cd994597345d167770523cfbf7d31a5697ac1"
       abi: ThresholdLike
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -98,12 +98,12 @@ dataSources:
           handler: handleThresholdSet
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: PileStaging
+    name: Pile
     network: kovan
     source:
       address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
       abi: Pile
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -120,12 +120,12 @@ dataSources:
           handler: handlePileChangeRate
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: CeilingStaging
+    name: Ceiling
     network: kovan
     source:
       address: "0x777d29da29e9e117ffc483dfd94a2fe593dd1182"
       abi: Ceiling
-      startBlock: 17937615
+      startBlock: 18257991
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3

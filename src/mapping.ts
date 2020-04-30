@@ -1,7 +1,7 @@
 import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
 import { Pile, SetRateCall, ChangeRateCall } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
-import { Ceiling, FileCall } from "../generated/Block/Ceiling"
+import { FileCall } from "../generated/Ceiling/Ceiling"
 import { Assessor } from "../generated/Block/Assessor"
 import { SeniorTranche } from "../generated/Block/SeniorTranche"
 import { SetCall } from "../generated/Threshold/ThresholdLike"
@@ -16,7 +16,7 @@ const blockTimeSeconds = 15
 
 export function handleCreateProxy(event: Created): void {
   let proxy = new Proxy(event.params.proxy.toHex())
-  proxy.owner = event.params.proxy
+  proxy.owner = event.params.owner
   proxy.save()
 }
 
@@ -113,8 +113,8 @@ export function handleShelfIssue(call: IssueCall): void {
   let nftRegistry = call.inputs.registry_
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
-    loanIndex.toString()])
+  log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString(), nftId.toString(), nftRegistry.toHex()])
 
 
   let poolId = poolFromShelf(shelf).id
@@ -167,7 +167,7 @@ export function handleShelfIssue(call: IssueCall): void {
 
   // get interest rate
   let pile = Pile.bind(<Address>Address.fromHexString(poolFromShelf(shelf).pile))
-  loan.interestRatePerSecond = pile.rates(BigInt.fromI32(0)).value3
+  loan.interestRatePerSecond = pile.rates(BigInt.fromI32(0)).value2
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])
@@ -339,7 +339,7 @@ function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: 
   let pile = Pile.bind(pileAddress)
 
   // get ratePerSecond for rate group
-  let ratePerSecond = pile.rates(rateIndex).value3
+  let ratePerSecond = pile.rates(rateIndex).value2
 
   log.debug("updateInterestRate, pile: {}, loanIndex: {}, ratePerSecond: {}", [pileAddress.toHex(),
     loanIndex.toString(), ratePerSecond.toString()])
