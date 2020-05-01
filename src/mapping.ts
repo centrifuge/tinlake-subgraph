@@ -1,15 +1,14 @@
-import { log, BigInt, EthereumBlock, Address } from "@graphprotocol/graph-ts"
+import { log, BigInt, EthereumBlock, Address, Bytes } from "@graphprotocol/graph-ts"
 import { Pile, SetRateCall, ChangeRateCall } from '../generated/Block/Pile'
-import { IssueCall, CloseCall, BorrowCall } from "../generated/Shelf/Shelf"
-import { FileCall } from "../generated/Ceiling/Ceiling"
+import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
 import { SeniorTranche } from "../generated/Block/SeniorTranche"
-import { SetCall } from "../generated/Threshold/ThresholdLike"
+import { UpdateCall, Update1Call, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas, poolMetaByShelf } from "./poolMetas"
-import { poolFromShelf, poolFromThreshold, poolFromPile, poolFromCeiling } from "./poolMetasUtil"
+import { poolMetas } from "./poolMetas"
+import { poolFromShelf, poolFromPile, poolFromNftFeed} from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -287,22 +286,26 @@ export function handleShelfRepay(call: BorrowCall): void {
   pool.save()
 }
 
-// handleThresholdSet handles changing the threshold of a loan
-export function handleThresholdSet(call: SetCall): void {
-  log.debug(`handle threshold set`, [call.to.toHex()]);
+// handleNftFeedUpdate handles changing the collateral value and/or the risk group of the loan
+export function handleNftFeedUpdate(call: UpdateCall | Update1Call): void {
+  log.debug(`handle nft feed update`, [call.to.toHex()]);
 
-  // let loanOwner = call.from
-  let thresholdContract = call.to
-  let loanIndex = call.inputs.value0 // incremental value, not unique across all tinlake pools
-  let threshold = call.inputs.value1
-
-  log.debug("handleThresholdSet, thresholdContract: {}, loanIndex: {}, threshold: {}", [thresholdContract.toHex(),
-    loanIndex.toString(), threshold.toString()])
-
-  let poolId = poolFromThreshold(thresholdContract).id
+  let nftFeedAddress = call.to
+  let nftId = call.inputs.nftID_
+  let pool =  poolFromNftFeed(nftFeedAddress)
+  let shelf = Shelf.bind(<Address>Address.fromHexString(pool.shelf))
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(pool.nftFeed))
+  
+  let poolId = pool.id
+  let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
-  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+  let ceiling = nftFeed.ceiling(loanIndex)
+  let threshold = nftFeed.threshold(loanIndex)
+
+
+  log.debug("handleNFTFeedUpdated, nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}", [nftFeedAddress.toHex(),
+    loanIndex.toString(), ceiling.toString(), threshold.toString()])
 
   // update loan
   let loan = Loan.load(loanId)
@@ -311,6 +314,7 @@ export function handleThresholdSet(call: SetCall): void {
     return
   }
   loan.threshold = threshold
+  loan.ceiling = ceiling
   loan.save()
 }
 
@@ -358,29 +362,4 @@ function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: 
   loan.save()
 }
 
-// handleCeilingFile handles changing the ceiling of a loan
-export function handleCeilingFile(call: FileCall): void {
-  log.debug(`handle ceiling set`, [call.to.toHex()]);
 
-  // let loanOwner = call.from
-  let ceilingContract = call.to
-  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
-  let ceiling = call.inputs.ceiling
-
-  log.debug("handleCeilingFile, ceilingContract: {}, loanIndex: {}, ceiling: {}", [ceilingContract.toHex(),
-    loanIndex.toString(), ceiling.toString()])
-
-  let poolId = poolFromCeiling(ceilingContract).id
-  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
-
-  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
-
-  // update loan
-  let loan = Loan.load(loanId)
-  if (loan == null) {
-    log.error("loan {} not found", [loanId])
-    return
-  }
-  loan.ceiling = ceiling
-  loan.save()
-}
