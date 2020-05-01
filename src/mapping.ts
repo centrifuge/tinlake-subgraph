@@ -165,8 +165,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftRegistry = nftRegistry
 
   // get interest rate
-  let pile = Pile.bind(<Address>Address.fromHexString(poolFromShelf(shelf).pile))
-  loan.interestRatePerSecond = pile.rates(BigInt.fromI32(0)).value2
+  loan.interestRatePerSecond = new BigInt(10^27)
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
     loan.owner.toHex(), call.block.timestamp.toString()])
