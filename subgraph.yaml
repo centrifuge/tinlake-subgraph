@@ -7,9 +7,9 @@ dataSources:
     name: Block
     network: kovan
     source:
-      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      address: "0x8A0184C12f3E060C7D0119021f58cd45073373d8"
       abi: Pile
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -31,9 +31,9 @@ dataSources:
     name: ProxyRegistry
     network: kovan
     source:
-      address: "0x8dd618d764c7094a2b959f665d44ae47ab8fa4e0"
+      address: "0x99a31c86d95e907dcf0001857b8aa83456e746c1"
       abi: ProxyRegistry
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -52,9 +52,9 @@ dataSources:
     name: Shelf
     network: kovan
     source:
-      address: "0x7c1e657f79b98409c54756b11aad016d040701d2"
+      address: "0x897a26C6a46E71973D779577aEB87395a9Dc6090"
       abi: Shelf
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -83,7 +83,7 @@ dataSources:
     source:
       address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
       abi: Pile
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -103,9 +103,9 @@ dataSources:
     name: NftFeed
     network: kovan
     source:
-      address: "0x777d29da29e9e117ffc483dfd94a2fe593dd1182"
+      address: "0xF9735946c98479b8C0F05c1C6A87a9D4afFAAe79"
       abi: NftFeed
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
