@@ -288,7 +288,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
 // handleNftFeedUpdate handles changing the collateral value and/or the risk group of the loan
 export function handleNftFeedUpdate(call: UpdateCall | Update1Call): void {
-  log.debug(`handle nft feed update`, [call.to.toHex()]);
+  log.debug(`handle nftFeed update`, [call.to.toHex()]);
 
   let nftFeedAddress = call.to
   let nftId = call.inputs.nftID_

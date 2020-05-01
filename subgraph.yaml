@@ -115,6 +115,8 @@ dataSources:
       abis:
         - name: NftFeed
           file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
       callHandlers:
         - function: update(bytes32,uint256,uint256)
           handler: handleNftFeedUpdate

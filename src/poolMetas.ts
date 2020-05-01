@@ -18,12 +18,12 @@ export class PoolMeta {
 
 export let poolMetas: PoolMeta[] = [
   {
-    id: ('0xa9a1501ed1319e2e3fdc1e95e25887cde9597558'),
-    shelf: ('0x7c1e657f79b98409c54756b11aad016d040701d2'),
-    pile: ('0x683e2129cf1cd4305d25bf89ad8564081ead0d8a'),
-    nftFeed: ('0x777d29da29e9e117ffc483dfd94a2fe593dd1182'),
-    assessor: ('0xcc76119e8082e4de6be7af5f877914aab266d114'),
-    senior: ('0xd0779006265a98c820dc483be79fe573a84c631f'),
+    id: ('0x41b7b379dee711b1a9bfbabd4b1309a584f5fe5a'),
+    shelf: ('0x897a26C6a46E71973D779577aEB87395a9Dc6090'),
+    pile: ('0x8A0184C12f3E060C7D0119021f58cd45073373d8'),
+    nftFeed: ('0xF9735946c98479b8C0F05c1C6A87a9D4afFAAe79'),
+    assessor: ('0x674C4a8B31E42Dd74a2C2bDb61fb9742AcbA0D5C'),
+    senior: ('0x3D7d580ae6cb80C6CED6543A3142CB04b3AB3770'),
     networkId: network.kovan,
   },
 ]
