@@ -81,7 +81,7 @@ dataSources:
     name: Pile
     network: kovan
     source:
-      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      address: "0x8a0184c12f3e060c7d0119021f58cd45073373d8"
       abi: Pile
       startBlock: 18282946
     mapping:
