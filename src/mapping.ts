@@ -116,7 +116,8 @@ export function handleShelfIssue(call: IssueCall): void {
     loanIndex.toString(), nftId.toString(), nftRegistry.toHex()])
 
 
-  let poolId = poolFromShelf(shelf).id
+  let poolMeta = poolFromShelf(shelf)
+  let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -164,11 +165,22 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftId = nftId.toString()
   loan.nftRegistry = nftRegistry
 
-  // get interest rate
-  loan.interestRatePerSecond = new BigInt(10^27)
+  // get risk group and interest rate from nftFeed
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+  let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
+  // generate hash from nftId & registry
+  let nftHash = nftFeed.nftID(loanIndex);
+  let riskGroup = nftFeed.risk(nftHash)
+  // get ratePerSecond for riskgroup
+  let ratePerSecond = pile.rates(riskGroup).value2
+  loan.interestRatePerSecond = ratePerSecond
+  // set ceiling & threshold based on collateral value
+  loan.ceiling = nftFeed.ceiling(loanIndex)
+  loan.threshold = nftFeed.threshold(loanIndex)
+
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
-    loan.owner.toHex(), call.block.timestamp.toString()])
+  loan.owner.toHex(), call.block.timestamp.toString()])
   loan.save()
 }
 
@@ -294,6 +306,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let pool =  poolFromNftFeed(nftFeedAddress)
 
   let shelf = Shelf.bind(<Address>Address.fromHexString(pool.shelf))
+  let pile = Pile.bind(<Address>Address.fromHexString(pool.pile))
   let nftFeed = NftFeed.bind(<Address>Address.fromHexString(pool.nftFeed))
   
   let poolId = pool.id
@@ -302,55 +315,13 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
 
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
+  let riskGroup = nftFeed.risk(nftId) 
+  // get ratePerSecond for riskGroup
+  let ratePerSecond = pile.rates(riskGroup).value2
 
 
-  log.debug("handleNFTFeedUpdated, nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}", [nftFeedAddress.toHex(),
-    loanIndex.toString(), ceiling.toString(), threshold.toString()])
-
-  // update loan
-  let loan = Loan.load(loanId)
-  if (loan == null) {
-    log.error("loan {} not found", [loanId])
-    return
-  }
-  loan.threshold = threshold
-  loan.ceiling = ceiling
-  loan.save()
-}
-
-// handlePileSetRate handles setting the interest rate of a loan
-export function handlePileSetRate(call: SetRateCall): void {
-  log.debug(`pile {} set rate`, [call.to.toHex()]);
-
-  let pileAddress = call.to
-  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
-  let rateIndex = call.inputs.rate
-  updateInterestRate(pileAddress, loanIndex, rateIndex);
-}
-
-// handlePileChangeRate handles changing the interest rate of a loan
-export function handlePileChangeRate(call: ChangeRateCall): void {
-  log.debug(`pile {} change rate`, [call.to.toHex()]);
-
-  let pileAddress = call.to
-  let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
-  let rateIndex = call.inputs.newRate
-
-  updateInterestRate(pileAddress, loanIndex, rateIndex);
-}
-
-function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: BigInt) : void {
-  let pile = Pile.bind(pileAddress)
-
-  // get ratePerSecond for rate group
-  let ratePerSecond = pile.rates(rateIndex).value2
-
-  log.debug("updateInterestRate, pile: {}, loanIndex: {}, ratePerSecond: {}", [pileAddress.toHex(),
-    loanIndex.toString(), ratePerSecond.toString()])
-
-  let poolId = poolFromPile(pileAddress).id
-  let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
-  log.debug("generated poolId {}, loanId {}", [poolId, loanId])
+  log.debug("handleNFTFeedUpdated, nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}, interestRate {}", [nftFeedAddress.toHex(),
+    loanIndex.toString(), ceiling.toString(), threshold.toString(), ratePerSecond.toString()])
 
   // update loan
   let loan = Loan.load(loanId)
@@ -359,7 +330,8 @@ function updateInterestRate(pileAddress: Address, loanIndex: BigInt, rateIndex: 
     return
   }
   loan.interestRatePerSecond = ratePerSecond
+  loan.threshold = threshold
+  loan.ceiling = ceiling
   loan.save()
 }
-
 
