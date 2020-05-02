@@ -67,6 +67,8 @@ dataSources:
           file: ./abis/Shelf.json
         - name: Pile
           file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue
@@ -76,28 +78,6 @@ dataSources:
           handler: handleShelfBorrow
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: Pile
-    network: kovan
-    source:
-      address: "0x8a0184c12f3e060c7d0119021f58cd45073373d8"
-      abi: Pile
-      startBlock: 18282946
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Loan
-      abis:
-        - name: Pile
-          file: ./abis/Pile.json
-      callHandlers:
-        - function: setRate(uint256,uint256)
-          handler: handlePileSetRate
-        - function: changeRate(uint256,uint256)
-          handler: handlePileChangeRate
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: NftFeed
@@ -117,6 +97,8 @@ dataSources:
           file: ./abis/NFTFeed.json
         - name: Shelf
           file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
       callHandlers:
         - function: update(bytes32,uint256,uint256)
           handler: handleNftFeedUpdate
