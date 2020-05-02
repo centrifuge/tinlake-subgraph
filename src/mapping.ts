@@ -165,13 +165,13 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftId = nftId.toString()
   loan.nftRegistry = nftRegistry
 
-  // if exists get risk group and interest rate from nftFeed
+  // get risk group and interest rate from nftFeed
   let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
   let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
   // generate hash from nftId & registry
   let nftHash = nftFeed.nftID(loanIndex);
   let riskGroup = nftFeed.risk(nftHash)
-  // get ratePerSecondForRiskGroup
+  // get ratePerSecond for riskgroup
   let ratePerSecond = pile.rates(riskGroup).value2
   loan.interestRatePerSecond = ratePerSecond
   // set ceiling & threshold based on collateral value
@@ -316,7 +316,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
   let riskGroup = nftFeed.risk(nftId) 
-  // get ratePerSecondForRiskGroup
+  // get ratePerSecond for riskGroup
   let ratePerSecond = pile.rates(riskGroup).value2
 
 
