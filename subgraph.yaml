@@ -7,9 +7,9 @@ dataSources:
     name: Block
     network: kovan
     source:
-      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      address: "0x8A0184C12f3E060C7D0119021f58cd45073373d8"
       abi: Pile
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -31,9 +31,9 @@ dataSources:
     name: ProxyRegistry
     network: kovan
     source:
-      address: "0x8dd618d764c7094a2b959f665d44ae47ab8fa4e0"
+      address: "0x99a31c86d95e907dcf0001857b8aa83456e746c1"
       abi: ProxyRegistry
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -52,9 +52,9 @@ dataSources:
     name: Shelf
     network: kovan
     source:
-      address: "0x7c1e657f79b98409c54756b11aad016d040701d2"
+      address: "0x897a26C6a46E71973D779577aEB87395a9Dc6090"
       abi: Shelf
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -78,32 +78,12 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Threshold
-    network: kovan
-    source:
-      address: "0xeb4cd994597345d167770523cfbf7d31a5697ac1"
-      abi: ThresholdLike
-      startBlock: 18257991
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Loan
-      abis:
-        - name: ThresholdLike
-          file: ./abis/ThresholdLike.json
-      callHandlers:
-        - function: set(uint256,uint256)
-          handler: handleThresholdSet
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
     name: Pile
     network: kovan
     source:
-      address: "0x683e2129cf1cd4305d25bf89ad8564081ead0d8a"
+      address: "0x8a0184c12f3e060c7d0119021f58cd45073373d8"
       abi: Pile
-      startBlock: 18257991
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -120,12 +100,12 @@ dataSources:
           handler: handlePileChangeRate
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Ceiling
+    name: NftFeed
     network: kovan
     source:
-      address: "0x777d29da29e9e117ffc483dfd94a2fe593dd1182"
-      abi: Ceiling
-      startBlock: 18257991
+      address: "0xF9735946c98479b8C0F05c1C6A87a9D4afFAAe79"
+      abi: NftFeed
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -133,9 +113,13 @@ dataSources:
       entities:
         - Loan
       abis:
-        - name: Ceiling
-          file: ./abis/Ceiling.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
       callHandlers:
-        - function: file(bytes32,uint256,uint256)
-          handler: handleCeilingFile
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
       file: ./src/mapping.ts

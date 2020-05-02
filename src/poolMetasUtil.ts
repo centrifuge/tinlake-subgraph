@@ -1,5 +1,5 @@
 import { Address, log } from "@graphprotocol/graph-ts"
-import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByCeiling, poolMetaByThreshold } from "./poolMetas"
+import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed } from "./poolMetas"
 
 export function poolFromShelf(shelf: Address): PoolMeta {
   if (!poolMetaByShelf.has(shelf.toHex())) {
@@ -17,20 +17,10 @@ export function poolFromPile(pile: Address): PoolMeta {
   return poolMeta
 }
 
-export function poolFromCeiling(ceiling: Address): PoolMeta {
-  if (!poolMetaByCeiling.has(ceiling.toHex())) {
-    log.critical("poolMeta not found for ceiling {}", [ceiling.toHex()])
+export function poolFromNftFeed(nftFeed: Address): PoolMeta {
+  if (!poolMetaByNftFeed.has(nftFeed.toHex())) {
+    log.critical("poolMeta not found for nftFeed {}", [nftFeed.toHex()])
   }
-  let poolMeta = poolMetaByCeiling.get(ceiling.toHex())
-
-  return poolMeta
-}
-
-export function poolFromThreshold(threshold: Address): PoolMeta {
-  if (!poolMetaByThreshold.has(threshold.toHex())) {
-    log.critical("poolMeta not found for threshold {}", [threshold.toHex()])
-  }
-  let poolMeta = poolMetaByThreshold.get(threshold.toHex())
-
+  let poolMeta = poolMetaByNftFeed.get(nftFeed.toHex())
   return poolMeta
 }
