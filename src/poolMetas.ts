@@ -17,15 +17,16 @@ export class PoolMeta {
 }
 
 export let poolMetas: PoolMeta[] = [
+  // Mainnet staging
   {
-    id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
-    shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
-    pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
-    nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
-    assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
-    senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
+    id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8'.toLowerCase(),
+    shelf: '0x7CA150514c9B17c1e343d420D66238a299F80070'.toLowerCase(),
+    pile: '0xbEF9e6B821C7A54797f0E73cF0d72A140B6Db378'.toLowerCase(),
+    nftFeed: '0x865963b74B87387106bf12B01A097b3801f906fB'.toLowerCase(),
+    assessor: '0x9F5D1CCE788D9383A5db8110D2f47D58011Ff230'.toLowerCase(),
+    senior: '0x3A448226a26C072a6554a1786A2E29f70c96d8B6'.toLowerCase(),
     networkId: network.mainnet,
-  }
+  },
 ]
 
 // lookup that contains the pool indexed by shelf
