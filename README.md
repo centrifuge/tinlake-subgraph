@@ -1,23 +1,38 @@
 ## Deployment
-override the name of the graph you want to deploy in the deploy script in package.json
-default: centrifuge/tinlake.
+
 In case you have made changes to the abi files or entities run
 
 ```
 yarn run codegen
 ```
 
-### auth for deployment
+### Mainnet production
 
-### testgraph/tinlake
 ```
-graph auth https://api.thegraph.com/deploy/ YOUR_ACCESS_TOKEN
-yarn run deploy
+graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
+yarn run deploy -- centrifuge/tinlake ./subgraph-mainnet-production.yaml
+```
+
+### Mainnet staging
+
+```
+graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
+yarn run deploy -- centrifuge/tinlake-staging ./subgraph-mainnet-staging.yaml
+```
+
+### Kovan staging
+
+```
+graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
+yarn run deploy -- centrifuge/tinlake-kovan-staging ./subgraph-kovan-staging.yaml
 ```
 
 ## Query data
-kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
-### get all loans 
+
+Mainnet staging playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake-staging
+
+### Get all loans
+
 ```
 { loans {
     id
@@ -29,20 +44,21 @@ kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
     opened
     closed
     debt
-    interestRatePerSecond   
+    interestRatePerSecond
     ceiling
     threshold
     borrowsCount
     borrowsAggregatedAmount
     repaysCount
     repaysAggregatedAmount
-    nftId, 
+    nftId,
     nftRegistry
   }
 }
 ```
 
-### get all pools
+### Get all pools
+
 ```
 {
   pools {
@@ -59,5 +75,3 @@ kovan playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake
     currentJuniorRatio
   }
 ```
-
-

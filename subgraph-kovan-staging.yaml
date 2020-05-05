@@ -1,5 +1,5 @@
 specVersion: 0.0.2
-description: Tinlake
+description: Tinlake Kovan Staging
 schema:
   file: ./schema.graphql
 dataSources:

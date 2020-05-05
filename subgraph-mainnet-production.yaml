@@ -1,0 +1,107 @@
+specVersion: 0.0.2
+description: Tinlake Mainnet Production
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Block
+    network: mainnet
+    source:
+      address: "0x95b74eF13fF280A89cE3d7bBEfc822c210e9939F"
+      abi: Pile
+      startBlock: 10002000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: ProxyRegistry
+    network: mainnet
+    source:
+      address: "0xc9045c815bf123ad12ea75b9a7c579c1e05051f9"
+      abi: ProxyRegistry
+      startBlock: 9994872
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf
+    network: mainnet
+    source:
+      address: "0x454C86Ba7e0CBd959CFa76aA2DB799F9D7a816e4"
+      abi: Shelf
+      startBlock: 10002000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed
+    network: mainnet
+    source:
+      address: "0xaB351D3e54c975BFA0c2edaFB6fAB03F94762111"
+      abi: NftFeed
+      startBlock: 10002000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
