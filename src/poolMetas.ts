@@ -17,6 +17,17 @@ export class PoolMeta {
 }
 
 export let poolMetas: PoolMeta[] = [
+  // Mainnet production
+  {
+    id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2'.toLowerCase(),
+    shelf: '0x454C86Ba7e0CBd959CFa76aA2DB799F9D7a816e4'.toLowerCase(),
+    pile: '0x95b74eF13fF280A89cE3d7bBEfc822c210e9939F'.toLowerCase(),
+    nftFeed: '0xaB351D3e54c975BFA0c2edaFB6fAB03F94762111'.toLowerCase(),
+    assessor: '0x1abA642c1AaC9F8dA36f7DF73EdA4Ca73E054084'.toLowerCase(),
+    senior: '0x4c1bfB4e3ecBd6200358038e3F560AB6dEe9bCb6'.toLowerCase(),
+    networkId: network.mainnet,
+  },
+
   // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8'.toLowerCase(),
@@ -26,6 +37,17 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x9F5D1CCE788D9383A5db8110D2f47D58011Ff230'.toLowerCase(),
     senior: '0x3A448226a26C072a6554a1786A2E29f70c96d8B6'.toLowerCase(),
     networkId: network.mainnet,
+  },
+
+  // Kovan staging
+  {
+    id: ('0x41b7b379dee711b1a9bfbabd4b1309a584f5fe5a'),
+    shelf: ('0x897a26c6a46e71973d779577aeb87395a9dc6090'),
+    pile: ('0x8a0184c12f3e060c7d0119021f58cd45073373d8'),
+    nftFeed: ('0xf9735946c98479b8c0f05c1c6a87a9d4affaae79'),
+    assessor: ('0x674c4a8b31e42dd74a2c2bdb61fb9742acba0d5c'),
+    senior: ('0xd0779006265a98c820dc483be79fe573a84c631f'),
+    networkId: network.kovan,
   },
 ]
 
