@@ -16,37 +16,39 @@ export class PoolMeta {
   networkId: network
 }
 
+// NOTE: the following addresses all need to be lower case. Also note that AssemblyScript does not support
+// .toLowerCase()
 export let poolMetas: PoolMeta[] = [
   // Mainnet production
   {
-    id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2'.toLowerCase(),
-    shelf: '0x454C86Ba7e0CBd959CFa76aA2DB799F9D7a816e4'.toLowerCase(),
-    pile: '0x95b74eF13fF280A89cE3d7bBEfc822c210e9939F'.toLowerCase(),
-    nftFeed: '0xaB351D3e54c975BFA0c2edaFB6fAB03F94762111'.toLowerCase(),
-    assessor: '0x1abA642c1AaC9F8dA36f7DF73EdA4Ca73E054084'.toLowerCase(),
-    senior: '0x4c1bfB4e3ecBd6200358038e3F560AB6dEe9bCb6'.toLowerCase(),
+    id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
+    shelf: '0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4',
+    pile: '0x95b74ef13ff280a89ce3d7bbefc822c210e9939f',
+    nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
+    assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
+    senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
     networkId: network.mainnet,
   },
 
   // Mainnet staging
   {
-    id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8'.toLowerCase(),
-    shelf: '0x7CA150514c9B17c1e343d420D66238a299F80070'.toLowerCase(),
-    pile: '0xbEF9e6B821C7A54797f0E73cF0d72A140B6Db378'.toLowerCase(),
-    nftFeed: '0x865963b74B87387106bf12B01A097b3801f906fB'.toLowerCase(),
-    assessor: '0x9F5D1CCE788D9383A5db8110D2f47D58011Ff230'.toLowerCase(),
-    senior: '0x3A448226a26C072a6554a1786A2E29f70c96d8B6'.toLowerCase(),
+    id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
+    shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
+    pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
+    nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
+    assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
+    senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
     networkId: network.mainnet,
   },
 
   // Kovan staging
   {
-    id: ('0x41b7b379dee711b1a9bfbabd4b1309a584f5fe5a'),
-    shelf: ('0x897a26c6a46e71973d779577aeb87395a9dc6090'),
-    pile: ('0x8a0184c12f3e060c7d0119021f58cd45073373d8'),
-    nftFeed: ('0xf9735946c98479b8c0f05c1c6a87a9d4affaae79'),
-    assessor: ('0x674c4a8b31e42dd74a2c2bdb61fb9742acba0d5c'),
-    senior: ('0xd0779006265a98c820dc483be79fe573a84c631f'),
+    id: '0x41b7b379dee711b1a9bfbabd4b1309a584f5fe5a',
+    shelf: '0x897a26c6a46e71973d779577aeb87395a9dc6090',
+    pile: '0x8a0184c12f3e060c7d0119021f58cd45073373d8',
+    nftFeed: '0xf9735946c98479b8c0f05c1c6a87a9d4affaae79',
+    assessor: '0x674c4a8b31e42dd74a2c2bdb61fb9742acba0d5c',
+    senior: '0xd0779006265a98c820dc483be79fe573a84c631f',
     networkId: network.kovan,
   },
 ]
