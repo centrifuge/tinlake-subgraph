@@ -282,7 +282,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   // decrease debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
   // the UI. Note that debt should not get negative, so we decrease debt (and totalDebt below) maximally by loan.debt
   let debtDecrease = amount.gt(loan.debt) ? loan.debt : amount
-  loan.debt = loan.debt.minus(amount)
+  loan.debt = loan.debt.minus(debtDecrease)
   // TODO adjust ceiling for pools that use creditLine ceiling
   loan.save()
 
@@ -294,7 +294,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   pool.totalRepaysCount = pool.totalRepaysCount + 1
   pool.totalRepaysAggregatedAmount = pool.totalRepaysAggregatedAmount.plus(amount)
-  pool.totalDebt = pool.totalDebt.minus(amount)
+  pool.totalDebt = pool.totalDebt.minus(debtDecrease)
   pool.save()
 }
 
