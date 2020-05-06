@@ -280,8 +280,9 @@ export function handleShelfRepay(call: BorrowCall): void {
   loan.repaysAggregatedAmount = loan.repaysAggregatedAmount.plus(amount)
   loan.repaysCount = loan.repaysCount + 1
   // decrease debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
-  // the UI
-  loan.debt = loan.debt.minus(amount)
+  // the UI. Note that debt should not get negative, so we decrease debt (and totalDebt below) maximally by loan.debt
+  let debtDecrease = amount.gt(loan.debt) ? loan.debt : amount
+  loan.debt = loan.debt.minus(debtDecrease)
   // TODO adjust ceiling for pools that use creditLine ceiling
   loan.save()
 
@@ -293,7 +294,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   pool.totalRepaysCount = pool.totalRepaysCount + 1
   pool.totalRepaysAggregatedAmount = pool.totalRepaysAggregatedAmount.plus(amount)
-  pool.totalDebt = pool.totalDebt.minus(amount)
+  pool.totalDebt = pool.totalDebt.minus(debtDecrease)
   pool.save()
 }
 
@@ -308,14 +309,14 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let shelf = Shelf.bind(<Address>Address.fromHexString(pool.shelf))
   let pile = Pile.bind(<Address>Address.fromHexString(pool.pile))
   let nftFeed = NftFeed.bind(<Address>Address.fromHexString(pool.nftFeed))
-  
+
   let poolId = pool.id
   let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
-  let riskGroup = nftFeed.risk(nftId) 
+  let riskGroup = nftFeed.risk(nftId)
   // get ratePerSecond for riskGroup
   let ratePerSecond = pile.rates(riskGroup).value2
 
