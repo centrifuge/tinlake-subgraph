@@ -69,6 +69,8 @@ dataSources:
           file: ./abis/Pile.json
         - name: NftFeed
           file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue
@@ -104,4 +106,24 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: SeniorTranche
+    network: kovan
+    source:
+      address: "0xd0779006265a98c820dc483be79fe573a84c631f"
+      abi: SeniorTranche
+      startBlock: 18282946
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
       file: ./src/mapping.ts
