@@ -26,7 +26,7 @@ export function poolFromNftFeed(nftFeed: Address): PoolMeta {
 }
 
 export function poolFromSeniorTranche(seniorTranche: Address): PoolMeta {
-  if (!poolMetaByNftFeed.has(seniorTranche.toHex())) {
+  if (!poolMetaBySeniorTranche.has(seniorTranche.toHex())) {
     log.critical("poolMeta not found for seniorTranche {}", [seniorTranche.toHex()])
   }
   let poolMeta = poolMetaBySeniorTranche.get(seniorTranche.toHex())
