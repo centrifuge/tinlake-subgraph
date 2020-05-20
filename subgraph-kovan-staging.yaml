@@ -128,30 +128,6 @@ dataSources:
           handler: handleSeniorTrancheFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Block2
-    network: kovan
-    source:
-      address: "0x4B2ed13CA3603BaC65De264CFc14A3C03d3C822C"
-      abi: Pile
-      startBlock: 18607297
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Loan
-      abis:
-        - name: Pile
-          file: ./abis/Pile.json
-        - name: Assessor
-          file: ./abis/Assessor.json
-        - name: SeniorTranche
-          file: ./abis/SeniorTranche.json
-      blockHandlers:
-        - handler: handleBlock
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
     name: Shelf2
     network: kovan
     source:
