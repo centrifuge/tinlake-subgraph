@@ -51,6 +51,7 @@ export let poolMetas: PoolMeta[] = [
     senior: '0xa5d9b0190874b29d824b0d0164dec8b6034d1615',
     networkId: network.kovan,
   },
+  
   {
     id: '0xc95e8de672d717f7b60bca629f6cc65dd448ddc1',
     shelf: '0xa51672dab1c3061900ef32600b69e763ca6384bf',

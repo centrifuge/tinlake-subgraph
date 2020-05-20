@@ -77,7 +77,7 @@ export function handleBlock(block: EthereumBlock): void {
         log.warning("interestRatePerSecond on loan {} is null", [loanId])
         continue
       }
-      totalWeightedDebt = debt.times(loan.interestRatePerSecond as BigInt)
+      totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
     let minJuniorRatio = assessor.minJuniorRatio()
