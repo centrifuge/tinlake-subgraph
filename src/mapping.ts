@@ -340,7 +340,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
-export function handleSeniorTrancheFile(call: FileCall):void {
+export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
   let seniorTrancheContract = call.to
   let interestRate = call.inputs.ratePerSecond_
