@@ -77,7 +77,7 @@ export function handleBlock(block: EthereumBlock): void {
         log.warning("interestRatePerSecond on loan {} is null", [loanId])
         continue
       }
-      totalWeightedDebt = debt.times(loan.interestRatePerSecond as BigInt)
+      totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
     let minJuniorRatio = assessor.minJuniorRatio()
@@ -340,18 +340,22 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
-export function handleSeniorTrancheFile(call: FileCall):void {
+export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
-  let seniorTrancheContract = call.to
+  let seniorTranche = call.to
   let interestRate = call.inputs.ratePerSecond_
+  
 
-  let poolId = poolFromSeniorTranche(seniorTrancheContract).id
+  let poolMeta = poolFromSeniorTranche(seniorTranche)
+  let poolId = poolMeta.id
+  log.debug(`handle senior tranche file pool Id {}`, [poolId]);
 
   let pool = Pool.load(poolId)
   if (pool == null) {
     log.error("pool {} not found", [poolId])
     return
   }
+  log.debug(`update pool {} - set senior interest rate `, [poolId, interestRate.toString()]);
   
   pool.seniorInterestRate = interestRate
   pool.save()
