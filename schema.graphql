@@ -8,6 +8,7 @@ type Pool @entity {
   totalRepaysAggregatedAmount: BigInt!
   weightedInterestRate: BigInt!
   seniorDebt: BigInt!
+  seniorInterestRate: BigInt!
   minJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
 }

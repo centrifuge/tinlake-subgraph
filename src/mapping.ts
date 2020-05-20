@@ -1,14 +1,14 @@
 import { log, BigInt, EthereumBlock, Address, Bytes } from "@graphprotocol/graph-ts"
-import { Pile, SetRateCall, ChangeRateCall } from '../generated/Block/Pile'
+import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
-import { SeniorTranche } from "../generated/Block/SeniorTranche"
-import { UpdateCall, Update1Call, NftFeed } from "../generated/NftFeed/NftFeed"
+import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
+import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromPile, poolFromNftFeed} from "./poolMetasUtil"
+import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche} from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -125,6 +125,9 @@ export function handleShelfIssue(call: IssueCall): void {
   let pool = Pool.load(poolId)
   let poolChanged = false
   if (pool == null) {
+
+    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+
     log.debug("will create new pool poolId {}", [poolId])
     pool = new Pool(poolId)
     // NOTE: need to initialize non-null values
@@ -138,6 +141,7 @@ export function handleShelfIssue(call: IssueCall): void {
     pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
     pool.totalBorrowsCount = 0
     pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+    pool.seniorInterestRate = seniorTranche.ratePerSecond()
     poolChanged = true
   }
   if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
@@ -336,3 +340,19 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
+export function handleSeniorTrancheFile(call: FileCall):void {
+  log.debug(`handle senior tranche file set`, [call.to.toHex()]);
+  let seniorTrancheContract = call.to
+  let interestRate = call.inputs.ratePerSecond_
+
+  let poolId = poolFromSeniorTranche(seniorTrancheContract).id
+
+  let pool = Pool.load(poolId)
+  if (pool == null) {
+    log.error("pool {} not found", [poolId])
+    return
+  }
+  
+  pool.seniorInterestRate = interestRate
+  pool.save()
+}

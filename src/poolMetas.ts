@@ -71,4 +71,10 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByNftFeed.set(poolMetas[i].nftFeed, poolMetas[i])
 }
 
+// lookup that contains the pool indexed by seniorTranche
+export let poolMetaBySeniorTranche = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaBySeniorTranche.set(poolMetas[i].senior, poolMetas[i])
+}
+
 

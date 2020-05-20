@@ -114,6 +114,15 @@ export class Pool extends Entity {
     this.set("seniorDebt", Value.fromBigInt(value));
   }
 
+  get seniorInterestRate(): BigInt {
+    let value = this.get("seniorInterestRate");
+    return value.toBigInt();
+  }
+
+  set seniorInterestRate(value: BigInt) {
+    this.set("seniorInterestRate", Value.fromBigInt(value));
+  }
+
   get minJuniorRatio(): BigInt {
     let value = this.get("minJuniorRatio");
     return value.toBigInt();
