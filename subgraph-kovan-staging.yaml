@@ -54,7 +54,7 @@ dataSources:
     source:
       address: "0xCcf827238991FC3D5A51067968501A38624F313d"
       abi: Shelf
-      startBlock: 18594066
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
