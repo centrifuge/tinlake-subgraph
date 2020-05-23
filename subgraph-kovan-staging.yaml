@@ -33,7 +33,7 @@ dataSources:
     source:
       address: "0x99a31c86d95e907dcf0001857b8aa83456e746c1"
       abi: ProxyRegistry
-      startBlock: 18594066
+      startBlock: 18282946
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
