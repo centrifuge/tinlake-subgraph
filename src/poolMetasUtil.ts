@@ -11,7 +11,7 @@ export function poolFromShelf(shelf: Address): PoolMeta {
 
 export function poolFromId(id: string): PoolMeta {
   if (!poolMetaById.has(id)){
-    log.critical("poolMeta not found for if {}", [id])
+    log.critical("poolMeta not found for id {}", [id])
   }
   let poolMeta = poolMetaById.get(id)
   return poolMeta
