@@ -1,11 +1,19 @@
 import { Address, log } from "@graphprotocol/graph-ts"
-import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche } from "./poolMetas"
+import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaById } from "./poolMetas"
 
 export function poolFromShelf(shelf: Address): PoolMeta {
   if (!poolMetaByShelf.has(shelf.toHex())) {
     log.critical("poolMeta not found for shelf {}", [shelf.toHex()])
   }
   let poolMeta = poolMetaByShelf.get(shelf.toHex())
+  return poolMeta
+}
+
+export function poolFromId(id: string): PoolMeta {
+  if (!poolMetaById.has(id)){
+    log.critical("poolMeta not found for if {}", [id])
+  }
+  let poolMeta = poolMetaById.get(id)
   return poolMeta
 }
 

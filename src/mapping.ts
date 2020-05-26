@@ -8,10 +8,30 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche} from "./poolMetasUtil"
+import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromId} from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
+
+function createPool(poolId: string) : void {
+
+  let poolMeta = poolFromId(poolId);
+  log.debug("will create new pool poolId {}", [poolId])
+  let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+  let pool = new Pool(poolId)
+  pool.loans = []
+  pool.totalDebt = BigInt.fromI32(0)
+  pool.seniorDebt = BigInt.fromI32(0)
+  pool.minJuniorRatio = BigInt.fromI32(0)
+  pool.currentJuniorRatio = BigInt.fromI32(0)
+  pool.weightedInterestRate = BigInt.fromI32(0)
+  pool.totalRepaysCount = 0
+  pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
+  pool.totalBorrowsCount = 0
+  pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+  pool.seniorInterestRate = seniorTranche.ratePerSecond()
+  pool.save()
+}
 
 export function handleCreateProxy(event: Created): void {
   let proxy = new Proxy(event.params.proxy.toHex())
@@ -42,6 +62,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     if (pool == null) {
       log.debug("pool {} not found", [poolMeta.id.toString()])
+      createPool(poolMeta.id.toString())
       continue
     }
     log.debug("pool {} loaded", [poolMeta.id.toString()])
@@ -126,22 +147,8 @@ export function handleShelfIssue(call: IssueCall): void {
   let poolChanged = false
   if (pool == null) {
 
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-
-    log.debug("will create new pool poolId {}", [poolId])
-    pool = new Pool(poolId)
-    // NOTE: need to initialize non-null values
-    pool.loans = []
-    pool.totalDebt = BigInt.fromI32(0)
-    pool.seniorDebt = BigInt.fromI32(0)
-    pool.minJuniorRatio = BigInt.fromI32(0)
-    pool.currentJuniorRatio = BigInt.fromI32(0)
-    pool.weightedInterestRate = BigInt.fromI32(0)
-    pool.totalRepaysCount = 0
-    pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
-    pool.totalBorrowsCount = 0
-    pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
-    pool.seniorInterestRate = seniorTranche.ratePerSecond()
+    createPool(poolId);
+    pool = Pool.load(poolId)
     poolChanged = true
   }
   if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
