@@ -63,6 +63,12 @@ export let poolMetas: PoolMeta[] = [
   }
 ]
 
+// lookup that contains the rootId indexed by shelf
+export let poolMetaById = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaById.set(poolMetas[i].id, poolMetas[i])
+}
+
 // lookup that contains the pool indexed by shelf
 export let poolMetaByShelf = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {

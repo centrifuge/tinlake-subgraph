@@ -8,10 +8,35 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche} from "./poolMetasUtil"
+import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromId} from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
+
+function createPool(poolId: string) : void {
+    let poolMeta = poolFromId(poolId);
+    
+    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+    let interestRateResult = seniorTranche.try_ratePerSecond() 
+    if (interestRateResult.reverted) {
+      log.debug("pool not deployed to the network yet {}", [poolId])
+      return
+    }
+    log.debug("will create new pool poolId {}", [poolId])
+    let pool = new Pool(poolId)
+    pool.seniorInterestRate = interestRateResult.value
+    pool.loans = []
+    pool.totalDebt = BigInt.fromI32(0)
+    pool.seniorDebt = BigInt.fromI32(0)
+    pool.minJuniorRatio = BigInt.fromI32(0)
+    pool.currentJuniorRatio = BigInt.fromI32(0)
+    pool.weightedInterestRate = BigInt.fromI32(0)
+    pool.totalRepaysCount = 0
+    pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
+    pool.totalBorrowsCount = 0
+    pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+    pool.save()
+}
 
 export function handleCreateProxy(event: Created): void {
   let proxy = new Proxy(event.params.proxy.toHex())
@@ -41,7 +66,7 @@ export function handleBlock(block: EthereumBlock): void {
     let pool = Pool.load(poolMeta.id)
 
     if (pool == null) {
-      log.debug("pool {} not found", [poolMeta.id.toString()])
+      createPool(poolMeta.id.toString())
       continue
     }
     log.debug("pool {} loaded", [poolMeta.id.toString()])
@@ -81,13 +106,13 @@ export function handleBlock(block: EthereumBlock): void {
     }
 
     let minJuniorRatio = assessor.minJuniorRatio()
-    let currentJuniorRatio = assessor.currentJuniorRatio()
+    let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
     // update pool values
     pool.totalDebt = totalDebt
     pool.minJuniorRatio = minJuniorRatio
-    pool.currentJuniorRatio = currentJuniorRatio
+    pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     pool.weightedInterestRate = weightedInterestRate
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
@@ -96,7 +121,7 @@ export function handleBlock(block: EthereumBlock): void {
       log.debug("will update seniorDebt {}", [seniorDebt.toString()])
     }
     log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [
-      poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), currentJuniorRatio.toString(),
+      poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), pool.currentJuniorRatio.toString(),
       weightedInterestRate.toString()])
     pool.save()
   }
@@ -125,23 +150,8 @@ export function handleShelfIssue(call: IssueCall): void {
   let pool = Pool.load(poolId)
   let poolChanged = false
   if (pool == null) {
-
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-
-    log.debug("will create new pool poolId {}", [poolId])
-    pool = new Pool(poolId)
-    // NOTE: need to initialize non-null values
-    pool.loans = []
-    pool.totalDebt = BigInt.fromI32(0)
-    pool.seniorDebt = BigInt.fromI32(0)
-    pool.minJuniorRatio = BigInt.fromI32(0)
-    pool.currentJuniorRatio = BigInt.fromI32(0)
-    pool.weightedInterestRate = BigInt.fromI32(0)
-    pool.totalRepaysCount = 0
-    pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
-    pool.totalBorrowsCount = 0
-    pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
-    pool.seniorInterestRate = seniorTranche.ratePerSecond()
+    createPool(poolId);
+    pool = Pool.load(poolId)
     poolChanged = true
   }
   if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
