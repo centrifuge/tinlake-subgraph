@@ -65,6 +65,7 @@ export function handleBlock(block: EthereumBlock): void {
     let poolMeta = poolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
+    log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
     if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
       createPool(poolMeta.id.toString())
       continue

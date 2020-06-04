@@ -18,6 +18,7 @@ export class PoolMeta {
 // NOTE: the following addresses all need to be lower case. Also note that AssemblyScript does not support
 // .toLowerCase()
 export let poolMetas: PoolMeta[] = [
+  
   // Mainnet production
   {
     id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
