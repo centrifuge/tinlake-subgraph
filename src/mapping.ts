@@ -65,10 +65,11 @@ export function handleBlock(block: EthereumBlock): void {
     let poolMeta = poolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
-    if (pool == null) {
+    if (pool == null && parseFloat(block.number.toString()) > poolMeta.startBlock) {
       createPool(poolMeta.id.toString())
       continue
     }
+
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
