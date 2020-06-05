@@ -39,10 +39,10 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
     networkId: network.mainnet,
-    startBlock: 2147483647
+    startBlock: 10103234
   },
 
-  // Mainnet staging
+  // // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
     shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
