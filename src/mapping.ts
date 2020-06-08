@@ -65,10 +65,16 @@ export function handleBlock(block: EthereumBlock): void {
     let poolMeta = poolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
-    if (pool == null) {
+    log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
+    if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
       createPool(poolMeta.id.toString())
-      continue
+      pool = Pool.load(poolMeta.id)
     }
+
+    if (pool == null) {
+      continue
+    } 
+
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
@@ -105,23 +111,25 @@ export function handleBlock(block: EthereumBlock): void {
       totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
-    let minJuniorRatio = assessor.minJuniorRatio()
+    let minJuniorRatioResult = assessor.try_minJuniorRatio()
     let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
     // update pool values
     pool.totalDebt = totalDebt
-    pool.minJuniorRatio = minJuniorRatio
+    pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
     pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     pool.weightedInterestRate = weightedInterestRate
+    
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebt = senior.debt();
-      pool.seniorDebt = seniorDebt
-      log.debug("will update seniorDebt {}", [seniorDebt.toString()])
+      let seniorDebtResult = senior.try_debt();
+      pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
+      log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
+
     log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [
-      poolMeta.id, totalDebt.toString(), minJuniorRatio.toString(), pool.currentJuniorRatio.toString(),
+      poolMeta.id, totalDebt.toString(), pool.minJuniorRatio.toString(), pool.currentJuniorRatio.toString(),
       weightedInterestRate.toString()])
     pool.save()
   }
