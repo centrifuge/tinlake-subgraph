@@ -164,9 +164,9 @@ dataSources:
     name: NftFeed2
     network: mainnet
     source:
-      address: "0xf7bE772A892340Cf28B7e2b4e7b48564F66D1a63"
+      address: "0xe231fAaeA039766fCbb72CbB7d70ce18F0a28b8E"
       abi: NftFeed
-      startBlock: 10103234
+      startBlock: 10285028
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
