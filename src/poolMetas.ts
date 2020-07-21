@@ -20,6 +20,7 @@ export class PoolMeta {
 export let poolMetas: PoolMeta[] = [
   
   // Mainnet production
+  // CF1
   {
     id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
     shelf: '0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4',
@@ -30,7 +31,7 @@ export let poolMetas: PoolMeta[] = [
     networkId: network.mainnet,
     startBlock: 10002000
   },
-
+  // PC
   {
     id: '0x90abc0adb789111b4b865fdb3350b14a6e78794e',
     shelf: '0x3d0e477f328e48daa315aa503a6edf5b67f2d387',
@@ -41,7 +42,7 @@ export let poolMetas: PoolMeta[] = [
     networkId: network.mainnet,
     startBlock: 10103234
   },
-
+  // CF2
   {
     id: "0x0b985e7c5811c368528a0fc990455f4b448f7d77",
     shelf: '0x56ba49ea5f0930d80d14bf077d4bbee0b398bb06',
@@ -52,7 +53,17 @@ export let poolMetas: PoolMeta[] = [
     networkId: network.mainnet,
     startBlock: 10304149
   },
-
+  // NS
+  {
+    id: '0xeb33ab19d17d62950b16e843005fcdda62d5f551',
+    shelf: '0x5fb8479d021e5881a4874fdf15e549355c57b885',
+    pile: '0x1f1ea72b9a1edf799f27ea3a5d18262e92a845a6',
+    nftFeed: '0x3fbcddee1f5efc545828560869353287ec901c04',
+    assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
+    senior: '0x05791d754ef5788532287de5a730645f2bbcf78f',
+    networkId: network.mainnet,
+    startBlock: 10498700
+  },
   // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
