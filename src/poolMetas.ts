@@ -35,14 +35,25 @@ export let poolMetas: PoolMeta[] = [
     id: '0x90abc0adb789111b4b865fdb3350b14a6e78794e',
     shelf: '0x3d0e477f328e48daa315aa503a6edf5b67f2d387',
     pile: '0xa6bf7d7779383f6e078d0969f5b85b391994fced',
-    nftFeed: '0xf7be772a892340cf28b7e2b4e7b48564f66d1a63',
+    nftFeed: '0xe231faaea039766fcbb72cbb7d70ce18f0a28b8e',
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
     networkId: network.mainnet,
     startBlock: 10103234
   },
 
-  // // Mainnet staging
+  {
+    id: "0x0b985e7c5811c368528a0fc990455f4b448f7d77",
+    shelf: '0x56ba49ea5f0930d80d14bf077d4bbee0b398bb06',
+    pile: '0x27865916b3e6208b54eb7b3c481b3157e0ac1b0e',
+    nftFeed: '0x7cdc05188b81e2cb11c6332b460233e654d8a3d4',
+    assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
+    senior: '0xae1845a50316fb6e571c569e78338c76d715a899',
+    networkId: network.mainnet,
+    startBlock: 10304149
+  },
+
+  // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
     shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',

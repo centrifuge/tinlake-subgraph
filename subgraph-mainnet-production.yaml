@@ -164,9 +164,9 @@ dataSources:
     name: NftFeed2
     network: mainnet
     source:
-      address: "0xf7bE772A892340Cf28B7e2b4e7b48564F66D1a63"
+      address: "0xe231fAaeA039766fCbb72CbB7d70ce18F0a28b8E"
       abi: NftFeed
-      startBlock: 10103234
+      startBlock: 10285028
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -193,6 +193,85 @@ dataSources:
       address: "0xF49599f60BaD647b9f82b7C5eF7736Af13Ff89ac"
       abi: SeniorTranche
       startBlock: 10103234
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf3
+    network: mainnet
+    source:
+      address: "0x56ba49ea5f0930d80d14bf077d4bbee0b398bb06"
+      abi: Shelf
+      startBlock: 10304149
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed3
+    network: mainnet
+    source:
+      address: "0x7cdc05188b81e2cb11c6332b460233e654d8a3d4"
+      abi: NftFeed
+      startBlock: 10304149
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: SeniorTranche3
+    network: mainnet
+    source:
+      address: "0xae1845a50316fb6e571c569e78338c76d715a899"
+      abi: SeniorTranche
+      startBlock: 10304149
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
