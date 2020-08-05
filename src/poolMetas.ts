@@ -64,6 +64,17 @@ export let poolMetas: PoolMeta[] = [
     networkId: network.mainnet,
     startBlock: 10498700
   },
+  // CF3
+  {
+    id: '0xe02d16927c7f73e48dd7aef4c86fa9aaedfe8abf',
+    shelf: '0xadafacda038d05e9b20845c66a6955143e3e50a7',
+    pile: '0xa1044556e2cd8e0d3c143fe0f02640727a5a380b',
+    nftFeed: '0xf4846f411e8ab969ef869a5e30dc10a68cf5d2b0',
+    assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
+    senior: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
+    networkId: network.mainnet,
+    startBlock: 10595436
+  },
   // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
