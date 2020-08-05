@@ -285,3 +285,82 @@ dataSources:
         - function: file(bytes32,uint256)
           handler: handleSeniorTrancheFile
       file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf4
+    network: mainnet
+    source:
+      address: "0x5fb8479d021e5881a4874fdf15e549355c57b885"
+      abi: Shelf
+      startBlock: 10498792
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed4
+    network: mainnet
+    source:
+      address: "0x3fbcddee1f5efc545828560869353287ec901c04"
+      abi: NftFeed
+      startBlock: 10498788
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: SeniorTranche4
+    network: mainnet
+    source:
+      address: "0x05791d754ef5788532287de5a730645f2bbcf78f"
+      abi: SeniorTranche
+      startBlock: 10498762
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
+      file: ./src/mapping.ts
