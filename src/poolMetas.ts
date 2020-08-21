@@ -119,7 +119,18 @@ export let poolMetas: PoolMeta[] = [
     senior: '0x0122e2480255e4323fa10c1022545743532ad610',
     networkId: network.kovan,
     startBlock: 18607297
-  }
+  },
+
+  {
+    id: '0x74cc21bbc8bbf19e2ab3e68c810a4316bd715d76',
+    shelf: '0x6dee02b3c14bb9caecf6026551a2053bac203b75',
+    pile: '0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa',
+    nftFeed: '0xc63807020f7629f341d7042a9bf12d84355d4d8e',
+    assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
+    senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
+    networkId: network.kovan,
+    startBlock: 20380418
+  },
 ]
 
 // lookup that contains the rootId indexed by shelf
