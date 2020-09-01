@@ -61,9 +61,7 @@ export function handleBlock(block: EthereumBlock): void {
 
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools that are for the current network
-  const relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId === dataSource.network())
-  log.debug("{} total poolMetas, {} {} poolMetas", [poolMetas.length.toString(), relevantPoolMetas.length.toString(),
-    dataSource.network()])
+  let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
   for (let i = 0; i < relevantPoolMetas.length; i++) {
     let poolMeta = relevantPoolMetas[i]
     let pool = Pool.load(poolMeta.id)
