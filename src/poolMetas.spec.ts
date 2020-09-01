@@ -3,13 +3,16 @@ import { poolMetaByShelf, network } from './poolMetas'
 describe('poolMeta', () => {
   test('should retreive poolMeta by shelf', () => {
     expect(
-      poolMetaByShelf.get("0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395")
+      poolMetaByShelf.get("0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4")
     ).toStrictEqual({
-      id: '0xde1b98d083db90a00dee656ccc50a84597312c8d',
-      shelf: '0x2F79F0AcCcB29767496BCc5aA95c8aFf109b2395',
-      pile: '0x1119F08aD829B2AaBE7b05E782BE61bdD7E0B835',
-      nftFeed: '0x5fD12CfD3a335B0e336cD9aD633C46C7a2c948cf',
-      networkId: network.kovan,
+      id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
+      shelf: '0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4',
+      pile: '0x95b74ef13ff280a89ce3d7bbefc822c210e9939f',
+      nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
+      assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
+      senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
+      networkId: 'mainnet',
+      startBlock: 10002000
     })
 
     expect(

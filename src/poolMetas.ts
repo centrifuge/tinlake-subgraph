@@ -1,7 +1,4 @@
-export enum network {
-  mainnet,
-  kovan,
-}
+export type network = string // 'mainnet' | 'kovan' does not work in AssemblyScript
 
 // NOTE: interfaces are not supported by AssemblyScript
 export class PoolMeta {
@@ -18,7 +15,7 @@ export class PoolMeta {
 // NOTE: the following addresses all need to be lower case. Also note that AssemblyScript does not support
 // .toLowerCase()
 export let poolMetas: PoolMeta[] = [
-  
+
   // Mainnet production
   // CF1
   {
@@ -28,7 +25,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
     assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
     senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10002000
   },
   // PC
@@ -39,7 +36,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xe231faaea039766fcbb72cbb7d70ce18f0a28b8e',
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10103234
   },
   // CF2
@@ -50,7 +47,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x7cdc05188b81e2cb11c6332b460233e654d8a3d4',
     assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
     senior: '0xae1845a50316fb6e571c569e78338c76d715a899',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10304149
   },
   // NS
@@ -61,7 +58,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x3fbcddee1f5efc545828560869353287ec901c04',
     assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
     senior: '0x05791d754ef5788532287de5a730645f2bbcf78f',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10498700
   },
   // CF3
@@ -72,7 +69,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xf4846f411e8ab969ef869a5e30dc10a68cf5d2b0',
     assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
     senior: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10595436
   },
   // HTC1
@@ -83,9 +80,10 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x7b01145a8d736207ac46bdb831e7759264b05e6b',
     assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
     senior: '0x473bd32f890855138ed085582d80099f11ad7767',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 10661341
   },
+
   // Mainnet staging
   {
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
@@ -94,33 +92,11 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
     assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
     senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
-    networkId: network.mainnet,
+    networkId: 'mainnet',
     startBlock: 9993512
   },
 
   // Kovan staging
-  {
-    id: '0xbb53072d054de55d56dbb4ee95840de3262e4097',
-    shelf: '0xccf827238991fc3d5a51067968501a38624f313d',
-    pile: '0xcad66910788d5344425e30bd665693bd5bb479c4',
-    nftFeed: '0xe3a0118028db155daaa553f266ca18bae8540fd2',
-    assessor: '0x8a62a77d9a0eaf0067a8134cdf3250642ff1df3c',
-    senior: '0xa5d9b0190874b29d824b0d0164dec8b6034d1615',
-    networkId: network.kovan,
-    startBlock: 18594066
-  },
-  
-  {
-    id: '0xc95e8de672d717f7b60bca629f6cc65dd448ddc1',
-    shelf: '0xa51672dab1c3061900ef32600b69e763ca6384bf',
-    pile: '0x4b2ed13ca3603bac65de264cfc14a3c03d3c822c',
-    nftFeed: '0xe2520cc30be375206127dcec370f51e664141a92',
-    assessor: '0x76598110ececc538a817b6154f645cf37702406f',
-    senior: '0x0122e2480255e4323fa10c1022545743532ad610',
-    networkId: network.kovan,
-    startBlock: 18607297
-  },
-
   {
     id: '0x74cc21bbc8bbf19e2ab3e68c810a4316bd715d76',
     shelf: '0x6dee02b3c14bb9caecf6026551a2053bac203b75',
@@ -128,7 +104,7 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xc63807020f7629f341d7042a9bf12d84355d4d8e',
     assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
     senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
-    networkId: network.kovan,
+    networkId: 'kovan',
     startBlock: 20380418
   },
 ]
