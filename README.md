@@ -1,30 +1,36 @@
+## Testing
+
+```
+yarn test
+```
+
 ## Deployment
 
 In case you have made changes to the abi files or entities run
 
 ```
-yarn run codegen
+yarn run codegen ./subgraph-mainnet-production.yaml
 ```
 
 ### Mainnet production
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run deploy -- centrifuge/tinlake ./subgraph-mainnet-production.yaml
+yarn run deploy centrifuge/tinlake ./subgraph-mainnet-production.yaml
 ```
 
 ### Mainnet staging
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run deploy -- centrifuge/tinlake-staging ./subgraph-mainnet-staging.yaml
+yarn run deploy centrifuge/tinlake-staging ./subgraph-mainnet-staging.yaml
 ```
 
 ### Kovan staging
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run deploy -- centrifuge/tinlake-kovan-staging ./subgraph-kovan-staging.yaml
+yarn run deploy centrifuge/tinlake-kovan-staging ./subgraph-kovan-staging.yaml
 ```
 
 ## Query data
