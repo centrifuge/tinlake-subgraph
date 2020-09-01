@@ -1,4 +1,4 @@
-import { log, BigInt, EthereumBlock, Address, Bytes } from "@graphprotocol/graph-ts"
+import { log, BigInt, EthereumBlock, Address, Bytes, dataSource } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
@@ -15,9 +15,9 @@ const blockTimeSeconds = 15
 
 function createPool(poolId: string) : void {
     let poolMeta = poolFromId(poolId);
-    
+
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let interestRateResult = seniorTranche.try_ratePerSecond() 
+    let interestRateResult = seniorTranche.try_ratePerSecond()
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
       return
@@ -60,9 +60,12 @@ export function handleBlock(block: EthereumBlock): void {
   }
 
   log.debug("handleBlock number {}", [block.number.toString()])
-  // iterate through all pools
-  for (let i = 0; i < poolMetas.length; i++) {
-    let poolMeta = poolMetas[i]
+  // iterate through all pools that are for the current network
+  const relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId === dataSource.network())
+  log.debug("{} total poolMetas, {} {} poolMetas", [poolMetas.length.toString(), relevantPoolMetas.length.toString(),
+    dataSource.network()])
+  for (let i = 0; i < relevantPoolMetas.length; i++) {
+    let poolMeta = relevantPoolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
     log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
@@ -73,7 +76,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     if (pool == null) {
       continue
-    } 
+    }
 
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
@@ -120,7 +123,7 @@ export function handleBlock(block: EthereumBlock): void {
     pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
     pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     pool.weightedInterestRate = weightedInterestRate
-    
+
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
       let seniorDebtResult = senior.try_debt();
@@ -362,7 +365,7 @@ export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
   let seniorTranche = call.to
   let interestRate = call.inputs.ratePerSecond_
-  
+
 
   let poolMeta = poolFromSeniorTranche(seniorTranche)
   let poolId = poolMeta.id
@@ -374,7 +377,7 @@ export function handleSeniorTrancheFile(call: FileCall): void {
     return
   }
   log.debug(`update pool {} - set senior interest rate `, [poolId, interestRate.toString()]);
-  
+
   pool.seniorInterestRate = interestRate
   pool.save()
 }
