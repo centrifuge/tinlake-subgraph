@@ -83,6 +83,17 @@ export let poolMetas: PoolMeta[] = [
     networkId: 'mainnet',
     startBlock: 10661341
   },
+  // PC2
+  {
+    id: '0x23e11b3f2cd3d73f68a4a3af436e2ed3459d0260',
+    shelf: '0x3cf4deecad850a2b09fc2c8ea223943b57d1d4d2',
+    pile: '0x3c3b4b2cc7dbc4409563e74a174ac3c4c4780dfb',
+    nftFeed: '0x67ba167bebed75cbc7bd6b5e9f7cb7749f5a6a50',
+    assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
+    senior: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
+    networkId: 'mainnet',
+    startBlock: 10783663
+  },
 
   // Mainnet staging
   {
