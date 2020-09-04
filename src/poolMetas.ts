@@ -96,28 +96,28 @@ export let poolMetas: PoolMeta[] = [
   },
 
   // Mainnet staging
-  {
-    id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
-    shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
-    pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
-    nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
-    assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
-    senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
-    networkId: 'mainnet',
-    startBlock: 9993512
-  },
+  // {
+  //   id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
+  //   shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
+  //   pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
+  //   nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
+  //   assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
+  //   senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
+  //   networkId: 'mainnet',
+  //   startBlock: 9993512
+  // },
 
-  // Kovan staging
-  {
-    id: '0x74cc21bbc8bbf19e2ab3e68c810a4316bd715d76',
-    shelf: '0x6dee02b3c14bb9caecf6026551a2053bac203b75',
-    pile: '0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa',
-    nftFeed: '0xc63807020f7629f341d7042a9bf12d84355d4d8e',
-    assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
-    senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
-    networkId: 'kovan',
-    startBlock: 20380418
-  },
+  // // Kovan staging
+  // {
+  //   id: '0x74cc21bbc8bbf19e2ab3e68c810a4316bd715d76',
+  //   shelf: '0x6dee02b3c14bb9caecf6026551a2053bac203b75',
+  //   pile: '0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa',
+  //   nftFeed: '0xc63807020f7629f341d7042a9bf12d84355d4d8e',
+  //   assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
+  //   senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
+  //   networkId: 'kovan',
+  //   startBlock: 20380418
+  // },
 ]
 
 // lookup that contains the rootId indexed by shelf
