@@ -17,7 +17,7 @@ function createPool(poolId: string) : void {
     let poolMeta = poolFromId(poolId);
 
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let interestRateResult = seniorTranche.try_ratePerSecond()
+    let interestRateResult = seniorTranche.try_ratePerSecond() // DISCUSS V3: does this function still exist?
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
       return
@@ -112,8 +112,8 @@ export function handleBlock(block: EthereumBlock): void {
       totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
-    let minJuniorRatioResult = assessor.try_minJuniorRatio()
-    let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
+    let minJuniorRatioResult = assessor.try_minJuniorRatio() // V3: we need to retrieve the 1 - maxSeniorRatio
+    let currentJuniorRatioResult = assessor.try_currentJuniorRatio() // V3: 1 - assessor.try_seniorRatio
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
     // update pool values
@@ -124,7 +124,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult = senior.try_debt();
+      let seniorDebtResult = senior.try_debt(); // DISCUSS V3: find out where this value is
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
@@ -189,7 +189,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftRegistry = nftRegistry
 
   // get risk group and interest rate from nftFeed
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed)) // DISCUSS V3: switch to NAV Feed?
   let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
   // generate hash from nftId & registry
   let nftHash = nftFeed.nftID(loanIndex);
@@ -337,6 +337,8 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
+  // DISCUSS V3: store NAV value here?
+
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
   let riskGroup = nftFeed.risk(nftId)
@@ -359,6 +361,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
+// DISCUSS V3: where did the file method go?
 export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
   let seniorTranche = call.to
