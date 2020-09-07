@@ -29,6 +29,7 @@ function createPool(poolId: string) : void {
     pool.totalDebt = BigInt.fromI32(0)
     pool.seniorDebt = BigInt.fromI32(0)
     pool.minJuniorRatio = BigInt.fromI32(0)
+    // V3: add maxJuniorRatio 
     pool.currentJuniorRatio = BigInt.fromI32(0)
     pool.weightedInterestRate = BigInt.fromI32(0)
     pool.totalRepaysCount = 0
