@@ -405,7 +405,7 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
   log.debug(`handle assessor file set`, [call.to.toHex()]);
   let assessor = call.to
   let name = call.inputs.name.toString()
-  let value = call.inputs.value.toI32()
+  let value = call.inputs.value
 
   let poolMeta = poolFromAssessor(assessor)
   let poolId = poolMeta.id
@@ -418,18 +418,18 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
   }
 
   if (name === 'seniorInterestRate') {
-    pool.seniorInterestRate = BigInt.fromI32(value)
+    pool.seniorInterestRate = value
     log.debug(`update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
   } else if (name === 'maxReserve') {
-    pool.maxReserve = BigInt.fromI32(value)
+    pool.maxReserve = value
     log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
   } else if (name === 'maxSeniorRatio') {
      // Internally we use senior ratio, while externally we use the junior ratio
-    pool.minJuniorRatio = BigInt.fromI32(1 - value)
-    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, value.toString()])
+    pool.minJuniorRatio = BigInt.fromI32(1).minus(value)
+    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, BigInt.fromI32(1).minus(value).toString()])
   } else if (name === 'minSeniorRatio') {
-    pool.maxJuniorRatio = BigInt.fromI32(1 - value)
-    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, value.toString()])
+    pool.maxJuniorRatio = BigInt.fromI32(1).minus(value)
+    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, BigInt.fromI32(1).minus(value).toString()])
   } else {
     // Don't save if nothing changed
     return
