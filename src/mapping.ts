@@ -135,7 +135,7 @@ export function handleBlock(block: EthereumBlock): void {
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     } else {
       let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
-      pool.currentJuniorRatio = (!currentSeniorRatioResult.reverted) ? BigInt.fromI32(1 - currentSeniorRatioResult.value.toI32()) : BigInt.fromI32(0)
+      pool.currentJuniorRatio = (!currentSeniorRatioResult.reverted) ? BigInt.fromI32(1).minus(currentSeniorRatioResult.value) : BigInt.fromI32(0)
     }
 
     // check if senior tranche exists
