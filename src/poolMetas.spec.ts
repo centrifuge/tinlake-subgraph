@@ -12,7 +12,8 @@ describe('poolMeta', () => {
       assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
       senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
       networkId: 'mainnet',
-      startBlock: 10002000
+      startBlock: 10002000,
+      version: 2
     })
 
     expect(

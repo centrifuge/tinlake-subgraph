@@ -45,6 +45,6 @@ export function poolFromAssessor(assessor: Address): PoolMeta {
   if (!poolMetaByAssessor.has(assessor.toHex())) {
     log.critical("poolMeta not found for assessor {}", [assessor.toHex()])
   }
-  let poolMeta = poolMetaBySeniorTranche.get(assessor.toHex())
+  let poolMeta = poolMetaByAssessor.get(assessor.toHex())
   return poolMeta
 }

@@ -20,8 +20,8 @@ function createPool(poolId: string) : void {
     let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
 
     let interestRateResult
-    if (poolMeta.version === 3) seniorTranche.try_seniorInterestRate() 
-    else assessor.try_ratePerSecond() 
+    if (poolMeta.version === 3) interestRateResult = assessor.try_seniorInterestRate() 
+    else interestRateResult = seniorTranche.try_ratePerSecond() 
     
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
@@ -35,8 +35,8 @@ function createPool(poolId: string) : void {
     pool.seniorDebt = BigInt.fromI32(0)
     pool.minJuniorRatio = BigInt.fromI32(0)
     pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
-    pool.maxReserve = BigInt.fromI32(0) // Only used for V3
     pool.currentJuniorRatio = BigInt.fromI32(0)
+    pool.maxReserve = BigInt.fromI32(0) // Only used for V3
     pool.weightedInterestRate = BigInt.fromI32(0)
     pool.totalRepaysCount = 0
     pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
@@ -126,8 +126,8 @@ export function handleBlock(block: EthereumBlock): void {
     pool.totalDebt = totalDebt
 
     if (poolMeta.version === 2) {
-      let minJuniorRatioResult = assessor.try_minJuniorRatio() // V3: we need to retrieve the 1 - maxSeniorRatio
-      let currentJuniorRatioResult = assessor.try_currentJuniorRatio() // V3: 1 - assessor.try_seniorRatio
+      let minJuniorRatioResult = assessor.try_minJuniorRatio()
+      let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
 
       pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
