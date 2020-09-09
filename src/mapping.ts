@@ -20,10 +20,11 @@ function createPool(poolId: string) : void {
     let poolMeta = poolFromId(poolId);
 
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+    let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
 
     let interestRateResult
     if (isV3) seniorTranche.try_seniorInterestRate() 
-    else seniorTranche.try_ratePerSecond() 
+    else assessor.try_ratePerSecond() 
     
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
@@ -36,8 +37,8 @@ function createPool(poolId: string) : void {
     pool.totalDebt = BigInt.fromI32(0)
     pool.seniorDebt = BigInt.fromI32(0)
     pool.minJuniorRatio = BigInt.fromI32(0)
-    pool.maxJuniorRatio = BigInt.fromI32(0) // Only for V3
-    pool.maxReserve = BigInt.fromI32(0) // Only for V3
+    pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
+    pool.maxReserve = BigInt.fromI32(0) // Only used for V3
     pool.currentJuniorRatio = BigInt.fromI32(0)
     pool.weightedInterestRate = BigInt.fromI32(0)
     pool.totalRepaysCount = 0
@@ -121,23 +122,26 @@ export function handleBlock(block: EthereumBlock): void {
       totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
-    let minJuniorRatioResult = assessor.try_minJuniorRatio() // V3: we need to retrieve the 1 - maxSeniorRatio
-    let currentJuniorRatioResult = assessor.try_currentJuniorRatio() // V3: 1 - assessor.try_seniorRatio
+    // update pool values
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
-    // update pool values
+    pool.weightedInterestRate = weightedInterestRate
     pool.totalDebt = totalDebt
 
     if (!isV3) {
-      pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
+      let minJuniorRatioResult = assessor.try_minJuniorRatio() // V3: we need to retrieve the 1 - maxSeniorRatio
+      let currentJuniorRatioResult = assessor.try_currentJuniorRatio() // V3: 1 - assessor.try_seniorRatio
+
+      pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     }
 
-    pool.weightedInterestRate = weightedInterestRate
-
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult = senior.try_debt(); // DISCUSS V3: find out where this value is
+      let seniorDebtResult
+      if (isV3) assessor.try_seniorDebt_()
+      else senior.try_debt();
+
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
@@ -202,7 +206,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftRegistry = nftRegistry
 
   // get risk group and interest rate from nftFeed
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed)) // DISCUSS V3: switch to NAV Feed?
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
   let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
   // generate hash from nftId & registry
   let nftHash = nftFeed.nftID(loanIndex);
@@ -350,8 +354,6 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
-  // DISCUSS V3: store NAV value here?
-
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
   let riskGroup = nftFeed.risk(nftId)
@@ -422,11 +424,11 @@ export function handleAssessorFile(call: FileCall): void {
     log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
   }
   else if (name === 'maxSeniorRatio') {
-    pool['maxSeniorRatio'] = 1 - value // Internally we use senior ratio, while externally we use the junior ratio
+    pool['minJuniorRatio'] = 1 - value // Internally we use senior ratio, while externally we use the junior ratio
     log.debug(`update pool {} - set maxSeniorRatio to {}`, [poolId, (1 - value).toString()])
   }
   else if (name === 'minSeniorRatio') {
-    pool['minSeniorRatio'] = 1 - value
+    pool['maxJuniorRatio'] = 1 - value
     log.debug(`update pool {} - set minSeniorRatio to {}`, [poolId, (1 - value).toString()])
   } else {
     return
