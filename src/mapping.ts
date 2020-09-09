@@ -8,16 +8,23 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromId} from "./poolMetasUtil"
+import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId} from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
+
+// TODO: all instances of isV3 in the handlers  should be replaced by the actual pool version
+const isV3 = true
 
 function createPool(poolId: string) : void {
     let poolMeta = poolFromId(poolId);
 
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let interestRateResult = seniorTranche.try_ratePerSecond() // DISCUSS V3: does this function still exist?
+
+    let interestRateResult
+    if (isV3) seniorTranche.try_seniorInterestRate() 
+    else seniorTranche.try_ratePerSecond() 
+    
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
       return
@@ -29,7 +36,8 @@ function createPool(poolId: string) : void {
     pool.totalDebt = BigInt.fromI32(0)
     pool.seniorDebt = BigInt.fromI32(0)
     pool.minJuniorRatio = BigInt.fromI32(0)
-    // V3: add maxJuniorRatio 
+    pool.maxJuniorRatio = BigInt.fromI32(0) // Only for V3
+    pool.maxReserve = BigInt.fromI32(0) // Only for V3
     pool.currentJuniorRatio = BigInt.fromI32(0)
     pool.weightedInterestRate = BigInt.fromI32(0)
     pool.totalRepaysCount = 0
@@ -119,8 +127,12 @@ export function handleBlock(block: EthereumBlock): void {
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
     // update pool values
     pool.totalDebt = totalDebt
-    pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
-    pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
+
+    if (!isV3) {
+      pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
+      pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
+    }
+
     pool.weightedInterestRate = weightedInterestRate
 
     // check if senior tranche exists
@@ -362,7 +374,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
-// DISCUSS V3: where did the file method go?
+// Only used in V2
 export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
   let seniorTranche = call.to
@@ -381,5 +393,45 @@ export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`update pool {} - set senior interest rate `, [poolId, interestRate.toString()]);
 
   pool.seniorInterestRate = interestRate
+  pool.save()
+}
+
+// Only used in V3
+export function handleAssessorFile(call: FileCall): void {
+  log.debug(`handle assessor file set`, [call.to.toHex()]);
+  let assessor = call.to
+  let name = call.inputs.name
+  let value = call.inputs.value
+
+  let poolMeta = poolFromAssessor(assessor)
+  let poolId = poolMeta.id
+  log.debug(`handle assessor file pool Id {}`, [poolId]);
+
+  let pool = Pool.load(poolId)
+  if (pool == null) {
+    log.error("pool {} not found", [poolId])
+    return
+  }
+
+  if (name === 'seniorInterestRate') {
+    pool['seniorInterestRate'] = value
+    log.debug(`update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
+  }
+  else if (name === 'maxReserve') {
+    pool['maxReserve'] = value
+    log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
+  }
+  else if (name === 'maxSeniorRatio') {
+    pool['maxSeniorRatio'] = 1 - value // Internally we use senior ratio, while externally we use the junior ratio
+    log.debug(`update pool {} - set maxSeniorRatio to {}`, [poolId, (1 - value).toString()])
+  }
+  else if (name === 'minSeniorRatio') {
+    pool['minSeniorRatio'] = 1 - value
+    log.debug(`update pool {} - set minSeniorRatio to {}`, [poolId, (1 - value).toString()])
+  } else {
+    return
+  }
+
+  pool[name] = value
   pool.save()
 }

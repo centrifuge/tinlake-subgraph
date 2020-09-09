@@ -150,4 +150,10 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaBySeniorTranche.set(poolMetas[i].senior, poolMetas[i])
 }
 
+// lookup that contains the pool indexed by assessor
+export let poolMetaByAssessor = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaByAssessor.set(poolMetas[i].assessor, poolMetas[i])
+}
+
 
