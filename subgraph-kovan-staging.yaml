@@ -135,7 +135,7 @@ dataSources:
 
   # Kovan NAV Pool 2
   - kind: ethereum/contract
-    name: SeniorTranche
+    name: SeniorTranche2
     network: kovan
     source:
       address: "0xfe9afc9e25e7ccff4350fe77706483a4af712e81"
@@ -155,7 +155,7 @@ dataSources:
           handler: handleSeniorTrancheFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf
+    name: Shelf2
     network: kovan
     source:
       address: "0x9d3fa751ae1a6faab1e46bfacb076308debce61a"
@@ -188,7 +188,7 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed
+    name: NftFeed2
     network: kovan
     source:
       address: "0x7269d558861e0adea3737c649e3aacc62a6403ac"
