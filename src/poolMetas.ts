@@ -1,4 +1,5 @@
 export type network = string // 'mainnet' | 'kovan' does not work in AssemblyScript
+export type version = number // 2 | 3
 
 // NOTE: interfaces are not supported by AssemblyScript
 export class PoolMeta {
@@ -10,6 +11,7 @@ export class PoolMeta {
   senior: string // senior contract address
   networkId: network
   startBlock: number // block where root contract was deployed
+  version: version
 }
 
 // NOTE: the following addresses all need to be lower case. Also note that AssemblyScript does not support
@@ -26,7 +28,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
     senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
     networkId: 'mainnet',
-    startBlock: 10002000
+    startBlock: 10002000,
+    version: 2
   },
   // PC
   {
@@ -37,7 +40,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
     networkId: 'mainnet',
-    startBlock: 10103234
+    startBlock: 10103234,
+    version: 2
   },
   // CF2
   {
@@ -48,7 +52,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
     senior: '0xae1845a50316fb6e571c569e78338c76d715a899',
     networkId: 'mainnet',
-    startBlock: 10304149
+    startBlock: 10304149,
+    version: 2
   },
   // NS
   {
@@ -59,7 +64,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
     senior: '0x05791d754ef5788532287de5a730645f2bbcf78f',
     networkId: 'mainnet',
-    startBlock: 10498700
+    startBlock: 10498700,
+    version: 2
   },
   // CF3
   {
@@ -70,7 +76,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
     senior: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
     networkId: 'mainnet',
-    startBlock: 10595436
+    startBlock: 10595436,
+    version: 2
   },
   // HTC1
   {
@@ -81,7 +88,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
     senior: '0x473bd32f890855138ed085582d80099f11ad7767',
     networkId: 'mainnet',
-    startBlock: 10661341
+    startBlock: 10661341,
+    version: 2
   },
   // PC2
   {
@@ -92,7 +100,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
     senior: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
     networkId: 'mainnet',
-    startBlock: 10783663
+    startBlock: 10783663,
+    version: 2
   },
 
   // Mainnet staging
@@ -104,7 +113,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
     senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
     networkId: 'mainnet',
-    startBlock: 9993512
+    startBlock: 9993512,
+    version: 2
   },
 
   // Kovan staging
@@ -116,7 +126,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
     senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
     networkId: 'kovan',
-    startBlock: 20380418
+    startBlock: 20380418,
+    version: 2
   },
 ]
 
