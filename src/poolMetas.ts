@@ -107,7 +107,7 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 9993512
   },
 
-  // Kovan NAV Pool 1
+  // Kovan Static NAV Pool 1
   {
     id: '0x382460db48ee1b84b23d7286cfd7d027c27bb885',
     shelf: '0x984a29dd6ac3525a2ed071359d6a6e5cd9752aca',
@@ -119,7 +119,7 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 20806634
   },
 
-  // Kovan NAV Pool 2
+  // Kovan Static NAV Pool 2
   {
     id: '0x9922c07feb725d6946adb94fd4fd1bbbb3a1dac9',
     shelf: '0x9d3fa751ae1a6faab1e46bfacb076308debce61a',
