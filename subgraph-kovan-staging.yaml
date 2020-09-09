@@ -134,3 +134,85 @@ dataSources:
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
       file: ./src/mapping.ts
+
+
+  # Kovan V3
+  - kind: ethereum/contract
+    name: SeniorTranche2
+    network: kovan
+    source:
+      address: "0x0f4ee0d02c98bb4443ff88ffafd76fc8ad3d82f4"
+      abi: SeniorTranche
+      startBlock: 20804424
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf2
+    network: kovan
+    source:
+      address: "0x04334a9bdf561314cca5abbd18c632bcf62e97a6"
+      abi: Shelf
+      startBlock: 20804403
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed2
+    network: kovan
+    source:
+      address: "0xe1e94229a49d6e89537926d29483e736152894b3"
+      abi: NftFeed
+      startBlock: 20804400
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
