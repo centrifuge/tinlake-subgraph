@@ -52,7 +52,7 @@ dataSources:
           handler: handleCreateProxy
       file: ./src/mapping.ts
 
-  # Kovan NAV Pool 1
+  # Kovan Static NAV Pool 1
   - kind: ethereum/contract
     name: SeniorTranche
     network: kovan
@@ -133,7 +133,7 @@ dataSources:
           handler: handleNftFeedUpdate
       file: ./src/mapping.ts
 
-  # Kovan NAV Pool 2
+  # Kovan Static NAV Pool 2
   - kind: ethereum/contract
     name: SeniorTranche2
     network: kovan
