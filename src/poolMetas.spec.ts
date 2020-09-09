@@ -1,4 +1,4 @@
-import { poolMetaByShelf, network } from './poolMetas'
+import { poolMetaByShelf } from './poolMetas'
 
 describe('poolMeta', () => {
   test('should retreive poolMeta by shelf', () => {

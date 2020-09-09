@@ -1,4 +1,4 @@
-import { Address, log } from "@graphprotocol/graph-ts"
+import { BigInt, Address, log } from "@graphprotocol/graph-ts";
 import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaByAssessor, poolMetaById } from "./poolMetas"
 
 export function poolFromShelf(shelf: Address): PoolMeta {
@@ -47,4 +47,8 @@ export function poolFromAssessor(assessor: Address): PoolMeta {
   }
   let poolMeta = poolMetaByAssessor.get(assessor.toHex())
   return poolMeta
+}
+
+export function seniorToJuniorRatio(seniorRatio: BigInt): BigInt {
+  return BigInt.fromI32(10).pow(27).minus(seniorRatio);
 }

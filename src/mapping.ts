@@ -9,7 +9,7 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId} from "./poolMetasUtil"
+import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./poolMetasUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -135,7 +135,9 @@ export function handleBlock(block: EthereumBlock): void {
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     } else {
       let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
-      pool.currentJuniorRatio = (!currentSeniorRatioResult.reverted) ? BigInt.fromI32(1).minus(currentSeniorRatioResult.value) : BigInt.fromI32(0)
+      pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
+        ? seniorToJuniorRatio(currentSeniorRatioResult.value)
+        : BigInt.fromI32(0);
     }
 
     // check if senior tranche exists
@@ -425,11 +427,11 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
     log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
   } else if (name === 'maxSeniorRatio') {
      // Internally we use senior ratio, while externally we use the junior ratio
-    pool.minJuniorRatio = BigInt.fromI32(1).minus(value)
-    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, BigInt.fromI32(1).minus(value).toString()])
+    pool.minJuniorRatio = seniorToJuniorRatio(value)
+    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
   } else if (name === 'minSeniorRatio') {
-    pool.maxJuniorRatio = BigInt.fromI32(1).minus(value)
-    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, BigInt.fromI32(1).minus(value).toString()])
+    pool.maxJuniorRatio = seniorToJuniorRatio(value)
+    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
   } else {
     // Don't save if nothing changed
     return
