@@ -52,14 +52,14 @@ dataSources:
           handler: handleCreateProxy
       file: ./src/mapping.ts
 
-  # Kovan NAV Feed
+  # Kovan Static NAV Pool 1
   - kind: ethereum/contract
     name: SeniorTranche
     network: kovan
     source:
-      address: "0xbb57a86a8655f4ded6beceff06127a55040f2f2c"
+      address: "0xe56864ac6cface027d825b06dd6089c92e982dcf"
       abi: SeniorTranche
-      startBlock: 20380438
+      startBlock: 20806656
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -77,9 +77,9 @@ dataSources:
     name: Shelf
     network: kovan
     source:
-      address: "0x6dee02b3c14bb9caecf6026551a2053bac203b75"
+      address: "0x984a29dd6ac3525a2ed071359d6a6e5cd9752aca"
       abi: Shelf
-      startBlock: 20380460
+      startBlock: 20806687
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -110,9 +110,90 @@ dataSources:
     name: NftFeed
     network: kovan
     source:
-      address: "0xc63807020f7629f341d7042a9bf12d84355d4d8e"
+      address: "0x88ce8de0ad64ede62a4541837ae869e3ac5a261d"
       abi: NftFeed
-      startBlock: 20380458
+      startBlock: 20806684
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+
+  # Kovan Static NAV Pool 2
+  - kind: ethereum/contract
+    name: SeniorTranche2
+    network: kovan
+    source:
+      address: "0xfe9afc9e25e7ccff4350fe77706483a4af712e81"
+      abi: SeniorTranche
+      startBlock: 20806836
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf2
+    network: kovan
+    source:
+      address: "0x9d3fa751ae1a6faab1e46bfacb076308debce61a"
+      abi: Shelf
+      startBlock: 20806861
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed2
+    network: kovan
+    source:
+      address: "0x7269d558861e0adea3737c649e3aacc62a6403ac"
+      abi: NftFeed
+      startBlock: 20806859
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
