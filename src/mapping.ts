@@ -2,6 +2,7 @@ import { log, BigInt, EthereumBlock, Address, Bytes, dataSource } from "@graphpr
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
+import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/AssessorV3"
 import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
@@ -17,11 +18,11 @@ function createPool(poolId: string) : void {
     let poolMeta = poolFromId(poolId);
 
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
 
-    let interestRateResult
-    if (poolMeta.version === 3) interestRateResult = assessor.try_seniorInterestRate() 
-    else interestRateResult = seniorTranche.try_ratePerSecond() 
+    let interestRateResult = poolMeta.version === 3
+      ? assessor_v3.try_seniorInterestRate()
+      : seniorTranche.try_ratePerSecond() 
     
     if (interestRateResult.reverted) {
       log.debug("pool not deployed to the network yet {}", [poolId])
@@ -87,6 +88,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
     let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
     let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
 
     let totalDebt = BigInt.fromI32(0)
@@ -131,13 +133,16 @@ export function handleBlock(block: EthereumBlock): void {
 
       pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
+    } else {
+      let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
+      pool.currentJuniorRatio = (!currentSeniorRatioResult.reverted) ? BigInt.fromI32(1 - currentSeniorRatioResult.value.toI32()) : BigInt.fromI32(0)
     }
 
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult
-      if (poolMeta.version === 3) assessor.try_seniorDebt_()
-      else senior.try_debt();
+      let seniorDebtResult = poolMeta.version === 3
+        ? assessor_v3.try_seniorDebt_()
+        : senior.try_debt()
 
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
@@ -396,11 +401,11 @@ export function handleSeniorTrancheFile(call: FileCall): void {
 }
 
 // Only used in V3
-export function handleAssessorFile(call: FileCall): void {
+export function handleAssessorFile(call: AssessorV3FileCall): void {
   log.debug(`handle assessor file set`, [call.to.toHex()]);
   let assessor = call.to
-  let name = call.inputs.name
-  let value = call.inputs.value
+  let name = call.inputs.name.toString()
+  let value = call.inputs.value.toI32()
 
   let poolMeta = poolFromAssessor(assessor)
   let poolId = poolMeta.id
@@ -413,23 +418,22 @@ export function handleAssessorFile(call: FileCall): void {
   }
 
   if (name === 'seniorInterestRate') {
-    pool['seniorInterestRate'] = value
+    pool.seniorInterestRate = BigInt.fromI32(value)
     log.debug(`update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
   } else if (name === 'maxReserve') {
-    pool['maxReserve'] = value
+    pool.maxReserve = BigInt.fromI32(value)
     log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
   } else if (name === 'maxSeniorRatio') {
      // Internally we use senior ratio, while externally we use the junior ratio
-    pool['minJuniorRatio'] = 1 - value
-    log.debug(`update pool {} - set minJuniorRatio to {}`, [poolId, (1 - value).toString()])
+    pool.minJuniorRatio = BigInt.fromI32(1 - value)
+    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, value.toString()])
   } else if (name === 'minSeniorRatio') {
-    pool['maxJuniorRatio'] = 1 - value
-    log.debug(`update pool {} - set maxJuniorRatio to {}`, [poolId, (1 - value).toString()])
+    pool.maxJuniorRatio = BigInt.fromI32(1 - value)
+    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, value.toString()])
   } else {
     // Don't save if nothing changed
     return
   }
 
-  pool[name] = value
   pool.save()
 }

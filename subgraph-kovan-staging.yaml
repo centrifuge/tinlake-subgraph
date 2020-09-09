@@ -23,6 +23,8 @@ dataSources:
           file: ./abis/Pile.json
         - name: Assessor
           file: ./abis/Assessor.json
+        - name: AssessorV3
+          file: ./abis/v3/Assessor.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
       blockHandlers:
