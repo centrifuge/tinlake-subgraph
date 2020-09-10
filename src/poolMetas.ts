@@ -116,21 +116,34 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 9993512,
     version: 2
   },
-
-  // Kovan staging
+  
+  // Kovan Static NAV Pool 1
   {
-    id: '0x74cc21bbc8bbf19e2ab3e68c810a4316bd715d76',
-    shelf: '0x6dee02b3c14bb9caecf6026551a2053bac203b75',
-    pile: '0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa',
-    nftFeed: '0xc63807020f7629f341d7042a9bf12d84355d4d8e',
-    assessor: '0x1c23a1deb57f034868e8c384880f4c4d1893c8dd',
-    senior: '0xbb57a86a8655f4ded6beceff06127a55040f2f2c',
+    id: '0x382460db48ee1b84b23d7286cfd7d027c27bb885',
+    shelf: '0x984a29dd6ac3525a2ed071359d6a6e5cd9752aca',
+    pile: '0xc6452941c848b2f946d00ca2dfc6afde35c98500',
+    nftFeed: '0x88ce8de0ad64ede62a4541837ae869e3ac5a261d',
+    assessor: '0xfc1ba387b03fa392c41f1cbd3149318db2cf8e2b',
+    senior: '0xe56864ac6cface027d825b06dd6089c92e982dcf',
     networkId: 'kovan',
-    startBlock: 20380418,
+    startBlock: 20806634,
     version: 2
   },
 
-  // Kovan staging V3
+  // Kovan Static NAV Pool 2
+  {
+    id: '0x9922c07feb725d6946adb94fd4fd1bbbb3a1dac9',
+    shelf: '0x9d3fa751ae1a6faab1e46bfacb076308debce61a',
+    pile: '0x14fe3195f43d953576b8abbb1497920cc9028885',
+    nftFeed: '0x7269d558861e0adea3737c649e3aacc62a6403ac',
+    assessor: '0x6a6dcb0faef789082278c61c28f11ee4adf6957a',
+    senior: '0xfe9afc9e25e7ccff4350fe77706483a4af712e81',
+    networkId: 'kovan',
+    startBlock: 20806806,
+    version: 2
+  },
+
+  // Kovan Revolving Pool 1
   {
     id: '0x6e2133b6c9c853158ca877f7540d99ca8a623e0c',
     shelf: '0x04334a9bdf561314cca5abbd18c632bcf62e97a6',
