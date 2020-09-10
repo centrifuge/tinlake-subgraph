@@ -15,35 +15,35 @@ const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 
 function createPool(poolId: string) : void {
-    let poolMeta = poolFromId(poolId);
+  let poolMeta = poolFromId(poolId);
 
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+  let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+  let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
 
-    let interestRateResult = poolMeta.version === 3
-      ? assessor_v3.try_seniorInterestRate()
-      : seniorTranche.try_ratePerSecond() 
-    
-    if (interestRateResult.reverted) {
-      log.debug("pool not deployed to the network yet {}", [poolId])
-      return
-    }
-    log.debug("will create new pool poolId {}", [poolId])
-    let pool = new Pool(poolId)
-    pool.seniorInterestRate = interestRateResult.value
-    pool.loans = []
-    pool.totalDebt = BigInt.fromI32(0)
-    pool.seniorDebt = BigInt.fromI32(0)
-    pool.minJuniorRatio = BigInt.fromI32(0)
-    pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
-    pool.currentJuniorRatio = BigInt.fromI32(0)
-    pool.maxReserve = BigInt.fromI32(0) // Only used for V3
-    pool.weightedInterestRate = BigInt.fromI32(0)
-    pool.totalRepaysCount = 0
-    pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
-    pool.totalBorrowsCount = 0
-    pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
-    pool.save()
+  let interestRateResult = poolMeta.version === 3
+    ? assessor_v3.try_seniorInterestRate()
+    : seniorTranche.try_ratePerSecond() 
+  
+  if (interestRateResult.reverted) {
+    log.debug("pool not deployed to the network yet {}", [poolId])
+    return
+  }
+  log.debug("will create new pool poolId {}", [poolId])
+  let pool = new Pool(poolId)
+  pool.seniorInterestRate = interestRateResult.value
+  pool.loans = []
+  pool.totalDebt = BigInt.fromI32(0)
+  pool.seniorDebt = BigInt.fromI32(0)
+  pool.minJuniorRatio = BigInt.fromI32(0)
+  pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
+  pool.currentJuniorRatio = BigInt.fromI32(0)
+  pool.maxReserve = BigInt.fromI32(0) // Only used for V3
+  pool.weightedInterestRate = BigInt.fromI32(0)
+  pool.totalRepaysCount = 0
+  pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
+  pool.totalBorrowsCount = 0
+  pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+  pool.save()
 }
 
 export function handleCreateProxy(event: Created): void {

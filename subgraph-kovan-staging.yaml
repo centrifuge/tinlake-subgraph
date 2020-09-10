@@ -138,11 +138,11 @@ dataSources:
 
   # Kovan V3
   - kind: ethereum/contract
-    name: SeniorTranche2
+    name: Assessor2
     network: kovan
     source:
       address: "0x0f4ee0d02c98bb4443ff88ffafd76fc8ad3d82f4"
-      abi: SeniorTranche
+      abi: AssessorV3
       startBlock: 20804424
     mapping:
       kind: ethereum/events
@@ -151,11 +151,11 @@ dataSources:
       entities:
         - Pool
       abis:
-        - name: SeniorTranche
-          file: ./abis/SeniorTranche.json
+        - name: AssessorV3
+          file: ./abis/v3/AssessorV3.json
       callHandlers:
         - function: file(bytes32,uint256)
-          handler: handleSeniorTrancheFile
+          handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Shelf2
