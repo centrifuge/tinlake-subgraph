@@ -1,4 +1,4 @@
-import { log, BigInt, EthereumBlock, Address, Bytes, dataSource } from "@graphprotocol/graph-ts"
+import { log, BigInt, CallResult, EthereumBlock, Address, dataSource } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
@@ -17,12 +17,14 @@ const blockTimeSeconds = 15
 function createPool(poolId: string) : void {
   let poolMeta = poolFromId(poolId);
 
-  let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-  let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-
-  let interestRateResult = poolMeta.version === 3
-    ? assessor_v3.try_seniorInterestRate()
-    : seniorTranche.try_ratePerSecond() 
+  let interestRateResult = new CallResult<BigInt>()
+  if (poolMeta.version === 3) {
+    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+    assessor_v3.try_seniorInterestRate()
+  } else {
+    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+    seniorTranche.try_ratePerSecond() 
+  }
   
   if (interestRateResult.reverted) {
     log.debug("pool not deployed to the network yet {}", [poolId])
@@ -87,9 +89,6 @@ export function handleBlock(block: EthereumBlock): void {
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
-    let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
 
     let totalDebt = BigInt.fromI32(0)
     let totalWeightedDebt = BigInt.fromI32(0)
@@ -128,12 +127,14 @@ export function handleBlock(block: EthereumBlock): void {
     pool.totalDebt = totalDebt
 
     if (poolMeta.version === 2) {
+      let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
       let minJuniorRatioResult = assessor.try_minJuniorRatio()
       let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
 
       pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
       pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     } else {
+      let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
       let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
       pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
         ? seniorToJuniorRatio(currentSeniorRatioResult.value)
@@ -142,9 +143,14 @@ export function handleBlock(block: EthereumBlock): void {
 
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult = poolMeta.version === 3
-        ? assessor_v3.try_seniorDebt_()
-        : senior.try_debt()
+      let seniorDebtResult = new CallResult<BigInt>()
+      if (poolMeta.version === 3) {
+        let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+        seniorDebtResult = assessor_v3.try_seniorDebt_()
+      } else {
+        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+        seniorDebtResult = senior.try_debt()
+      }
 
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])

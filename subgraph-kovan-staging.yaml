@@ -152,7 +152,7 @@ dataSources:
         - Pool
       abis:
         - name: AssessorV3
-          file: ./abis/v3/AssessorV3.json
+          file: ./abis/v3/Assessor.json
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
