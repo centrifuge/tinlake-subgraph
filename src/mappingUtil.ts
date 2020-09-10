@@ -1,5 +1,5 @@
-import { Address, log } from "@graphprotocol/graph-ts"
-import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaById } from "./poolMetas"
+import { BigInt, Address, log } from "@graphprotocol/graph-ts";
+import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaByAssessor, poolMetaById } from "./poolMetas"
 
 export function poolFromShelf(shelf: Address): PoolMeta {
   if (!poolMetaByShelf.has(shelf.toHex())) {
@@ -39,4 +39,16 @@ export function poolFromSeniorTranche(seniorTranche: Address): PoolMeta {
   }
   let poolMeta = poolMetaBySeniorTranche.get(seniorTranche.toHex())
   return poolMeta
+}
+
+export function poolFromAssessor(assessor: Address): PoolMeta {
+  if (!poolMetaByAssessor.has(assessor.toHex())) {
+    log.critical("poolMeta not found for assessor {}", [assessor.toHex()])
+  }
+  let poolMeta = poolMetaByAssessor.get(assessor.toHex())
+  return poolMeta
+}
+
+export function seniorToJuniorRatio(seniorRatio: BigInt): BigInt {
+  return BigInt.fromI32(10).pow(27).minus(seniorRatio);
 }

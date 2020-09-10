@@ -10,7 +10,9 @@ type Pool @entity {
   seniorDebt: BigInt!
   seniorInterestRate: BigInt!
   minJuniorRatio: BigInt!
+  maxJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
+  maxReserve: BigInt!
 }
 
 type Loan @entity {

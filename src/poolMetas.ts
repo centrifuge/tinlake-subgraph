@@ -1,15 +1,17 @@
 export type network = string // 'mainnet' | 'kovan' does not work in AssemblyScript
+export type version = number // 2 | 3
 
 // NOTE: interfaces are not supported by AssemblyScript
 export class PoolMeta {
   id: string // root contract address
   shelf: string // shelf contract address
   pile: string // pile contract address
-  nftFeed: string // nftFeed contract address
+  nftFeed: string // NFT or NAV feed contract address
   assessor: string // assessor contract address
   senior: string // senior contract address
   networkId: network
   startBlock: number // block where root contract was deployed
+  version: version
 }
 
 // NOTE: the following addresses all need to be lower case. Also note that AssemblyScript does not support
@@ -26,7 +28,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
     senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
     networkId: 'mainnet',
-    startBlock: 10002000
+    startBlock: 10002000,
+    version: 2
   },
   // PC
   {
@@ -37,7 +40,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
     networkId: 'mainnet',
-    startBlock: 10103234
+    startBlock: 10103234,
+    version: 2
   },
   // CF2
   {
@@ -48,7 +52,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
     senior: '0xae1845a50316fb6e571c569e78338c76d715a899',
     networkId: 'mainnet',
-    startBlock: 10304149
+    startBlock: 10304149,
+    version: 2
   },
   // NS
   {
@@ -59,7 +64,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
     senior: '0x05791d754ef5788532287de5a730645f2bbcf78f',
     networkId: 'mainnet',
-    startBlock: 10498700
+    startBlock: 10498700,
+    version: 2
   },
   // CF3
   {
@@ -70,7 +76,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
     senior: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
     networkId: 'mainnet',
-    startBlock: 10595436
+    startBlock: 10595436,
+    version: 2
   },
   // HTC1
   {
@@ -81,7 +88,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
     senior: '0x473bd32f890855138ed085582d80099f11ad7767',
     networkId: 'mainnet',
-    startBlock: 10661341
+    startBlock: 10661341,
+    version: 2
   },
   // PC2
   {
@@ -92,7 +100,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
     senior: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
     networkId: 'mainnet',
-    startBlock: 10783663
+    startBlock: 10783663,
+    version: 2
   },
 
   // Mainnet staging
@@ -104,9 +113,10 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
     senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
     networkId: 'mainnet',
-    startBlock: 9993512
+    startBlock: 9993512,
+    version: 2
   },
-
+  
   // Kovan Static NAV Pool 1
   {
     id: '0x382460db48ee1b84b23d7286cfd7d027c27bb885',
@@ -116,7 +126,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xfc1ba387b03fa392c41f1cbd3149318db2cf8e2b',
     senior: '0xe56864ac6cface027d825b06dd6089c92e982dcf',
     networkId: 'kovan',
-    startBlock: 20806634
+    startBlock: 20806634,
+    version: 2
   },
 
   // Kovan Static NAV Pool 2
@@ -128,7 +139,21 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x6a6dcb0faef789082278c61c28f11ee4adf6957a',
     senior: '0xfe9afc9e25e7ccff4350fe77706483a4af712e81',
     networkId: 'kovan',
-    startBlock: 20806806
+    startBlock: 20806806,
+    version: 2
+  },
+
+  // Kovan Revolving Pool 1
+  {
+    id: '0x6e2133b6c9c853158ca877f7540d99ca8a623e0c',
+    shelf: '0x04334a9bdf561314cca5abbd18c632bcf62e97a6',
+    pile: '0xc60d14d4003b7a67b7d0a726aa11e7c9f3680a9e',
+    nftFeed: '0xe1e94229a49d6e89537926d29483e736152894b3',
+    assessor: '0x4034a9573135b6e70ba7c950650f1748530333be',
+    senior: '0x0f4ee0d02c98bb4443ff88ffafd76fc8ad3d82f4',
+    networkId: 'kovan',
+    startBlock: 20804382,
+    version: 3
   },
 ]
 
@@ -160,6 +185,12 @@ for (let i = 0; i < poolMetas.length; i++) {
 export let poolMetaBySeniorTranche = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {
   poolMetaBySeniorTranche.set(poolMetas[i].senior, poolMetas[i])
+}
+
+// lookup that contains the pool indexed by assessor
+export let poolMetaByAssessor = new Map<string, PoolMeta>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolMetaByAssessor.set(poolMetas[i].assessor, poolMetas[i])
 }
 
 

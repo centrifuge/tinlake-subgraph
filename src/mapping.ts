@@ -1,41 +1,51 @@
-import { log, BigInt, EthereumBlock, Address, Bytes, dataSource } from "@graphprotocol/graph-ts"
+import { log, BigInt, CallResult, EthereumBlock, Address, dataSource } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
+import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/AssessorV3"
 import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas } from "./poolMetas"
-import { poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromId} from "./poolMetasUtil"
+import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./mappingUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 
 function createPool(poolId: string) : void {
-    let poolMeta = poolFromId(poolId);
+  let poolMeta = poolFromId(poolId);
 
+  let interestRateResult = new CallResult<BigInt>()
+  if (poolMeta.version === 3) {
+    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+    assessor_v3.try_seniorInterestRate()
+  } else {
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    let interestRateResult = seniorTranche.try_ratePerSecond()
-    if (interestRateResult.reverted) {
-      log.debug("pool not deployed to the network yet {}", [poolId])
-      return
-    }
-    log.debug("will create new pool poolId {}", [poolId])
-    let pool = new Pool(poolId)
-    pool.seniorInterestRate = interestRateResult.value
-    pool.loans = []
-    pool.totalDebt = BigInt.fromI32(0)
-    pool.seniorDebt = BigInt.fromI32(0)
-    pool.minJuniorRatio = BigInt.fromI32(0)
-    pool.currentJuniorRatio = BigInt.fromI32(0)
-    pool.weightedInterestRate = BigInt.fromI32(0)
-    pool.totalRepaysCount = 0
-    pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
-    pool.totalBorrowsCount = 0
-    pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
-    pool.save()
+    seniorTranche.try_ratePerSecond() 
+  }
+  
+  if (interestRateResult.reverted) {
+    log.debug("pool not deployed to the network yet {}", [poolId])
+    return
+  }
+  log.debug("will create new pool poolId {}", [poolId])
+  let pool = new Pool(poolId)
+  pool.seniorInterestRate = interestRateResult.value
+  pool.loans = []
+  pool.totalDebt = BigInt.fromI32(0)
+  pool.seniorDebt = BigInt.fromI32(0)
+  pool.minJuniorRatio = BigInt.fromI32(0)
+  pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
+  pool.currentJuniorRatio = BigInt.fromI32(0)
+  pool.maxReserve = BigInt.fromI32(0) // Only used for V3
+  pool.weightedInterestRate = BigInt.fromI32(0)
+  pool.totalRepaysCount = 0
+  pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
+  pool.totalBorrowsCount = 0
+  pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+  pool.save()
 }
 
 export function handleCreateProxy(event: Created): void {
@@ -79,8 +89,6 @@ export function handleBlock(block: EthereumBlock): void {
     log.debug("pool {} loaded", [poolMeta.id.toString()])
 
     let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
-    let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
 
     let totalDebt = BigInt.fromI32(0)
     let totalWeightedDebt = BigInt.fromI32(0)
@@ -112,19 +120,38 @@ export function handleBlock(block: EthereumBlock): void {
       totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
     }
 
-    let minJuniorRatioResult = assessor.try_minJuniorRatio()
-    let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
+    // update pool values
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
-    // update pool values
-    pool.totalDebt = totalDebt
-    pool.minJuniorRatio =(!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
-    pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
     pool.weightedInterestRate = weightedInterestRate
+    pool.totalDebt = totalDebt
+
+    if (poolMeta.version === 2) {
+      let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+      let minJuniorRatioResult = assessor.try_minJuniorRatio()
+      let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
+
+      pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
+      pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
+    } else {
+      let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+      let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
+      pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
+        ? seniorToJuniorRatio(currentSeniorRatioResult.value)
+        : BigInt.fromI32(0);
+    }
 
     // check if senior tranche exists
     if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult = senior.try_debt();
+      let seniorDebtResult = new CallResult<BigInt>()
+      if (poolMeta.version === 3) {
+        let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
+        seniorDebtResult = assessor_v3.try_seniorDebt_()
+      } else {
+        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+        seniorDebtResult = senior.try_debt()
+      }
+
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
@@ -359,6 +386,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
+// Only used in V2
 export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`handle senior tranche file set`, [call.to.toHex()]);
   let seniorTranche = call.to
@@ -377,5 +405,43 @@ export function handleSeniorTrancheFile(call: FileCall): void {
   log.debug(`update pool {} - set senior interest rate `, [poolId, interestRate.toString()]);
 
   pool.seniorInterestRate = interestRate
+  pool.save()
+}
+
+// Only used in V3
+export function handleAssessorFile(call: AssessorV3FileCall): void {
+  log.debug(`handle assessor file set`, [call.to.toHex()]);
+  let assessor = call.to
+  let name = call.inputs.name.toString()
+  let value = call.inputs.value
+
+  let poolMeta = poolFromAssessor(assessor)
+  let poolId = poolMeta.id
+  log.debug(`handle assessor file pool Id {}`, [poolId]);
+
+  let pool = Pool.load(poolId)
+  if (pool == null) {
+    log.error("pool {} not found", [poolId])
+    return
+  }
+
+  if (name === 'seniorInterestRate') {
+    pool.seniorInterestRate = value
+    log.debug(`update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
+  } else if (name === 'maxReserve') {
+    pool.maxReserve = value
+    log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
+  } else if (name === 'maxSeniorRatio') {
+     // Internally we use senior ratio, while externally we use the junior ratio
+    pool.minJuniorRatio = seniorToJuniorRatio(value)
+    log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
+  } else if (name === 'minSeniorRatio') {
+    pool.maxJuniorRatio = seniorToJuniorRatio(value)
+    log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
+  } else {
+    // Don't save if nothing changed
+    return
+  }
+
   pool.save()
 }
