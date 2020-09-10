@@ -122,7 +122,7 @@ export let poolMetas: PoolMeta[] = [
     id: '0x382460db48ee1b84b23d7286cfd7d027c27bb885',
     shelf: '0x984a29dd6ac3525a2ed071359d6a6e5cd9752aca',
     pile: '0xc6452941c848b2f946d00ca2dfc6afde35c98500',
-    nftFeed: '0x88ce8de0ad64ede62a4541837ae869e3ac5a261d',
+    nftFeed: '0xf55011db9e9d8b22e2ad21981397de32dcb3aeab',
     assessor: '0xfc1ba387b03fa392c41f1cbd3149318db2cf8e2b',
     senior: '0xe56864ac6cface027d825b06dd6089c92e982dcf',
     networkId: 'kovan',
