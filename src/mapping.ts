@@ -221,13 +221,21 @@ export function handleShelfIssue(call: IssueCall): void {
   // generate hash from nftId & registry
   let nftHash = nftFeed.try_nftID(loanIndex);
   if (nftHash.reverted) {
-    log.debug("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
+    if (poolMeta.id === "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
+      log.error("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
+    } else {
+      log.critical("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
+    }
     return;
   }
 
   let riskGroup = nftFeed.try_risk(nftHash.value)
   if (riskGroup.reverted) {
-    log.debug("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
+    if (poolMeta.id === "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
+      log.error("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
+    } else {
+      log.critical("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
+    }
     return;
   }
 
