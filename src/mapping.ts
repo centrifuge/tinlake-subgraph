@@ -219,10 +219,20 @@ export function handleShelfIssue(call: IssueCall): void {
   let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
   let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
   // generate hash from nftId & registry
-  let nftHash = nftFeed.nftID(loanIndex);
-  let riskGroup = nftFeed.risk(nftHash)
+  let nftHash = nftFeed.try_nftID(loanIndex);
+  if (nftHash.reverted) {
+    log.debug("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
+    return;
+  }
+
+  let riskGroup = nftFeed.try_risk(nftHash.value)
+  if (riskGroup.reverted) {
+    log.debug("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
+    return;
+  }
+
   // get ratePerSecond for riskgroup
-  let ratePerSecond = pile.rates(riskGroup).value2
+  let ratePerSecond = pile.rates(riskGroup.value).value2
   loan.interestRatePerSecond = ratePerSecond
   // set ceiling & threshold based on collateral value
   loan.ceiling = nftFeed.ceiling(loanIndex)
