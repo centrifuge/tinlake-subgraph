@@ -119,14 +119,14 @@ export let poolMetas: PoolMeta[] = [
   
   // Kovan Static NAV Pool 1
   {
-    id: '0x382460db48ee1b84b23d7286cfd7d027c27bb885',
-    shelf: '0x984a29dd6ac3525a2ed071359d6a6e5cd9752aca',
-    pile: '0xc6452941c848b2f946d00ca2dfc6afde35c98500',
-    nftFeed: '0xf55011db9e9d8b22e2ad21981397de32dcb3aeab',
-    assessor: '0xfc1ba387b03fa392c41f1cbd3149318db2cf8e2b',
-    senior: '0xe56864ac6cface027d825b06dd6089c92e982dcf',
+    id: '0x6f3d561b203c69cdee90f2870ea58e5a7da460b2',
+    shelf: '0x838faae94ed562a9597634d558987c7b5acd6b84',
+    pile: '0x7a5d7331b7229014d0469de5cdd369d119c7e4de',
+    nftFeed: '0x66390b34772c8e3665aba884b18c6365cef091b8',
+    assessor: '0xb99b95e37ec8bc796fe8a18a8a61a3e36b007372',
+    senior: '0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97',
     networkId: 'kovan',
-    startBlock: 20806634,
+    startBlock: 20911916,
     version: 2
   },
 
