@@ -129,20 +129,7 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 20911916,
     version: 2
   },
-
-  // Kovan Static NAV Pool 2
-  // {
-  //   id: '0x9922c07feb725d6946adb94fd4fd1bbbb3a1dac9',
-  //   shelf: '0x9d3fa751ae1a6faab1e46bfacb076308debce61a',
-  //   pile: '0x14fe3195f43d953576b8abbb1497920cc9028885',
-  //   nftFeed: '0x7269d558861e0adea3737c649e3aacc62a6403ac',
-  //   assessor: '0x6a6dcb0faef789082278c61c28f11ee4adf6957a',
-  //   senior: '0xfe9afc9e25e7ccff4350fe77706483a4af712e81',
-  //   networkId: 'kovan',
-  //   startBlock: 20806806,
-  //   version: 2
-  // },
-
+  
   // Kovan Revolving Pool 1
   {
     id: '0x6e2133b6c9c853158ca877f7540d99ca8a623e0c',
