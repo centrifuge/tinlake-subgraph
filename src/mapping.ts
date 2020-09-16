@@ -20,10 +20,10 @@ function createPool(poolId: string) : void {
   let interestRateResult = new CallResult<BigInt>()
   if (poolMeta.version == 3) {
     let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    assessor_v3.try_seniorInterestRate()
+    interestRateResult = assessor_v3.try_seniorInterestRate()
   } else {
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    seniorTranche.try_ratePerSecond()
+    interestRateResult = seniorTranche.try_ratePerSecond()
   }
 
   if (interestRateResult.reverted) {
