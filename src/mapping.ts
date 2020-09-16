@@ -8,7 +8,7 @@ import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas } from "./poolMetas"
+import { poolMetas, poolStartBlocks } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./mappingUtil"
 
 const handleBlockFrequencyMinutes = 5
@@ -63,8 +63,10 @@ export function handleBlock(block: EthereumBlock): void {
   // TODO: change the logic in handleBlock to solely use call/event handlers. The idea is to only track changes to the
   // debt (borrowing/repaying) and interest rate through calls/events, and then run the block handler without actual
   // calls to just calculate the current debt off-chain using the same logic that is used on-chain (without calls into
-  // the current debt value)
-  if (block.number.mod(BigInt.fromI32(handleBlockFrequencyMinutes*60/blockTimeSeconds)).notEqual(BigInt.fromI32(0))) {
+  // the current debt value).
+  // We do run handleBlock for poolStartBlocks though.
+  if (!poolStartBlocks.has(block.number.toI32()) &&
+    block.number.mod(BigInt.fromI32(handleBlockFrequencyMinutes*60/blockTimeSeconds)).notEqual(BigInt.fromI32(0))) {
     log.debug("skip handleBlock at number {}", [block.number.toString()])
     return
   }
