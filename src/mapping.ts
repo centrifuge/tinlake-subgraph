@@ -240,8 +240,20 @@ export function handleShelfIssue(call: IssueCall): void {
   }
 
   // get ratePerSecond for riskgroup
-  let ratePerSecond = pile.rates(riskGroup.value).value2
-  loan.interestRatePerSecond = ratePerSecond
+  let ratePerSecond = pile.try_rates(riskGroup.value)
+  if (ratePerSecond.reverted) {
+    if (poolMeta.id === "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
+      log.error("failed to find rates for risk group {}", [
+        riskGroup.value.toString(),
+      ]);
+    } else {
+      log.critical("failed to find rates for risk group {}", [
+        riskGroup.value.toString(),
+      ]);
+    }
+    return;
+  }
+  loan.interestRatePerSecond = ratePerSecond.value.value2
   // set ceiling & threshold based on collateral value
   loan.ceiling = nftFeed.ceiling(loanIndex)
   loan.threshold = nftFeed.threshold(loanIndex)
