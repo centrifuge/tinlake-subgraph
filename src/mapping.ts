@@ -23,13 +23,14 @@ function createPool(poolId: string) : void {
     assessor_v3.try_seniorInterestRate()
   } else {
     let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
-    seniorTranche.try_ratePerSecond() 
+    seniorTranche.try_ratePerSecond()
   }
-  
+
   if (interestRateResult.reverted) {
-    log.debug("pool not deployed to the network yet {}", [poolId])
+    log.warning("pool not deployed to the network yet {}", [poolId])
     return
   }
+
   log.debug("will create new pool poolId {}", [poolId])
   let pool = new Pool(poolId)
   pool.seniorInterestRate = interestRateResult.value
@@ -178,7 +179,6 @@ export function handleShelfIssue(call: IssueCall): void {
   log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), nftId.toString(), nftRegistry.toHex()])
 
-
   let poolMeta = poolFromShelf(shelf)
   let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
@@ -190,6 +190,11 @@ export function handleShelfIssue(call: IssueCall): void {
   if (pool == null) {
     createPool(poolId);
     pool = Pool.load(poolId)
+
+    if (pool == null) {
+      return
+    }
+
     poolChanged = true
   }
   if (!pool.loans.includes(poolId)) { // TODO: maybe optimize by using a binary search on a sorted array instead
