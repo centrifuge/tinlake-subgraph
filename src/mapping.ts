@@ -18,7 +18,7 @@ function createPool(poolId: string) : void {
   let poolMeta = poolFromId(poolId);
 
   let interestRateResult = new CallResult<BigInt>()
-  if (poolMeta.version === 3) {
+  if (poolMeta.version == 3) {
     let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
     assessor_v3.try_seniorInterestRate()
   } else {
@@ -129,7 +129,7 @@ export function handleBlock(block: EthereumBlock): void {
     pool.weightedInterestRate = weightedInterestRate
     pool.totalDebt = totalDebt
 
-    if (poolMeta.version === 2) {
+    if (poolMeta.version == 2) {
       let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
       let minJuniorRatioResult = assessor.try_minJuniorRatio()
       let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
@@ -145,9 +145,9 @@ export function handleBlock(block: EthereumBlock): void {
     }
 
     // check if senior tranche exists
-    if (poolMeta.senior !== '0x0000000000000000000000000000000000000000') {
+    if (poolMeta.senior != '0x0000000000000000000000000000000000000000') {
       let seniorDebtResult = new CallResult<BigInt>()
-      if (poolMeta.version === 3) {
+      if (poolMeta.version == 3) {
         let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
         seniorDebtResult = assessor_v3.try_seniorDebt_()
       } else {
@@ -228,7 +228,7 @@ export function handleShelfIssue(call: IssueCall): void {
   // generate hash from nftId & registry
   let nftHash = nftFeed.try_nftID(loanIndex);
   if (nftHash.reverted) {
-    if (poolMeta.id === "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
+    if (poolMeta.id == "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
       log.error("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
     } else {
       log.critical("failed to find nft hash for loan idx {}", [loanIndex.toString()]);
@@ -238,7 +238,7 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let riskGroup = nftFeed.try_risk(nftHash.value)
   if (riskGroup.reverted) {
-    if (poolMeta.id === "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
+    if (poolMeta.id == "0x382460db48ee1b84b23d7286cfd7d027c27bb885") {
       log.error("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
     } else {
       log.critical("failed to find risk group for nft hash {}", [nftHash.value.toString()]);
@@ -450,17 +450,17 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
     return
   }
 
-  if (name === 'seniorInterestRate') {
+  if (name == 'seniorInterestRate') {
     pool.seniorInterestRate = value
     log.debug(`update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
-  } else if (name === 'maxReserve') {
+  } else if (name == 'maxReserve') {
     pool.maxReserve = value
     log.debug(`update pool {} - set maxReserve to {}`, [poolId, value.toString()])
-  } else if (name === 'maxSeniorRatio') {
+  } else if (name == 'maxSeniorRatio') {
      // Internally we use senior ratio, while externally we use the junior ratio
     pool.minJuniorRatio = seniorToJuniorRatio(value)
     log.debug(`update pool {} - set minJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
-  } else if (name === 'minSeniorRatio') {
+  } else if (name == 'minSeniorRatio') {
     pool.maxJuniorRatio = seniorToJuniorRatio(value)
     log.debug(`update pool {} - set maxJuniorRatio to 1 - {}`, [poolId, seniorToJuniorRatio(value).toString()])
   } else {
