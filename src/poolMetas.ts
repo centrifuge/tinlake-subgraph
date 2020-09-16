@@ -116,7 +116,7 @@ export let poolMetas: PoolMeta[] = [
   //   startBlock: 9993512,
   //   version: 2
   // },
-  
+
   // Kovan Static NAV Pool 1
   {
     id: '0x6f3d561b203c69cdee90f2870ea58e5a7da460b2',
@@ -129,7 +129,7 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 20911916,
     version: 2
   },
-  
+
   // Kovan Revolving Pool 1
   {
     id: '0x6e2133b6c9c853158ca877f7540d99ca8a623e0c',
@@ -180,4 +180,7 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByAssessor.set(poolMetas[i].assessor, poolMetas[i])
 }
 
-
+export let poolStartBlocks = new Map<number, boolean>()
+for (let i = 0; i < poolMetas.length; i++) {
+  poolStartBlocks.set(poolMetas[i].startBlock, true)
+}
