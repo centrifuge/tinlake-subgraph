@@ -132,14 +132,14 @@ export let poolMetas: PoolMeta[] = [
 
   // Kovan Revolving Pool 1
   {
-    id: '0x6e2133b6c9c853158ca877f7540d99ca8a623e0c',
-    shelf: '0x04334a9bdf561314cca5abbd18c632bcf62e97a6',
-    pile: '0xc60d14d4003b7a67b7d0a726aa11e7c9f3680a9e',
-    nftFeed: '0xe1e94229a49d6e89537926d29483e736152894b3',
-    assessor: '0x4034a9573135b6e70ba7c950650f1748530333be',
-    senior: '0x0f4ee0d02c98bb4443ff88ffafd76fc8ad3d82f4',
+    id: '0x1a4348fd405208f35101ce27e8baccf2468056df',
+    shelf: '0xf58c17a23f834fea383692f9384a28043a3595f1',
+    pile: '0xffd7feea35af71db6dac7f0c96cf5a8dca7bb459',
+    nftFeed: '0xc7d9416d88189543d11617f9ceec59e333ae9669',
+    assessor: '0xe333e7de561d6fc09d0f9463cfd4795be0a88902',
+    senior: '0x32db69af00f6b52ac49a213854f0ff83f848a528',
     networkId: 'kovan',
-    startBlock: 20804382,
+    startBlock: 20956766,
     version: 3
   },
 ]
