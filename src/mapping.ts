@@ -127,6 +127,7 @@ export function handleBlock(block: EthereumBlock): void {
     // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)
     let weightedInterestRate = totalDebt.gt(BigInt.fromI32(0)) ? totalWeightedDebt.div(totalDebt) : BigInt.fromI32(0)
     pool.weightedInterestRate = weightedInterestRate
+    // TODO may want to add weighted fixed rate
     pool.totalDebt = totalDebt
 
     if (poolMeta.version == 2) {
@@ -264,7 +265,7 @@ export function handleShelfIssue(call: IssueCall): void {
   // set ceiling & threshold based on collateral value
   loan.ceiling = nftFeed.ceiling(loanIndex)
   loan.threshold = nftFeed.threshold(loanIndex)
-
+  // TODO may want to add fixed rate here
 
   log.debug("will save loan {} (pool: {}, index: {}, owner: {}, opened {})", [loan.id, loan.pool, loanIndex.toString(),
   loan.owner.toHex(), call.block.timestamp.toString()])
@@ -296,6 +297,8 @@ export function handleShelfClose(call: CloseCall): void {
   loan.closed = call.block.timestamp.toI32()
   loan.save()
 }
+
+// TODO we should handle pile changeRate here
 
 // handleShelfBorrow handles borrowing of a loan
 export function handleShelfBorrow(call: BorrowCall): void {
