@@ -219,7 +219,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.borrowsAggregatedAmount = BigInt.fromI32(0)
   loan.repaysCount = 0
   loan.repaysAggregatedAmount = BigInt.fromI32(0)
-  loan.nftId = nftId.toString()
+  loan.nftId = tokenId.toString()
   loan.nftRegistry = nftRegistry
 
   // get risk group and interest rate from nftFeed
