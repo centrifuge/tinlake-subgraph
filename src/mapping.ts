@@ -172,12 +172,12 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let loanOwner = call.from
   let shelf = call.to
-  let nftId = call.inputs.token_
+  let tokenId = call.inputs.token_
   let nftRegistry = call.inputs.registry_
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}", [shelf.toHex(), loanOwner.toHex(),
-    loanIndex.toString(), nftId.toString(), nftRegistry.toHex()])
+  log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {},  tokenId: {}, nftRegistry: {}", [shelf.toHex(), loanOwner.toHex(),
+    loanIndex.toString(), tokenId.toString(), nftRegistry.toHex()])
 
   let poolMeta = poolFromShelf(shelf)
   let poolId = poolMeta.id
@@ -400,6 +400,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let poolId = pool.id
   let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
+  log.debug("Loan to be retrieved: nftId {}, poolId {}, loanIndex {}, loanId {}",  [nftId.toString(), poolId, loanIndex.toString(), loanId])
 
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
