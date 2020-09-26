@@ -400,7 +400,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let poolId = pool.id
   let loanIndex = shelf.nftlookup(nftId);
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
-  log.debug("Loan to be retrieved: nftId {}, poolId {}, loanIndex {}, loanId {}",  [nftId.toString(), poolId, loanIndex.toString(), loanId])
+  log.debug("Loan to be retrieved: nftId {}, poolId {}, loanIndex {}, loanId {}",  [nftId.toHex(), poolId, loanIndex.toString(), loanId])
 
   let ceiling = nftFeed.ceiling(loanIndex)
   let threshold = nftFeed.threshold(loanIndex)
