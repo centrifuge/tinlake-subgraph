@@ -8,7 +8,7 @@ export class PoolMeta {
   pile: string // pile contract address
   nftFeed: string // NFT or NAV feed contract address
   assessor: string // assessor contract address
-  senior: string // senior contract address
+  seniorTranche: string // senior tranche contract address
   networkId: network
   startBlock: number // block where root contract was deployed
   version: version
@@ -26,7 +26,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0x95b74ef13ff280a89ce3d7bbefc822c210e9939f',
   //   nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
   //   assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
-  //   senior: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
+  //   seniorTranche: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
   //   networkId: 'mainnet',
   //   startBlock: 10002000,
   //   version: 2
@@ -38,7 +38,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0xa6bf7d7779383f6e078d0969f5b85b391994fced',
   //   nftFeed: '0xe231faaea039766fcbb72cbb7d70ce18f0a28b8e',
   //   assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
-  //   senior: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
+  //   seniorTranche: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
   //   networkId: 'mainnet',
   //   startBlock: 10103234,
   //   version: 2
@@ -50,7 +50,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0x27865916b3e6208b54eb7b3c481b3157e0ac1b0e',
   //   nftFeed: '0x7cdc05188b81e2cb11c6332b460233e654d8a3d4',
   //   assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
-  //   senior: '0xae1845a50316fb6e571c569e78338c76d715a899',
+  //   seniorTranche: '0xae1845a50316fb6e571c569e78338c76d715a899',
   //   networkId: 'mainnet',
   //   startBlock: 10304149,
   //   version: 2
@@ -62,7 +62,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0x1f1ea72b9a1edf799f27ea3a5d18262e92a845a6',
   //   nftFeed: '0x3fbcddee1f5efc545828560869353287ec901c04',
   //   assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
-  //   senior: '0x05791d754ef5788532287de5a730645f2bbcf78f',
+  //   seniorTranche: '0x05791d754ef5788532287de5a730645f2bbcf78f',
   //   networkId: 'mainnet',
   //   startBlock: 10498700,
   //   version: 2
@@ -74,7 +74,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0xa1044556e2cd8e0d3c143fe0f02640727a5a380b',
   //   nftFeed: '0xf4846f411e8ab969ef869a5e30dc10a68cf5d2b0',
   //   assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
-  //   senior: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
+  //   seniorTranche: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
   //   networkId: 'mainnet',
   //   startBlock: 10595436,
   //   version: 2
@@ -86,7 +86,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0x9c623e8864c9fcd56a2b87826198687ec9d03665',
   //   nftFeed: '0x7b01145a8d736207ac46bdb831e7759264b05e6b',
   //   assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
-  //   senior: '0x473bd32f890855138ed085582d80099f11ad7767',
+  //   seniorTranche: '0x473bd32f890855138ed085582d80099f11ad7767',
   //   networkId: 'mainnet',
   //   startBlock: 10661341,
   //   version: 2
@@ -98,7 +98,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0x3c3b4b2cc7dbc4409563e74a174ac3c4c4780dfb',
   //   nftFeed: '0x67ba167bebed75cbc7bd6b5e9f7cb7749f5a6a50',
   //   assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
-  //   senior: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
+  //   seniorTranche: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
   //   networkId: 'mainnet',
   //   startBlock: 10783663,
   //   version: 2
@@ -111,7 +111,7 @@ export let poolMetas: PoolMeta[] = [
   //   pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
   //   nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
   //   assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
-  //   senior: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
+  //   seniorTranche: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
   //   networkId: 'mainnet',
   //   startBlock: 9993512,
   //   version: 2
@@ -124,7 +124,7 @@ export let poolMetas: PoolMeta[] = [
     pile: '0x7a5d7331b7229014d0469de5cdd369d119c7e4de',
     nftFeed: '0x66390b34772c8e3665aba884b18c6365cef091b8',
     assessor: '0xb99b95e37ec8bc796fe8a18a8a61a3e36b007372',
-    senior: '0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97',
+    seniorTranche: '0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97',
     networkId: 'kovan',
     startBlock: 20911916,
     version: 2
@@ -132,14 +132,14 @@ export let poolMetas: PoolMeta[] = [
 
   // Kovan Revolving Pool 1
   {
-    id: '0x1a4348fd405208f35101ce27e8baccf2468056df',
-    shelf: '0xf58c17a23f834fea383692f9384a28043a3595f1',
-    pile: '0xffd7feea35af71db6dac7f0c96cf5a8dca7bb459',
-    nftFeed: '0xc7d9416d88189543d11617f9ceec59e333ae9669',
-    assessor: '0xe333e7de561d6fc09d0f9463cfd4795be0a88902',
-    senior: '0x32db69af00f6b52ac49a213854f0ff83f848a528',
+    id: '0x953c51c8a32ff45938ee37429bc5d52d64abbd99',
+    shelf: '0x4802460bf5fa80abed45a350fd6bfaab4eaf7114',
+    pile: '0x1e8607ff1a5568c3497b24d6c3b295c0c803781e',
+    nftFeed: '0xaad0195f09afc5be3fd5591b38b85ca8cd6d6406',
+    assessor: '0x3d00a953cdd73b13fe2a2d9eb812ae8052691b02',
+    seniorTranche: '0xc026785ba298cf7ea3c6d33e2e3b1a1b79c33f9d',
     networkId: 'kovan',
-    startBlock: 20956766,
+    startBlock: 21274895,
     version: 3
   },
 ]
@@ -171,7 +171,7 @@ for (let i = 0; i < poolMetas.length; i++) {
 // lookup that contains the pool indexed by seniorTranche
 export let poolMetaBySeniorTranche = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaBySeniorTranche.set(poolMetas[i].senior, poolMetas[i])
+  poolMetaBySeniorTranche.set(poolMetas[i].seniorTranche, poolMetas[i])
 }
 
 // lookup that contains the pool indexed by assessor

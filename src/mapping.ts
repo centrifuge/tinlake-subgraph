@@ -22,7 +22,7 @@ function createPool(poolId: string) : void {
     let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
     interestRateResult = assessor_v3.try_seniorInterestRate()
   } else {
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
     interestRateResult = seniorTranche.try_ratePerSecond()
   }
 
@@ -145,13 +145,13 @@ export function handleBlock(block: EthereumBlock): void {
     }
 
     // check if senior tranche exists
-    if (poolMeta.senior != '0x0000000000000000000000000000000000000000') {
+    if (poolMeta.seniorTranche != '0x0000000000000000000000000000000000000000') {
       let seniorDebtResult = new CallResult<BigInt>()
       if (poolMeta.version == 3) {
         let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
         seniorDebtResult = assessor_v3.try_seniorDebt_()
       } else {
-        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
         seniorDebtResult = senior.try_debt()
       }
 
