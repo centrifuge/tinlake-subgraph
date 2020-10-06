@@ -309,7 +309,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolMeta = poolFromShelf(shelf);
+  let poolMeta = poolFromShelf(shelf)
   let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
@@ -334,10 +334,10 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.ceiling = nftFeed.ceiling(loanIndex);
   loan.save()
 
-  let pool = Pool.load(poolId);
+  let pool = Pool.load(poolId)
   if (pool == null) {
-    log.error("pool {} not found", [poolId]);
-    return;
+    log.error("pool {} not found", [poolId])
+    return
   }
 
   pool.totalBorrowsCount = pool.totalBorrowsCount + 1
