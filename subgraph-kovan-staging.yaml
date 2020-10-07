@@ -137,7 +137,7 @@ dataSources:
 
   # Kovan Revolving Pool 1
   - kind: ethereum/contract
-    name: Assessor3
+    name: Assessor2
     network: kovan
     source:
       address: "0x8b80927fca02566c29728c4a620c161f63116953"
@@ -157,7 +157,7 @@ dataSources:
           handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf3
+    name: Shelf2
     network: kovan
     source:
       address: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af"
@@ -192,7 +192,7 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed3
+    name: NftFeed2
     network: kovan
     source:
       address: "0x677b85998f15921982b1548763f01ac6c265b8eb"
