@@ -140,9 +140,9 @@ dataSources:
     name: Assessor3
     network: kovan
     source:
-      address: "0x3d00a953cdd73b13fe2a2d9eb812ae8052691b02"
+      address: "0x8b80927fca02566c29728c4a620c161f63116953"
       abi: AssessorV3
-      startBlock: 21275189
+      startBlock: 21406450
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -162,7 +162,7 @@ dataSources:
     source:
       address: "0x4802460bf5fa80abed45a350fd6bfaab4eaf7114"
       abi: Shelf
-      startBlock: 21275010
+      startBlock: 21406337
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -197,7 +197,7 @@ dataSources:
     source:
       address: "0xaad0195f09afc5be3fd5591b38b85ca8cd6d6406"
       abi: NftFeed
-      startBlock: 21275002
+      startBlock: 21406328
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
