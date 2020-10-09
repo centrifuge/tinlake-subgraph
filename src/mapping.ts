@@ -46,7 +46,7 @@ function createPool(poolId: string) : void {
   pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
   pool.totalBorrowsCount = 0
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
-  pool.version = poolMeta.version
+  pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3)
   pool.save()
 }
 
