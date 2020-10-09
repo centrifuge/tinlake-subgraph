@@ -13,6 +13,7 @@ type Pool @entity {
   maxJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
   maxReserve: BigInt!
+  version: BigInt!
 }
 
 type Loan @entity {
