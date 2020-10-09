@@ -137,12 +137,12 @@ dataSources:
 
   # Kovan Revolving Pool 1
   - kind: ethereum/contract
-    name: Assessor3
+    name: Assessor2
     network: kovan
     source:
-      address: "0xe333e7de561d6fc09d0f9463cfd4795be0a88902"
+      address: "0x8b80927fca02566c29728c4a620c161f63116953"
       abi: AssessorV3
-      startBlock: 20956847
+      startBlock: 21406450
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -157,12 +157,12 @@ dataSources:
           handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf3
+    name: Shelf2
     network: kovan
     source:
-      address: "0xf58c17a23f834fea383692f9384a28043a3595f1"
+      address: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af"
       abi: Shelf
-      startBlock: 20956799
+      startBlock: 21406337
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
@@ -192,12 +192,12 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed3
+    name: NftFeed2
     network: kovan
     source:
-      address: "0xc7d9416d88189543d11617f9ceec59e333ae9669"
+      address: "0x677b85998f15921982b1548763f01ac6c265b8eb"
       abi: NftFeed
-      startBlock: 20956796
+      startBlock: 21406328
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3

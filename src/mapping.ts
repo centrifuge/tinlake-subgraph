@@ -22,7 +22,7 @@ function createPool(poolId: string) : void {
     let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
     interestRateResult = assessor_v3.try_seniorInterestRate()
   } else {
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
     interestRateResult = seniorTranche.try_ratePerSecond()
   }
 
@@ -145,13 +145,13 @@ export function handleBlock(block: EthereumBlock): void {
     }
 
     // check if senior tranche exists
-    if (poolMeta.senior != '0x0000000000000000000000000000000000000000') {
+    if (poolMeta.seniorTranche != '0x0000000000000000000000000000000000000000') {
       let seniorDebtResult = new CallResult<BigInt>()
       if (poolMeta.version == 3) {
         let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
         seniorDebtResult = assessor_v3.try_seniorDebt_()
       } else {
-        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.senior))
+        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
         seniorDebtResult = senior.try_debt()
       }
 
@@ -309,7 +309,8 @@ export function handleShelfBorrow(call: BorrowCall): void {
   log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolFromShelf(shelf).id
+  let poolMeta = poolFromShelf(shelf)
+  let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -320,13 +321,17 @@ export function handleShelfBorrow(call: BorrowCall): void {
     log.error("loan {} not found", [loanId])
     return
   }
+
   loan.borrowsAggregatedAmount = loan.borrowsAggregatedAmount.plus(amount)
   loan.borrowsCount = loan.borrowsCount + 1
   // increase debt here. Reason: debt won't be updated on every block, but we want relatively up-to-date information in
   // the UI
   loan.debt = loan.debt.plus(amount)
+  
   // TODO add support for pools using creditLine ceilings – the following only supports principal, not creditLine
-  loan.ceiling = loan.ceiling.minus(amount)
+  // loan.ceiling = loan.ceiling.minus(amount)
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed));
+  loan.ceiling = nftFeed.ceiling(loanIndex);
   loan.save()
 
   let pool = Pool.load(poolId)
