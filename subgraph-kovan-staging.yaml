@@ -13,7 +13,7 @@ dataSources:
       startBlock: 20380456
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -41,7 +41,7 @@ dataSources:
       startBlock: 20606911
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -64,7 +64,7 @@ dataSources:
       startBlock: 20911954
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -84,7 +84,7 @@ dataSources:
       startBlock: 20911983
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -117,7 +117,7 @@ dataSources:
       startBlock: 20911980
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -145,7 +145,7 @@ dataSources:
       startBlock: 21406450
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -165,7 +165,7 @@ dataSources:
       startBlock: 21406337
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -200,7 +200,7 @@ dataSources:
       startBlock: 21406328
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       entities:
         - Loan
