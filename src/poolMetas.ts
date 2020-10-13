@@ -3,6 +3,7 @@ export type version = number // 2 | 3
 
 // NOTE: interfaces are not supported by AssemblyScript
 export class PoolMeta {
+  shortName: string
   id: string // root contract address
   shelf: string // shelf contract address
   pile: string // pile contract address
@@ -21,6 +22,7 @@ export let poolMetas: PoolMeta[] = [
   // Mainnet production
   // CF1
   {
+    shortName: 'ConsolFreight 1',
     id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
     shelf: '0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4',
     pile: '0x95b74ef13ff280a89ce3d7bbefc822c210e9939f',
@@ -33,6 +35,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // PC
   {
+    shortName: 'Paperchain Pilot',
     id: '0x90abc0adb789111b4b865fdb3350b14a6e78794e',
     shelf: '0x3d0e477f328e48daa315aa503a6edf5b67f2d387',
     pile: '0xa6bf7d7779383f6e078d0969f5b85b391994fced',
@@ -45,6 +48,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // CF2
   {
+    shortName: 'ConsolFreight 2',
     id: "0x0b985e7c5811c368528a0fc990455f4b448f7d77",
     shelf: '0x56ba49ea5f0930d80d14bf077d4bbee0b398bb06',
     pile: '0x27865916b3e6208b54eb7b3c481b3157e0ac1b0e',
@@ -57,6 +61,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // NS
   {
+    shortName: 'New Silver 1',
     id: '0xeb33ab19d17d62950b16e843005fcdda62d5f551',
     shelf: '0x5fb8479d021e5881a4874fdf15e549355c57b885',
     pile: '0x1f1ea72b9a1edf799f27ea3a5d18262e92a845a6',
@@ -69,6 +74,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // CF3
   {
+    shortName: 'ConsolFreight 3',
     id: '0xe02d16927c7f73e48dd7aef4c86fa9aaedfe8abf',
     shelf: '0xadafacda038d05e9b20845c66a6955143e3e50a7',
     pile: '0xa1044556e2cd8e0d3c143fe0f02640727a5a380b',
@@ -81,6 +87,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // HTC1
   {
+    shortName: 'Harbor Trade 1',
     id: '0xa5caefbaa3902c3567ec2ba650a7ee4b19ea0d28',
     shelf: '0x406504500ac3efba725f14b6c7ac1e0047ecf520',
     pile: '0x9c623e8864c9fcd56a2b87826198687ec9d03665',
@@ -93,6 +100,7 @@ export let poolMetas: PoolMeta[] = [
   },
   // PC2
   {
+    shortName: 'Paperchain Series 2',
     id: '0x23e11b3f2cd3d73f68a4a3af436e2ed3459d0260',
     shelf: '0x3cf4deecad850a2b09fc2c8ea223943b57d1d4d2',
     pile: '0x3c3b4b2cc7dbc4409563e74a174ac3c4c4780dfb',
@@ -106,6 +114,7 @@ export let poolMetas: PoolMeta[] = [
 
   // Mainnet staging
   {
+    shortName: 'Mainnet Staging',
     id: '0x05597dd9b8e1d4fdb44eb69d20bc3a2feef605e8',
     shelf: '0x7ca150514c9b17c1e343d420d66238a299f80070',
     pile: '0xbef9e6b821c7a54797f0e73cf0d72a140b6db378',
@@ -119,6 +128,7 @@ export let poolMetas: PoolMeta[] = [
 
   // Kovan Static NAV Pool 1
   {
+    shortName: 'Kovan Static 1',
     id: '0x6f3d561b203c69cdee90f2870ea58e5a7da460b2',
     shelf: '0x838faae94ed562a9597634d558987c7b5acd6b84',
     pile: '0x7a5d7331b7229014d0469de5cdd369d119c7e4de',
@@ -132,6 +142,7 @@ export let poolMetas: PoolMeta[] = [
 
   // Kovan Revolving Pool 1
   {
+    shortName: 'Kovan Revolving 1',
     id: '0xc4084221fb5d0f28f817c795435c2d17eab6c389',
     shelf: '0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af',
     pile: '0x82ee3f4b872d2a53b7b5cf2bd88ebc8736914407',
