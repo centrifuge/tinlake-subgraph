@@ -111,6 +111,19 @@ export let poolMetas: PoolMeta[] = [
     startBlock: 10783663,
     version: 2
   },
+  // CF4
+  {
+    shortName: 'ConsolFreight 4',
+    id: '0xdb3bc9fb1893222d266762e9ff857eb74d75c7d6',
+    shelf: '0xa0b0d8394adc79f5d1563a892abfc6186e519644',
+    pile: '0x3fc72da5545e2ab6202d81fbeb1c8273be95068c',
+    nftFeed: '0x69504da6b2cd8320b9a62f3aed410a298d3e7ac6',
+    assessor: '0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a',
+    seniorTranche: '0xb101ed16ad86cb5cc92dadc357ad994ab6c663a5',
+    networkId: 'mainnet',
+    startBlock: 11063000,
+    version: 3
+  },
 
   // Mainnet staging
   {
