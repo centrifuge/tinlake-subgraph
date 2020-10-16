@@ -622,7 +622,7 @@ dataSources:
   # CF4
   - kind: ethereum/contract
     name: Assessor8
-    network: kovan
+    network: mainnet
     source:
       address: "0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a"
       abi: AssessorV3
@@ -642,7 +642,7 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: Shelf8
-    network: kovan
+    network: mainnet
     source:
       address: "0xa0b0d8394adc79f5d1563a892abfc6186e519644"
       abi: Shelf
@@ -677,7 +677,7 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum/contract
     name: NftFeed8
-    network: kovan
+    network: mainnet
     source:
       address: "0x69504da6b2cd8320b9a62f3aed410a298d3e7ac6"
       abi: NftFeed
