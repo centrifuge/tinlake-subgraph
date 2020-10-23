@@ -1,5 +1,13 @@
 import { BigInt, Address, log } from "@graphprotocol/graph-ts";
-import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaByAssessor, poolMetaById } from "./poolMetas"
+import { PoolMeta, poolMetaByShelf, poolMetaByPile, poolMetaByNftFeed, poolMetaBySeniorTranche, poolMetaByAssessor, poolMetaById, poolMetaByAddress } from "./poolMetas"
+
+export function poolFromAddress(address: Address): PoolMeta {
+  if (!poolMetaByAddress.has(address.toHex())) {
+    log.critical("poolMeta not found for address {}", [address.toHex()])
+  }
+  let poolMeta = poolMetaByAddress.get(address.toHex())
+  return poolMeta
+}
 
 export function poolFromShelf(shelf: Address): PoolMeta {
   if (!poolMetaByShelf.has(shelf.toHex())) {

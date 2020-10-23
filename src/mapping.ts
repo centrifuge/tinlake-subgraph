@@ -6,10 +6,12 @@ import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/A
 import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
-import { Pool, Loan, Proxy } from "../generated/schema"
+import { Transfer as TransferEvent } from '../generated/Block/ERC20'
+import { Pool, Loan, Proxy, ERC20Transfer } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks } from "./poolMetas"
-import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./mappingUtil"
+import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId, poolFromAddress } from "./mappingUtil"
+import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -488,4 +490,18 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
   }
 
   pool.save()
+}
+
+export function handleERC20Transfer(event: TransferEvent): void {
+  createToken(event)
+  loadOrCreateTokenBalanceDst(event)
+  loadOrCreateTokenBalanceSrc(event)
+  updateAccounts(event)
+
+  let poolMeta = poolFromAddress(event.address)
+  let id = event.block.number.toString().concat('-').concat(event.logIndex.toString())
+  let transfer = ERC20Transfer.load(id)
+  if(transfer == null) {
+    transfer = createERC20Transfer(id, event, poolMeta)
+  }
 }
