@@ -12,9 +12,9 @@ describe('poolMeta', () => {
       nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
       assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
       seniorTranche: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
-      juniorTranche: '0xd5c9a6f250fe21d1e39d4a74e0fa3b69192bd889',
-      drop: '0xd5a8c4ba74438aaacf108095e7697f1d295266d8',
-      tin: '0xcebba0db0834610ea34d5e4ccca62df3382b774a',
+      juniorTranche: null,
+      drop: null,
+      tin: null,
       networkId: 'mainnet',
       startBlock: 10002000,
       version: 2
