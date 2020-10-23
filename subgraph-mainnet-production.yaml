@@ -56,7 +56,7 @@ dataSources:
           handler: handleCreateProxy
       file: ./src/mapping.ts
 
-  # CF1
+  # # CF1
   - kind: ethereum/contract
     name: Shelf
     network: mainnet
