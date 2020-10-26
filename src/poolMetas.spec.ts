@@ -13,8 +13,8 @@ describe('poolMeta', () => {
       assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
       seniorTranche: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
       juniorTranche: null,
-      drop: null,
-      tin: null,
+      seniorToken: null,
+      juniorToken: null,
       networkId: 'mainnet',
       startBlock: 10002000,
       version: 2

@@ -11,8 +11,8 @@ export class PoolMeta {
   assessor: string // assessor contract address
   juniorTranche: string
   seniorTranche: string // senior tranche contract address
-  drop: string
-  tin: string
+  seniorToken: string
+  juniorToken: string
   networkId: network
   startBlock: number // block where root contract was deployed
   version: version
@@ -33,8 +33,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
     seniorTranche: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10002000,
     version: 2
@@ -49,8 +49,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     seniorTranche: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10103234,
     version: 2
@@ -65,8 +65,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
     seniorTranche: '0xae1845a50316fb6e571c569e78338c76d715a899',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10304149,
     version: 2
@@ -81,8 +81,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
     seniorTranche: '0x05791d754ef5788532287de5a730645f2bbcf78f',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10498700,
     version: 2
@@ -97,8 +97,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
     seniorTranche: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10595436,
     version: 2
@@ -113,8 +113,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
     seniorTranche: '0x473bd32f890855138ed085582d80099f11ad7767',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10661341,
     version: 2
@@ -129,8 +129,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
     seniorTranche: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10783663,
     version: 2
@@ -145,8 +145,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a',
     juniorTranche: '0x145d6256e20cd115eda44eb9258a3bc13c2a86fc',
     seniorTranche: '0xb101ed16ad86cb5cc92dadc357ad994ab6c663a5',
-    drop: '0x5b2f0521875b188c0afc925b1598e1ff246f9306',
-    tin: '0x05dd145aa26dbdcc7774e4118e34bb67c64661c6',
+    seniorToken: '0x5b2f0521875b188c0afc925b1598e1ff246f9306',
+    juniorToken: '0x05dd145aa26dbdcc7774e4118e34bb67c64661c6',
     networkId: 'mainnet',
     startBlock: 11063000,
     version: 3
@@ -162,8 +162,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
     seniorTranche: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 9993512,
     version: 2
@@ -179,8 +179,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0xb99b95e37ec8bc796fe8a18a8a61a3e36b007372',
     seniorTranche: '0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'kovan',
     startBlock: 20911916,
     version: 2
@@ -196,8 +196,8 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x8b80927fca02566c29728c4a620c161f63116953',
     seniorTranche: '0x88ad5b21a01d838b15619f36f88b618410797b95',
     juniorTranche: null,
-    drop: null,
-    tin: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'kovan',
     startBlock: 21406294,
     version: 3
@@ -212,8 +212,8 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByAddress.set(poolMetas[i].nftFeed, poolMetas[i])
   poolMetaByAddress.set(poolMetas[i].seniorTranche, poolMetas[i])
   poolMetaByAddress.set(poolMetas[i].juniorTranche, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].drop, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].tin, poolMetas[i])
+  poolMetaByAddress.set(poolMetas[i].seniorToken, poolMetas[i])
+  poolMetaByAddress.set(poolMetas[i].juniorToken, poolMetas[i])
 }
 
 // lookup that contains the rootId indexed by shelf
