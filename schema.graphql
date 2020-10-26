@@ -12,6 +12,8 @@ type Pool @entity {
   minJuniorRatio: BigInt!
   maxJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
+  reserve: BigInt!
+  netAssetValue: BigInt!
   maxReserve: BigInt!
   shortName: String!
   version: BigInt!

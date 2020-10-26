@@ -1,4 +1,14 @@
-import { log, BigInt, CallResult, EthereumBlock, Address, dataSource } from "@graphprotocol/graph-ts"
+import {
+  log,
+  BigInt,
+  CallResult,
+  EthereumBlock,
+  Address,
+  dataSource,
+  ipfs,
+  Bytes,
+  json,
+} from "@graphprotocol/graph-ts";
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
 import { Assessor } from "../generated/Block/Assessor"
@@ -6,10 +16,12 @@ import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/A
 import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
+import { PoolCreated } from "../generated/PoolRegistry/PoolRegistry";
 import { Pool, Loan, Proxy } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./mappingUtil"
+import { Assessor as AssessorTemplate } from "../generated/templates";
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -166,6 +178,36 @@ export function handleBlock(block: EthereumBlock): void {
       weightedInterestRate.toString()])
     pool.save()
   }
+}
+
+// handlePoolCreated handles creating pools from the registry
+export function handlePoolCreated(call: PoolCreated): void {
+  log.debug("handlePoolCreated, pool: {}, live: {}, name: {},  data: {}", [
+    call.params.pool.toHexString(),
+    call.params.live ? "true" : "false",
+    call.params.name,
+    call.params.data,
+  ]);
+
+  // TODO: this still uses poolMetas, but we should actually pull all information from the registry
+  // createPool(call.params.pool.toHexString())
+
+  log.debug("ipfs hash: {}", [call.params.data])  
+  let data = ipfs.cat(call.params.data)
+  // let obj = json.fromBytes(data).toObject().entries.toString()
+  if (data == null) {
+    return
+  }
+  let obj = json.fromBytes(data as Bytes).toObject()
+  let addresses = obj.get('addresses').toObject()
+
+  if (addresses == null) {
+    return
+  }
+
+  log.debug("ipfs data, name: {}, seniorTranche: {}", [obj.get('name').toString(), addresses.get('SENIOR_TRANCHE').toString()])
+
+  AssessorTemplate.create(call.params.pool)
 }
 
 // handleShelfIssue handles creating a new/opening a loan
