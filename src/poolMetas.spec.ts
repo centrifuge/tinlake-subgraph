@@ -1,9 +1,9 @@
-import { poolMetaByShelf } from './poolMetas'
+import { poolMetaByIdentifier } from './poolMetas'
 
 describe('poolMeta', () => {
   test('should retrieve poolMeta by shelf', () => {
     expect(
-      poolMetaByShelf.get("0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4")
+      poolMetaByIdentifier.get("0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4")
     ).toStrictEqual({
       shortName: 'ConsolFreight 1',
       id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
@@ -21,7 +21,7 @@ describe('poolMeta', () => {
     })
 
     expect(
-      poolMetaByShelf.get("non existing")
+      poolMetaByIdentifier.get("non existing")
     ).toStrictEqual(undefined)
   })
 })

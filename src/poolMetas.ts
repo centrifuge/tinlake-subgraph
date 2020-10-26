@@ -204,52 +204,17 @@ export let poolMetas: PoolMeta[] = [
   },
 ]
 
-export let poolMetaByAddress = new Map<string, PoolMeta>()
+// lookup that contains the pool by associated address or poolId
+export let poolMetaByIdentifier = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByAddress.set(poolMetas[i].id, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].shelf, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].pile, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].nftFeed, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].seniorTranche, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].juniorTranche, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].seniorToken, poolMetas[i])
-  poolMetaByAddress.set(poolMetas[i].juniorToken, poolMetas[i])
-}
-
-// lookup that contains the rootId indexed by shelf
-export let poolMetaById = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaById.set(poolMetas[i].id, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by shelf
-export let poolMetaByShelf = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByShelf.set(poolMetas[i].shelf, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by pile
-export let poolMetaByPile = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByPile.set(poolMetas[i].pile, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by nftFeed
-export let poolMetaByNftFeed = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByNftFeed.set(poolMetas[i].nftFeed, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by seniorTranche
-export let poolMetaBySeniorTranche = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaBySeniorTranche.set(poolMetas[i].seniorTranche, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by assessor
-export let poolMetaByAssessor = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByAssessor.set(poolMetas[i].assessor, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].id, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].shelf, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].pile, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].nftFeed, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].seniorTranche, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].juniorTranche, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].seniorToken, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].juniorToken, poolMetas[i])
 }
 
 export let poolStartBlocks = new Map<number, boolean>()
