@@ -500,8 +500,7 @@ export function handleERC20Transfer(event: TransferEvent): void {
 
   let poolMeta = poolFromAddress(event.address)
   let id = event.block.number.toString().concat('-').concat(event.logIndex.toString())
-  let transfer = ERC20Transfer.load(id)
-  if(transfer == null) {
-    transfer = createERC20Transfer(id, event, poolMeta)
+  if (ERC20Transfer.load(id) == null) {
+    createERC20Transfer(id, event, poolMeta)
   }
 }
