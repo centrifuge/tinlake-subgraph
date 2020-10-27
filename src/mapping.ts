@@ -1,8 +1,7 @@
 import {
   log,
   BigInt,
-  CallResult,
-  EthereumBlock,
+  ethereum,
   Address,
   dataSource,
   ipfs,
@@ -26,41 +25,47 @@ import { Assessor as AssessorTemplate } from "../generated/templates";
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 
-function createPool(poolId: string) : void {
+function createPool(poolId: string): void {
   let poolMeta = poolFromId(poolId);
 
-  let interestRateResult = new CallResult<BigInt>()
+  let interestRateResult = new ethereum.CallResult<BigInt>();
   if (poolMeta.version == 3) {
-    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    interestRateResult = assessor_v3.try_seniorInterestRate()
+    let assessor_v3 = AssessorV3.bind(
+      <Address>Address.fromHexString(poolMeta.assessor)
+    );
+    interestRateResult = assessor_v3.try_seniorInterestRate();
   } else {
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
-    interestRateResult = seniorTranche.try_ratePerSecond()
+    let seniorTranche = SeniorTranche.bind(
+      <Address>Address.fromHexString(poolMeta.seniorTranche)
+    );
+    interestRateResult = seniorTranche.try_ratePerSecond();
   }
 
   if (interestRateResult.reverted) {
-    log.warning("pool not deployed to the network yet {}", [poolId])
-    return
+    log.warning("pool not deployed to the network yet {}", [poolId]);
+    return;
   }
 
-  log.debug("will create new pool poolId {}", [poolId])
-  let pool = new Pool(poolId)
-  pool.seniorInterestRate = interestRateResult.value
-  pool.loans = []
-  pool.totalDebt = BigInt.fromI32(0)
-  pool.seniorDebt = BigInt.fromI32(0)
-  pool.minJuniorRatio = BigInt.fromI32(0)
-  pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
-  pool.currentJuniorRatio = BigInt.fromI32(0)
-  pool.maxReserve = BigInt.fromI32(0) // Only used for V3
-  pool.weightedInterestRate = BigInt.fromI32(0)
-  pool.totalRepaysCount = 0
-  pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
-  pool.totalBorrowsCount = 0
-  pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+  log.debug("will create new pool poolId {}", [poolId]);
+  let pool = new Pool(poolId);
+  pool.seniorInterestRate = interestRateResult.value;
+  pool.loans = [];
+  pool.totalDebt = BigInt.fromI32(0);
+  pool.seniorDebt = BigInt.fromI32(0);
+  pool.minJuniorRatio = BigInt.fromI32(0);
+  pool.maxJuniorRatio = BigInt.fromI32(0); // Only used for V3
+  pool.currentJuniorRatio = BigInt.fromI32(0);
+  pool.reserve = BigInt.fromI32(0); // Only used for V3
+  pool.netAssetValue = BigInt.fromI32(0); // Only used for V3
+  pool.maxReserve = BigInt.fromI32(0); // Only used for V3
+  pool.weightedInterestRate = BigInt.fromI32(0);
+  pool.totalRepaysCount = 0;
+  pool.totalRepaysAggregatedAmount = BigInt.fromI32(0);
+  pool.totalBorrowsCount = 0;
+  pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0);
   pool.shortName = poolMeta.shortName;
-  pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3)
-  pool.save()
+  pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3);
+  pool.save();
 }
 
 export function handleCreateProxy(event: Created): void {
@@ -69,7 +74,7 @@ export function handleCreateProxy(event: Created): void {
   proxy.save()
 }
 
-export function handleBlock(block: EthereumBlock): void {
+export function handleBlock(block: ethereum.Block): void {
   // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
   // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect
   // that the Graph won't be able to keep up with block production on Ethereum. Executing this handler only every x
@@ -160,7 +165,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     // check if senior tranche exists
     if (poolMeta.seniorTranche != '0x0000000000000000000000000000000000000000') {
-      let seniorDebtResult = new CallResult<BigInt>()
+      let seniorDebtResult = new ethereum.CallResult<BigInt>()
       if (poolMeta.version == 3) {
         let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
         seniorDebtResult = assessor_v3.try_seniorDebt_()
@@ -205,7 +210,46 @@ export function handlePoolCreated(call: PoolCreated): void {
     return
   }
 
-  log.debug("ipfs data, name: {}, seniorTranche: {}", [obj.get('name').toString(), addresses.get('SENIOR_TRANCHE').toString()])
+  let shortName = obj
+      .get(obj.isSet("shortName") ? "shortName" : "name")
+      .toString()
+
+  let seniorTranche = addresses
+    .get("SENIOR_TRANCHE")
+    .toString()
+
+    //   id: addresses
+    //     .get("ROOT_CONTRACT")
+    //     .toString()
+    //     .toLowerCase(),
+    //   shelf: addresses
+    //     .get("SHELF")
+    //     .toString()
+    //     .toLowerCase(),
+    //   pile: addresses
+    //     .get("PILE")
+    //     .toString()
+    //     .toLowerCase(),
+    //   nftFeed: addresses
+    //     .get("FEED")
+    //     .toString()
+    //     .toLowerCase(),
+    //   assessor: addresses
+    //     .get("ASSESSOR")
+    //     .toString()
+    //     .toLowerCase(),
+    //   seniorTranche: addresses
+    //     .get("SENIOR_TRANCHE")
+    //     .toString()
+    //     .toLowerCase(),
+    //   networkId: obj.get("network").toString(),
+    //   version: 2, // TODO
+    // }
+
+    log.debug("ipfs data, name: {}, seniorTranche: {}", [
+      shortName,
+      seniorTranche,
+    ]);
 
   AssessorTemplate.create(call.params.pool)
 }

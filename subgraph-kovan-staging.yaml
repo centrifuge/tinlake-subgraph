@@ -4,55 +4,55 @@ schema:
   file: ./schema.graphql
 dataSources:
   # Block handler across polls, using oldest pile
-  # - kind: ethereum/contract
-  #   name: Block
-  #   network: kovan
-  #   source:
-  #     address: "0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa"
-  #     abi: Pile
-  #     startBlock: 20380456
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Pool
-  #       - Loan
-  #     abis:
-  #       - name: Pile
-  #         file: ./abis/Pile.json
-  #       - name: Assessor
-  #         file: ./abis/Assessor.json
-  #       - name: AssessorV3
-  #         file: ./abis/v3/Assessor.json
-  #       - name: SeniorTranche
-  #         file: ./abis/SeniorTranche.json
-  #     blockHandlers:
-  #       - handler: handleBlock
-  #     file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Block
+    network: kovan
+    source:
+      address: "0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa"
+      abi: Pile
+      startBlock: 21592834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: AssessorV3
+          file: ./abis/v3/Assessor.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mapping.ts
 
-  # # Proxy registry across pools
-  # - kind: ethereum/contract
-  #   name: ProxyRegistry
-  #   network: kovan
-  #   source:
-  #     address: "0xb0cd959bbbe799ba7d18c7d28008553a7b47a04c"
-  #     abi: ProxyRegistry
-  #     startBlock: 20606911
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.3
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Pool
-  #       - Loan
-  #     abis:
-  #       - name: ProxyRegistry
-  #         file: ./abis/ProxyRegistry.json
-  #     eventHandlers:
-  #       - event: Created(indexed address,indexed address,address,uint256)
-  #         handler: handleCreateProxy
-  #     file: ./src/mapping.ts
+  # Proxy registry across pools
+  - kind: ethereum/contract
+    name: ProxyRegistry
+    network: kovan
+    source:
+      address: "0xb0cd959bbbe799ba7d18c7d28008553a7b47a04c"
+      abi: ProxyRegistry
+      startBlock: 21592834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mapping.ts
 
   # Pool registry
   - kind: ethereum/contract
@@ -64,7 +64,7 @@ dataSources:
       startBlock: 21592834
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -78,6 +78,88 @@ dataSources:
         - event: PoolCreated(address,bool,string,string)
           handler: handlePoolCreated
       file: ./src/mapping.ts
+
+  # Kovan Static NAV Pool 1
+  - kind: ethereum/contract
+    name: SeniorTranche
+    network: kovan
+    source:
+      address: "0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97"
+      abi: SeniorTranche
+      startBlock: 21592834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleSeniorTrancheFile
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: Shelf
+    network: kovan
+    source:
+      address: "0x838faae94ed562a9597634d558987c7b5acd6b84"
+      abi: Shelf
+      startBlock: 21592834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: NftFeed
+    network: kovan
+    source:
+      address: "0x66390b34772c8e3665aba884b18c6365cef091b8"
+      abi: NftFeed
+      startBlock: 21592834
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+
 templates:
   - kind: ethereum/contract
     name: Assessor
@@ -86,7 +168,7 @@ templates:
       abi: AssessorV3
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
