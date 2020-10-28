@@ -211,6 +211,7 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByIdentifier.set(poolMetas[i].shelf, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].pile, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].nftFeed, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].assessor, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].seniorTranche, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].juniorTranche, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].seniorToken, poolMetas[i])

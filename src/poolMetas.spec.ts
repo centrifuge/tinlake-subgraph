@@ -1,7 +1,7 @@
 import { poolMetaByIdentifier } from './poolMetas'
 
 describe('poolMeta', () => {
-  test('should retrieve poolMeta by shelf', () => {
+  test('should retrieve poolMeta by identifier', () => {
     expect(
       poolMetaByIdentifier.get("0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4")
     ).toStrictEqual({
@@ -19,7 +19,7 @@ describe('poolMeta', () => {
       startBlock: 10002000,
       version: 2
     })
-
+    
     expect(
       poolMetaByIdentifier.get("non existing")
     ).toStrictEqual(undefined)
