@@ -6,16 +6,18 @@ import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/A
 import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
-import { Pool, Loan, Proxy } from "../generated/schema"
+import { Transfer as TransferEvent } from '../generated/Block/ERC20'
+import { Pool, Loan, Proxy, ERC20Transfer } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks } from "./poolMetas"
-import { seniorToJuniorRatio, poolFromShelf, poolFromNftFeed, poolFromSeniorTranche, poolFromAssessor, poolFromId } from "./mappingUtil"
+import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
+import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 
 function createPool(poolId: string) : void {
-  let poolMeta = poolFromId(poolId);
+  let poolMeta = poolFromIdentifier(poolId);
 
   let interestRateResult = new CallResult<BigInt>()
   if (poolMeta.version == 3) {
@@ -181,7 +183,7 @@ export function handleShelfIssue(call: IssueCall): void {
   log.debug("handleShelfIssue, shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), nftId.toString(), nftRegistry.toHex()])
 
-  let poolMeta = poolFromShelf(shelf)
+  let poolMeta = poolFromIdentifier(shelf.toHex())
   let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
@@ -284,7 +286,7 @@ export function handleShelfClose(call: CloseCall): void {
   log.debug("handleShelfClose, shelf: {}, loanOwner: {}, loanIndex: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString()])
 
-  let poolId = poolFromShelf(shelf).id
+  let poolId = poolFromIdentifier(shelf.toHex()).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -311,7 +313,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   log.debug("handleShelfBorrow, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolMeta = poolFromShelf(shelf)
+  let poolMeta = poolFromIdentifier(shelf.toHex())
   let poolId = poolMeta.id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
@@ -360,7 +362,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   log.debug("handleShelfRepay, shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}", [shelf.toHex(), loanOwner.toHex(),
     loanIndex.toString(), amount.toString()])
 
-  let poolId = poolFromShelf(shelf).id
+  let poolId = poolFromIdentifier(shelf.toHex()).id
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug("generated poolId {}, loanId {}", [poolId, loanId])
@@ -398,7 +400,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
 
   let nftFeedAddress = call.to
   let nftId = call.inputs.nftID_
-  let pool =  poolFromNftFeed(nftFeedAddress)
+  let pool =  poolFromIdentifier(nftFeedAddress.toHex())
 
   let shelf = Shelf.bind(<Address>Address.fromHexString(pool.shelf))
   let pile = Pile.bind(<Address>Address.fromHexString(pool.pile))
@@ -437,7 +439,7 @@ export function handleSeniorTrancheFile(call: FileCall): void {
   let interestRate = call.inputs.ratePerSecond_
 
 
-  let poolMeta = poolFromSeniorTranche(seniorTranche)
+  let poolMeta = poolFromIdentifier(seniorTranche.toHex())
   let poolId = poolMeta.id
   log.debug(`handle senior tranche file pool Id {}`, [poolId]);
 
@@ -459,7 +461,7 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
   let name = call.inputs.name.toString()
   let value = call.inputs.value
 
-  let poolMeta = poolFromAssessor(assessor)
+  let poolMeta = poolFromIdentifier(assessor.toHex())
   let poolId = poolMeta.id
   log.debug(`handle assessor file pool Id {}`, [poolId]);
 
@@ -488,4 +490,17 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
   }
 
   pool.save()
+}
+
+export function handleERC20Transfer(event: TransferEvent): void {
+  createToken(event)
+  loadOrCreateTokenBalanceDst(event)
+  loadOrCreateTokenBalanceSrc(event)
+  updateAccounts(event)
+
+  let poolMeta = poolFromIdentifier(event.address.toHex())
+  let id = event.block.number.toString().concat('-').concat(event.logIndex.toString())
+  if (ERC20Transfer.load(id) == null) {
+    createERC20Transfer(id, event, poolMeta)
+  }
 }
