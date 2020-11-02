@@ -27,6 +27,8 @@ dataSources:
           file: ./abis/v3/Assessor.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mapping.ts
@@ -702,4 +704,46 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
+      file: ./src/mapping.ts
+  # senior token
+  - kind: ethereum/contract
+    name: CF4DROP
+    network: mainnet
+    source:
+      address: "0x5b2F0521875B188C0afc925B1598e1FF246F9306"
+      abi: ERC20
+      startBlock: 11063000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+      file: ./src/mapping.ts
+  # junior token
+  - kind: ethereum/contract
+    name: CF4TIN
+    network: mainnet
+    source:
+      address: "0x05DD145AA26dBDcc7774E4118E34Bb67C64661c6"
+      abi: ERC20
+      startBlock: 11063000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
       file: ./src/mapping.ts

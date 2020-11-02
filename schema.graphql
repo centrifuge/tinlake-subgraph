@@ -42,3 +42,32 @@ type Proxy @entity {
   id: ID!
   owner: Bytes!
 }
+
+type Account @entity {
+  id: ID! # address
+  tokenBalances: [TokenBalance!] @derivedFrom (field: "owner")
+  currentActiveInvestmentAmount: BigInt # not based on token balance
+}
+
+type ERC20Transfer @entity {
+  id: ID!
+  transaction: String # txhash
+  token: Token!
+  from: String
+  to: String
+  amount: BigInt
+  pool: Pool!
+}
+
+type Token @entity {
+  id: ID! # token address
+  tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
+}
+
+type TokenBalance @entity {
+  id: ID! # account address + token address 
+  owner: Account!
+  balance: BigInt!
+  value: BigInt!
+  token: Token!
+}

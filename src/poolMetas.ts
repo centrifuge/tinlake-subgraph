@@ -9,7 +9,10 @@ export class PoolMeta {
   pile: string // pile contract address
   nftFeed: string // NFT or NAV feed contract address
   assessor: string // assessor contract address
+  juniorTranche: string
   seniorTranche: string // senior tranche contract address
+  seniorToken: string
+  juniorToken: string
   networkId: network
   startBlock: number // block where root contract was deployed
   version: version
@@ -29,6 +32,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xab351d3e54c975bfa0c2edafb6fab03f94762111',
     assessor: '0x1aba642c1aac9f8da36f7df73eda4ca73e054084',
     seniorTranche: '0x4c1bfb4e3ecbd6200358038e3f560ab6dee9bcb6',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10002000,
     version: 2
@@ -42,6 +48,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xe231faaea039766fcbb72cbb7d70ce18f0a28b8e',
     assessor: '0x41203b4c2b497334c01f9ce6f88ab42bd485199d',
     seniorTranche: '0xf49599f60bad647b9f82b7c5ef7736af13ff89ac',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10103234,
     version: 2
@@ -55,6 +64,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x7cdc05188b81e2cb11c6332b460233e654d8a3d4',
     assessor: '0x78bae79c9867bbe393c90cb13401ca1217a2fbee',
     seniorTranche: '0xae1845a50316fb6e571c569e78338c76d715a899',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10304149,
     version: 2
@@ -68,6 +80,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x3fbcddee1f5efc545828560869353287ec901c04',
     assessor: '0xfee2b69eddd98397b6cbf816e805ad52bd4407c7',
     seniorTranche: '0x05791d754ef5788532287de5a730645f2bbcf78f',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10498700,
     version: 2
@@ -81,6 +96,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0xf4846f411e8ab969ef869a5e30dc10a68cf5d2b0',
     assessor: '0x1f7adb00e86935a8ba83d8d51dc56d8cadf7b1da',
     seniorTranche: '0x6f038b9987baa1b0acc2b4b96c4050e204acdddd',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10595436,
     version: 2
@@ -94,6 +112,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x7b01145a8d736207ac46bdb831e7759264b05e6b',
     assessor: '0xaa298fd9206a4d66346124b6358fc4fc803398e5',
     seniorTranche: '0x473bd32f890855138ed085582d80099f11ad7767',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10661341,
     version: 2
@@ -107,6 +128,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x67ba167bebed75cbc7bd6b5e9f7cb7749f5a6a50',
     assessor: '0x6377737c28921fab9497e2a9f30fe8147a3bdfe4',
     seniorTranche: '0xf2c43699306dab17ec353886272bdfb4f443ad84',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 10783663,
     version: 2
@@ -119,7 +143,10 @@ export let poolMetas: PoolMeta[] = [
     pile: '0x3fc72da5545e2ab6202d81fbeb1c8273be95068c',
     nftFeed: '0x69504da6b2cd8320b9a62f3aed410a298d3e7ac6',
     assessor: '0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a',
+    juniorTranche: '0x145d6256e20cd115eda44eb9258a3bc13c2a86fc',
     seniorTranche: '0xb101ed16ad86cb5cc92dadc357ad994ab6c663a5',
+    seniorToken: '0x5b2f0521875b188c0afc925b1598e1ff246f9306',
+    juniorToken: '0x05dd145aa26dbdcc7774e4118e34bb67c64661c6',
     networkId: 'mainnet',
     startBlock: 11063000,
     version: 3
@@ -134,6 +161,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x865963b74b87387106bf12b01a097b3801f906fb',
     assessor: '0x9f5d1cce788d9383a5db8110d2f47d58011ff230',
     seniorTranche: '0x3a448226a26c072a6554a1786a2e29f70c96d8b6',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'mainnet',
     startBlock: 9993512,
     version: 2
@@ -148,6 +178,9 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x66390b34772c8e3665aba884b18c6365cef091b8',
     assessor: '0xb99b95e37ec8bc796fe8a18a8a61a3e36b007372',
     seniorTranche: '0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'kovan',
     startBlock: 20911916,
     version: 2
@@ -162,46 +195,27 @@ export let poolMetas: PoolMeta[] = [
     nftFeed: '0x677b85998f15921982b1548763f01ac6c265b8eb',
     assessor: '0x8b80927fca02566c29728c4a620c161f63116953',
     seniorTranche: '0x88ad5b21a01d838b15619f36f88b618410797b95',
+    juniorTranche: null,
+    seniorToken: null,
+    juniorToken: null,
     networkId: 'kovan',
     startBlock: 21406294,
     version: 3
   },
 ]
 
-// lookup that contains the rootId indexed by shelf
-export let poolMetaById = new Map<string, PoolMeta>()
+// lookup that contains the pool by associated address or poolId
+export let poolMetaByIdentifier = new Map<string, PoolMeta>()
 for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaById.set(poolMetas[i].id, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by shelf
-export let poolMetaByShelf = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByShelf.set(poolMetas[i].shelf, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by pile
-export let poolMetaByPile = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByPile.set(poolMetas[i].pile, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by nftFeed
-export let poolMetaByNftFeed = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByNftFeed.set(poolMetas[i].nftFeed, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by seniorTranche
-export let poolMetaBySeniorTranche = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaBySeniorTranche.set(poolMetas[i].seniorTranche, poolMetas[i])
-}
-
-// lookup that contains the pool indexed by assessor
-export let poolMetaByAssessor = new Map<string, PoolMeta>()
-for (let i = 0; i < poolMetas.length; i++) {
-  poolMetaByAssessor.set(poolMetas[i].assessor, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].id, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].shelf, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].pile, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].nftFeed, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].assessor, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].seniorTranche, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].juniorTranche, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].seniorToken, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].juniorToken, poolMetas[i])
 }
 
 export let poolStartBlocks = new Map<number, boolean>()
