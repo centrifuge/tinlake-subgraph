@@ -7,11 +7,15 @@ import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Transfer as TransferEvent } from '../generated/Block/ERC20'
-import { Pool, Loan, Proxy, ERC20Transfer } from "../generated/schema"
+import { Reserve } from '../generated/Block/Reserve'
+import { NavFeed } from '../generated/Block/NavFeed'
+import { Pool, Loan, Proxy, ERC20Transfer, Day } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
-import { poolMetas, poolStartBlocks } from "./poolMetas"
+import { poolMetas, poolStartBlocks, PoolMeta } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
 import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
+import { timestampToDate, createDay } from "./dateUtil"
+import { createDailyPoolData } from "./rewardUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -59,6 +63,66 @@ export function handleCreateProxy(event: Created): void {
   proxy.save()
 }
 
+function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
+  let pool = Pool.load(poolMeta.id)
+
+  log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
+  if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
+    createPool(poolMeta.id.toString())
+    pool = Pool.load(poolMeta.id)
+  }
+
+  log.debug("successfully using this for pool meta id: {}", [poolMeta.id.toString()])
+  return <Pool>pool    
+}
+
+function createYesterdaySnapshot(date: BigInt, block: EthereumBlock): void {
+  let yesterdayTimeStamp = date.minus(BigInt.fromI32(86400))
+  let yesterday = Day.load(yesterdayTimeStamp.toString())
+
+  let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
+  for (let i = 0; i < relevantPoolMetas.length; i++) {
+    let poolMeta = relevantPoolMetas[i]
+
+    let pool = loadOrCreatePool(poolMeta, block)
+    if (pool == null) {
+      continue
+    }
+
+    let dailyPoolData = createDailyPoolData(poolMeta, yesterday.id)
+
+    // only get these values in v3
+    if (poolMeta.version == 3) {
+      let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
+      let reserve = reserveContract.totalBalance()
+      dailyPoolData.reserve = reserve
+
+      let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+      let currentNav = navFeedContract.currentNAV()
+      dailyPoolData.assetValue = currentNav
+    } 
+
+    dailyPoolData.totalDebt = pool.totalDebt
+    dailyPoolData.seniorDebt = pool.seniorDebt
+    dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
+    dailyPoolData.save()
+  }
+}
+
+// capture a snapshot of the investments by day
+function runRewardLogic(block: EthereumBlock): void {
+  let date = timestampToDate(block.timestamp)
+  let today = Day.load(date.toString())
+
+  if (today == null) {
+    today = createDay(date.toString())
+
+    // if we create a new day
+    // then we want to run the calculation on the previous day
+    createYesterdaySnapshot(date, block);
+  }
+}
+
 export function handleBlock(block: EthereumBlock): void {
   // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
   // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect
@@ -75,6 +139,8 @@ export function handleBlock(block: EthereumBlock): void {
     log.debug("skip handleBlock at number {}", [block.number.toString()])
     return
   }
+
+  runRewardLogic(block)
 
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools that are for the current network

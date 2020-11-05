@@ -13,6 +13,7 @@ export class PoolMeta {
   seniorTranche: string // senior tranche contract address
   seniorToken: string
   juniorToken: string
+  reserve: string
   networkId: network
   startBlock: number // block where root contract was deployed
   version: version
@@ -35,6 +36,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10002000,
     version: 2
@@ -51,6 +53,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10103234,
     version: 2
@@ -67,6 +70,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10304149,
     version: 2
@@ -83,6 +87,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10498700,
     version: 2
@@ -99,6 +104,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10595436,
     version: 2
@@ -115,6 +121,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10661341,
     version: 2
@@ -131,6 +138,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 10783663,
     version: 2
@@ -147,6 +155,7 @@ export let poolMetas: PoolMeta[] = [
     seniorTranche: '0xb101ed16ad86cb5cc92dadc357ad994ab6c663a5',
     seniorToken: '0x5b2f0521875b188c0afc925b1598e1ff246f9306',
     juniorToken: '0x05dd145aa26dbdcc7774e4118e34bb67c64661c6',
+    reserve: '0x0d601b451afd502e473ba4ce6e3876d652bcbee7',
     networkId: 'mainnet',
     startBlock: 11063000,
     version: 3
@@ -164,6 +173,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'mainnet',
     startBlock: 9993512,
     version: 2
@@ -181,6 +191,7 @@ export let poolMetas: PoolMeta[] = [
     juniorTranche: null,
     seniorToken: null,
     juniorToken: null,
+    reserve: null,
     networkId: 'kovan',
     startBlock: 20911916,
     version: 2
@@ -196,8 +207,9 @@ export let poolMetas: PoolMeta[] = [
     assessor: '0x8b80927fca02566c29728c4a620c161f63116953',
     seniorTranche: '0x88ad5b21a01d838b15619f36f88b618410797b95',
     juniorTranche: null,
-    seniorToken: null,
-    juniorToken: null,
+    seniorToken: '0x085c3f24dc6b4131a5620a28702101d163ac7798',
+    juniorToken: '0x3173244a39d3e918f3e27f6765f2438006c90e73',
+    reserve: '0xa590f0f6b627b9e0a63e5062eed4dfcbbef7fced',
     networkId: 'kovan',
     startBlock: 21406294,
     version: 3
@@ -216,6 +228,7 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByIdentifier.set(poolMetas[i].juniorTranche, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].seniorToken, poolMetas[i])
   poolMetaByIdentifier.set(poolMetas[i].juniorToken, poolMetas[i])
+  poolMetaByIdentifier.set(poolMetas[i].reserve, poolMetas[i])
 }
 
 export let poolStartBlocks = new Map<number, boolean>()

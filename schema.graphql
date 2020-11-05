@@ -17,6 +17,17 @@ type Pool @entity {
   version: BigInt!
 }
 
+type DailyPoolData @entity {
+  id: ID! # poolId+day
+  day: Day!
+  pool: Pool!
+  reserve: BigInt # reserve.sol totalBalance()
+  totalDebt: BigInt # outstanding Volume (but also is already in the pool)
+  assetValue: BigInt # navfeed.sol currentNav()
+  seniorDebt: BigInt
+  currentJuniorRatio: BigInt 
+}
+
 type Loan @entity {
   id: ID!
   pool: Pool!
@@ -68,4 +79,9 @@ type TokenBalance @entity {
   balance: BigInt!
   value: BigInt!
   token: Token!
+}
+
+type Day @entity {
+  id: ID!
+  dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
 }
