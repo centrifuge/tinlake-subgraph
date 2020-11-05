@@ -171,7 +171,7 @@ export let poolMetas: PoolMeta[] = [
     seniorTranche: "0x56a128820d8c30181634162a49f79c22ba799fd2",
     seniorToken: "0x1aefc15de9c2e1ebb97146c3c2cdc4fc0ad539bc",
     juniorToken: "0xac1c0f9e1fb54694f43754b044b464b981554d8d",
-    reserve: null,
+    reserve: "0x932344ba99bf34035b4bc25cbd98f912ebc60371",
     networkId: "mainnet",
     startBlock: 11196893,
     version: 3,
