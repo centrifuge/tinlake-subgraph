@@ -3,11 +3,9 @@ import { Account, ERC20Transfer, Token, TokenBalance } from '../generated/schema
 import { Transfer as TransferEvent } from '../generated/Block/ERC20'
 import { PoolMeta } from './poolMetas'
 
-const zero = BigInt.fromI32(0)
-
 export function createAccount(address: string): Account {
     let account = new Account(address)
-    account.currentActiveInvestmentAmount = zero
+    account.currentActiveInvestmentAmount = BigInt.fromI32(0)
     account.save()
     return account;
 }
@@ -33,8 +31,8 @@ export function createERC20Transfer(id: string, event: TransferEvent, poolMeta: 
 export function createTokenBalance(id: string, event: TransferEvent, owner: string): TokenBalance {
     let tokenBalance = new TokenBalance(id)
     tokenBalance.owner = owner
-    tokenBalance.balance = zero
-    tokenBalance.value = zero
+    tokenBalance.balance = BigInt.fromI32(0)
+    tokenBalance.value = BigInt.fromI32(0)
     tokenBalance.token = event.address.toHex()
     tokenBalance.save()
     return tokenBalance
