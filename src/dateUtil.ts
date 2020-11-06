@@ -1,6 +1,8 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { Day } from "../generated/schema"
 
+const secondsInDay = 86400
+
 export function createDay(dateString: string): Day {
     let day = new Day(dateString)
     day.save()
@@ -12,6 +14,6 @@ export function toBigInt(integer: i32): BigInt {
 }
 
 export function timestampToDate(timestamp: BigInt): BigInt {
-    let daysSinceEpochStart: BigInt = timestamp / BigInt.fromI32(86400);
-    return daysSinceEpochStart * BigInt.fromI32(86400);
+    let daysSinceEpochStart: BigInt = timestamp / BigInt.fromI32(secondsInDay);
+    return daysSinceEpochStart * BigInt.fromI32(secondsInDay);
 }

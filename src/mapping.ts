@@ -19,6 +19,7 @@ import { createDailyPoolData } from "./rewardUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
+const secondsInDay = 86400
 
 function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
@@ -77,7 +78,7 @@ function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
 }
 
 function createYesterdaySnapshot(date: BigInt, block: EthereumBlock): void {
-  let yesterdayTimeStamp = date.minus(BigInt.fromI32(86400))
+  let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
   let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
