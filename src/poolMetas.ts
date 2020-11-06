@@ -53,7 +53,7 @@ export let poolMetas: PoolMeta[] = [
     seniorToken: null,
     juniorToken: null,
     reserve: null,
-    networkId: "mainnet"
+    networkId: "mainnet",
     startBlock: 10103234,
     version: 2,
   },
