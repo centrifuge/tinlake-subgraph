@@ -111,7 +111,7 @@ function createYesterdaySnapshot(date: BigInt, block: EthereumBlock): void {
 }
 
 // capture a snapshot of the investments by day
-function runRewardLogic(block: EthereumBlock): void {
+function createDailySnapshot(block: EthereumBlock): void {
   let date = timestampToDate(block.timestamp)
   let today = Day.load(date.toString())
 
@@ -141,7 +141,7 @@ export function handleBlock(block: EthereumBlock): void {
     return
   }
 
-  runRewardLogic(block)
+  createDailySnapshot(block)
 
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools that are for the current network
