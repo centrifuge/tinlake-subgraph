@@ -139,7 +139,6 @@ function isNewDay(block: EthereumBlock): boolean {
 }
 
 function updatePoolLogic(block: EthereumBlock): void {
-
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools that are for the current network
   let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
