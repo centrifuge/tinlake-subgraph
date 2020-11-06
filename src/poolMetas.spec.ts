@@ -15,6 +15,7 @@ describe('poolMeta', () => {
       juniorTranche: null,
       seniorToken: null,
       juniorToken: null,
+      reserve: null,
       networkId: 'mainnet',
       startBlock: 10002000,
       version: 2

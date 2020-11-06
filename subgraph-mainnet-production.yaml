@@ -29,6 +29,10 @@ dataSources:
           file: ./abis/SeniorTranche.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: Reserve
+          file: ./abis/Reserve.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mapping.ts
