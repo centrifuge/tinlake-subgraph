@@ -13,6 +13,8 @@ type Pool @entity {
   maxJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
   maxReserve: BigInt!
+  seniorTokenPrice: BigInt # assessor
+  juniorTokenPrice: BigInt # assessor
   shortName: String!
   version: BigInt!
 }
@@ -24,8 +26,10 @@ type DailyPoolData @entity {
   reserve: BigInt # reserve.sol totalBalance()
   totalDebt: BigInt # outstanding Volume (but also is already in the pool)
   assetValue: BigInt # navfeed.sol currentNav()
-  seniorDebt: BigInt
-  currentJuniorRatio: BigInt 
+  seniorDebt: BigInt  
+  seniorTokenPrice: BigInt # assessor
+  juniorTokenPrice: BigInt # assessor
+  currentJuniorRatio: BigInt
 }
 
 type Loan @entity {
@@ -83,5 +87,9 @@ type TokenBalance @entity {
 
 type Day @entity {
   id: ID!
+  reserve: BigInt # sum for all pools active on this day
+  totalDebt: BigInt # sum for all pools active on this day
+  assetValue: BigInt # sum for all pools active on this day
+  seniorDebt: BigInt # sum for all pools active on this day
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
 }

@@ -9,7 +9,7 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Transfer as TransferEvent } from '../generated/Block/ERC20'
 import { Reserve } from '../generated/Block/Reserve'
 import { NavFeed } from '../generated/Block/NavFeed'
-import { Pool, Loan, Proxy, ERC20Transfer, Day } from "../generated/schema"
+import { Pool, Loan, Proxy, ERC20Transfer, Day, DailyPoolData } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks, PoolMeta } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
@@ -20,6 +20,11 @@ import { createDailyPoolData } from "./rewardUtil"
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
 const secondsInDay = 86400
+// the fast forward block should be
+// updated to the latest block before every new deployment
+// for optimal optimization
+const fastForwardUntilBlock = 11204470
+const v3LaunchBlock = 11063000
 
 function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
@@ -53,6 +58,8 @@ function createPool(poolId: string) : void {
   pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
   pool.totalBorrowsCount = 0
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
+  pool.seniorTokenPrice = BigInt.fromI32(0)
+  pool.juniorTokenPrice = BigInt.fromI32(0)
   pool.shortName = poolMeta.shortName;
   pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3)
   pool.save()
@@ -69,7 +76,7 @@ function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
 
   log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
   if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
-    createPool(poolMeta.id.toString())
+    createPool(poolMeta.id)
     pool = Pool.load(poolMeta.id)
   }
 
@@ -77,7 +84,16 @@ function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
   return <Pool>pool    
 }
 
-function createYesterdaySnapshot(date: BigInt, block: EthereumBlock): void {
+function addToDailyAggregate(day: Day, dailyPoolData: DailyPoolData): void {
+  day.reserve = day.reserve.plus(<BigInt>dailyPoolData.reserve)
+  day.totalDebt = day.totalDebt.plus(<BigInt>dailyPoolData.totalDebt)
+  day.assetValue = day.assetValue.plus(<BigInt>dailyPoolData.assetValue)
+  day.seniorDebt = day.seniorDebt.plus(<BigInt>dailyPoolData.seniorDebt)
+  day.save()
+}
+
+function createDailySnapshot(block: EthereumBlock): void {
+  let date = timestampToDate(block.timestamp)
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
@@ -101,48 +117,28 @@ function createYesterdaySnapshot(date: BigInt, block: EthereumBlock): void {
       let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
       let currentNav = navFeedContract.currentNAV()
       dailyPoolData.assetValue = currentNav
-    } 
-
+    }
     dailyPoolData.totalDebt = pool.totalDebt
     dailyPoolData.seniorDebt = pool.seniorDebt
     dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
     dailyPoolData.save()
+
+    addToDailyAggregate(<Day>yesterday, dailyPoolData)
   }
 }
 
-// capture a snapshot of the investments by day
-function createDailySnapshot(block: EthereumBlock): void {
+function isNewDay(block: EthereumBlock): boolean {
   let date = timestampToDate(block.timestamp)
   let today = Day.load(date.toString())
-
-  if (today == null) {
-    today = createDay(date.toString())
-
-    // if we create a new day
-    // then we want to run the calculation on the previous day
-    createYesterdaySnapshot(date, block);
+  
+  if(today == null) {
+    createDay(date.toString())
+    return true
   }
+  else return false
 }
 
-export function handleBlock(block: EthereumBlock): void {
-  // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
-  // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect
-  // that the Graph won't be able to keep up with block production on Ethereum. Executing this handler only every x
-  // minutes is a workaround for now, but we should change the architecture to fix the scalability at a later point as
-  // described in the following:
-  // TODO: change the logic in handleBlock to solely use call/event handlers. The idea is to only track changes to the
-  // debt (borrowing/repaying) and interest rate through calls/events, and then run the block handler without actual
-  // calls to just calculate the current debt off-chain using the same logic that is used on-chain (without calls into
-  // the current debt value).
-  // We do run handleBlock for poolStartBlocks though.
-  if (!poolStartBlocks.has(block.number.toI32()) &&
-    block.number.mod(BigInt.fromI32(handleBlockFrequencyMinutes*60/blockTimeSeconds)).notEqual(BigInt.fromI32(0))) {
-    log.debug("skip handleBlock at number {}", [block.number.toString()])
-    return
-  }
-
-  createDailySnapshot(block)
-
+function updatePoolLogic(block: EthereumBlock): void {
   log.debug("handleBlock number {}", [block.number.toString()])
   // iterate through all pools that are for the current network
   let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
@@ -152,7 +148,7 @@ export function handleBlock(block: EthereumBlock): void {
 
     log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
     if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
-      createPool(poolMeta.id.toString())
+      createPool(poolMeta.id)
       pool = Pool.load(poolMeta.id)
     }
 
@@ -230,11 +226,39 @@ export function handleBlock(block: EthereumBlock): void {
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
 
-    log.debug("will update pool {}: totalDebt {} minJuniorRatio {} cuniorRatio {} weightedInterestRate {}", [
+    log.debug("will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}", [
       poolMeta.id, totalDebt.toString(), pool.minJuniorRatio.toString(), pool.currentJuniorRatio.toString(),
       weightedInterestRate.toString()])
     pool.save()
   }
+}
+
+export function handleBlock(block: EthereumBlock): void {
+  // Do not run handleBlock for every single block, since it is not performing well at the moment. Issue: handleBlock
+  // calls 3*n contracts for n loans, which takes with 12 loans already ~8 seconds. Since it scales linearly, we expect
+  // that the Graph won't be able to keep up with block production on Ethereum. Executing this handler only every x
+  // minutes is a workaround for now, but we should change the architecture to fix the scalability at a later point as
+  // described in the following:
+  // TODO: change the logic in handleBlock to solely use call/event handlers. The idea is to only track changes to the
+  // debt (borrowing/repaying) and interest rate through calls/events, and then run the block handler without actual
+  // calls to just calculate the current debt off-chain using the same logic that is used on-chain (without calls into
+  // the current debt value).
+  // We do run handleBlock for poolStartBlocks though.
+  let poolStartBlock = poolStartBlocks.has(block.number.toI32())
+  if (!poolStartBlock &&
+    block.number.mod(BigInt.fromI32(handleBlockFrequencyMinutes*60/blockTimeSeconds)).notEqual(BigInt.fromI32(0))) {
+    log.debug("skip handleBlock at number {}", [block.number.toString()])
+    return
+  }
+
+  // optimization to only update historical pool data once/day
+  // and to only get daily snapshots for v3 pools
+  let blockNum = block.number.toI32()
+  let fastForward = blockNum < fastForwardUntilBlock
+  let newDay = isNewDay(block)
+  let v3Active = blockNum > v3LaunchBlock
+  if (!fastForward || (fastForward && newDay && v3Active) || (fastForward && poolStartBlock )) { updatePoolLogic(block) }
+  if (newDay && v3Active) { createDailySnapshot(block) }
 }
 
 // handleShelfIssue handles creating a new/opening a loan

@@ -11,6 +11,8 @@ export function createDailyPoolData(poolMeta: PoolMeta, yesterday: string): Dail
     dailyPoolData.assetValue = BigInt.fromI32(0)
     dailyPoolData.seniorDebt = BigInt.fromI32(0)
     dailyPoolData.currentJuniorRatio = BigInt.fromI32(0)
+    dailyPoolData.seniorTokenPrice = BigInt.fromI32(0)
+    dailyPoolData.juniorTokenPrice = BigInt.fromI32(0)
     dailyPoolData.save()
     return dailyPoolData
 }

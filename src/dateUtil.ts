@@ -5,6 +5,10 @@ const secondsInDay = 86400
 
 export function createDay(dateString: string): Day {
     let day = new Day(dateString)
+    day.reserve = BigInt.fromI32(0)
+    day.totalDebt = BigInt.fromI32(0)
+    day.assetValue = BigInt.fromI32(0)
+    day.seniorDebt = BigInt.fromI32(0)
     day.save()
     return day;
 }

@@ -156,7 +156,7 @@ export let poolMetas: PoolMeta[] = [
     juniorToken: "0x05dd145aa26dbdcc7774e4118e34bb67c64661c6",
     reserve: "0x0d601b451afd502e473ba4ce6e3876d652bcbee7",
     networkId: "mainnet",
-    startBlock: 11063000,
+    startBlock: 11063166, // root deploy transaction, not root contract creation
     version: 3,
   },
   // BL1
@@ -173,7 +173,7 @@ export let poolMetas: PoolMeta[] = [
     juniorToken: "0xac1c0f9e1fb54694f43754b044b464b981554d8d",
     reserve: "0x932344ba99bf34035b4bc25cbd98f912ebc60371",
     networkId: "mainnet",
-    startBlock: 11196893,
+    startBlock: 11197245,
     version: 3,
   },
 
