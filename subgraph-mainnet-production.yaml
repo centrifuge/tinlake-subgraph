@@ -22,8 +22,6 @@ dataSources:
         - name: Pile
           file: ./abis/Pile.json
         - name: Assessor
-          file: ./abis/Assessor.json
-        - name: AssessorV3
           file: ./abis/v3/Assessor.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
@@ -62,11 +60,11 @@ dataSources:
 
   # CF4
   - kind: ethereum/contract
-    name: Assessor8
+    name: CF4Assessor
     network: mainnet
     source:
       address: "0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a"
-      abi: AssessorV3
+      abi: Assessor
       startBlock: 11063153
     mapping:
       kind: ethereum/events
@@ -75,14 +73,14 @@ dataSources:
       entities:
         - Pool
       abis:
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf8
+    name: CF4Shelf
     network: mainnet
     source:
       address: "0xa0b0d8394adc79f5d1563a892abfc6186e519644"
@@ -104,7 +102,7 @@ dataSources:
           file: ./abis/NFTFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: issue(address,uint256)
@@ -117,7 +115,7 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed8
+    name: CF4NftFeed
     network: mainnet
     source:
       address: "0x69504da6b2cd8320b9a62f3aed410a298d3e7ac6"
@@ -143,7 +141,7 @@ dataSources:
           handler: handleNftFeedUpdate
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: CF4DROP
+    name: CF4DRP
     network: mainnet
     source:
       address: "0x5b2F0521875B188C0afc925B1598e1FF246F9306"
@@ -186,11 +184,11 @@ dataSources:
 
   # BL1
   - kind: ethereum/contract
-    name: Assessor9
+    name: BL1Assessor
     network: mainnet
     source:
       address: "0x2b8fea4eedb43fca58ccb063221fae5858b47538"
-      abi: AssessorV3
+      abi: Assessor
       startBlock: 11197221
     mapping:
       kind: ethereum/events
@@ -199,14 +197,14 @@ dataSources:
       entities:
         - Pool
       abis:
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf9
+    name: BL1Shelf
     network: mainnet
     source:
       address: "0xcfad06adacf221f8119995c8bca25184a6b5a268"
@@ -228,7 +226,7 @@ dataSources:
           file: ./abis/NFTFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: issue(address,uint256)
@@ -241,7 +239,7 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed9
+    name: BL1NftFeed
     network: mainnet
     source:
       address: "0x1621b607a62dac0dc2e4044ff1235a30f135cbd2"
