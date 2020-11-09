@@ -19,13 +19,6 @@ graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
 yarn run deploy centrifuge/tinlake ./subgraph-mainnet-production.yaml
 ```
 
-### Mainnet staging
-
-```
-graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run deploy centrifuge/tinlake-staging ./subgraph-mainnet-staging.yaml
-```
-
 ### Kovan staging
 
 ```

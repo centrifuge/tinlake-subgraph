@@ -1,9 +1,7 @@
 import { log, BigInt, CallResult, EthereumBlock, Address, dataSource } from "@graphprotocol/graph-ts"
 import { Pile } from '../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall, Shelf } from "../generated/Shelf/Shelf"
-import { Assessor } from "../generated/Block/Assessor"
-import { AssessorV3, FileCall as AssessorV3FileCall } from "../generated/Block/AssessorV3"
-import { SeniorTranche, FileCall } from "../generated/Block/SeniorTranche"
+import { Assessor, FileCall as AssessorFileCall } from "../generated/Block/Assessor"
 import { UpdateCall, NftFeed } from "../generated/NftFeed/NftFeed"
 import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Transfer as TransferEvent } from '../generated/Block/ERC20'
@@ -30,13 +28,8 @@ function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
 
   let interestRateResult = new CallResult<BigInt>()
-  if (poolMeta.version == 3) {
-    let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-    interestRateResult = assessor_v3.try_seniorInterestRate()
-  } else {
-    let seniorTranche = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
-    interestRateResult = seniorTranche.try_ratePerSecond()
-  }
+  let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+  interestRateResult = assessor.try_seniorInterestRate()
 
   if (interestRateResult.reverted) {
     log.warning("pool not deployed to the network yet {}", [poolId])
@@ -50,9 +43,9 @@ function createPool(poolId: string) : void {
   pool.totalDebt = BigInt.fromI32(0)
   pool.seniorDebt = BigInt.fromI32(0)
   pool.minJuniorRatio = BigInt.fromI32(0)
-  pool.maxJuniorRatio = BigInt.fromI32(0) // Only used for V3
+  pool.maxJuniorRatio = BigInt.fromI32(0)
   pool.currentJuniorRatio = BigInt.fromI32(0)
-  pool.maxReserve = BigInt.fromI32(0) // Only used for V3
+  pool.maxReserve = BigInt.fromI32(0)
   pool.weightedInterestRate = BigInt.fromI32(0)
   pool.totalRepaysCount = 0
   pool.totalRepaysAggregatedAmount = BigInt.fromI32(0)
@@ -108,16 +101,14 @@ function createDailySnapshot(block: EthereumBlock): void {
 
     let dailyPoolData = createDailyPoolData(poolMeta, yesterday.id)
 
-    // only get these values in v3
-    if (poolMeta.version == 3) {
-      let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
-      let reserve = reserveContract.totalBalance()
-      dailyPoolData.reserve = reserve
+    let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
+    let reserve = reserveContract.totalBalance()
+    dailyPoolData.reserve = reserve
 
-      let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
-      let currentNav = navFeedContract.currentNAV()
-      dailyPoolData.assetValue = currentNav
-    }
+    let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+    let currentNav = navFeedContract.currentNAV()
+    dailyPoolData.assetValue = currentNav
+
     dailyPoolData.totalDebt = pool.totalDebt
     dailyPoolData.seniorDebt = pool.seniorDebt
     dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
@@ -196,31 +187,17 @@ function updatePoolLogic(block: EthereumBlock): void {
     pool.weightedInterestRate = weightedInterestRate
     pool.totalDebt = totalDebt
 
-    if (poolMeta.version == 2) {
-      let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
-      let minJuniorRatioResult = assessor.try_minJuniorRatio()
-      let currentJuniorRatioResult = assessor.try_currentJuniorRatio()
-
-      pool.minJuniorRatio = (!minJuniorRatioResult.reverted) ? minJuniorRatioResult.value : BigInt.fromI32(0)
-      pool.currentJuniorRatio = (!currentJuniorRatioResult.reverted) ? currentJuniorRatioResult.value : BigInt.fromI32(0)
-    } else {
-      let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-      let currentSeniorRatioResult = assessor_v3.try_seniorRatio()
-      pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
-        ? seniorToJuniorRatio(currentSeniorRatioResult.value)
-        : BigInt.fromI32(0);
-    }
+    let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+    let currentSeniorRatioResult = assessor.try_seniorRatio()
+    pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
+      ? seniorToJuniorRatio(currentSeniorRatioResult.value)
+      : BigInt.fromI32(0);
 
     // check if senior tranche exists
     if (poolMeta.seniorTranche != '0x0000000000000000000000000000000000000000') {
       let seniorDebtResult = new CallResult<BigInt>()
-      if (poolMeta.version == 3) {
-        let assessor_v3 = AssessorV3.bind(<Address>Address.fromHexString(poolMeta.assessor))
-        seniorDebtResult = assessor_v3.try_seniorDebt_()
-      } else {
-        let senior = SeniorTranche.bind(<Address>Address.fromHexString(poolMeta.seniorTranche))
-        seniorDebtResult = senior.try_debt()
-      }
+      let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
+      seniorDebtResult = assessor.try_seniorDebt_()
 
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
@@ -523,30 +500,8 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   loan.save()
 }
 
-// Only used in V2
-export function handleSeniorTrancheFile(call: FileCall): void {
-  log.debug(`handle senior tranche file set`, [call.to.toHex()]);
-  let seniorTranche = call.to
-  let interestRate = call.inputs.ratePerSecond_
 
-
-  let poolMeta = poolFromIdentifier(seniorTranche.toHex())
-  let poolId = poolMeta.id
-  log.debug(`handle senior tranche file pool Id {}`, [poolId]);
-
-  let pool = Pool.load(poolId)
-  if (pool == null) {
-    log.error("pool {} not found", [poolId])
-    return
-  }
-  log.debug(`update pool {} - set senior interest rate `, [poolId, interestRate.toString()]);
-
-  pool.seniorInterestRate = interestRate
-  pool.save()
-}
-
-// Only used in V3
-export function handleAssessorFile(call: AssessorV3FileCall): void {
+export function handleAssessorFile(call: AssessorFileCall): void {
   log.debug(`handle assessor file set`, [call.to.toHex()]);
   let assessor = call.to
   let name = call.inputs.name.toString()
