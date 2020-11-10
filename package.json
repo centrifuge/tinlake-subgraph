@@ -3,6 +3,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
+    "codegen-mainnet": "rm -rf generated && graph codegen ./subgraph-mainnet-production.yaml",
     "build": "graph build",
     "test": "jest",
     "deploy-dev": "rm -rf generated && graph codegen ./subgraph-mainnet-production.yaml && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $GRAPH_ENDPOINT ./subgraph-mainnet-production.yaml --access-token $GRAPH_ACCESS_TOKEN",

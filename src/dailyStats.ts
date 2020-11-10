@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { DailyPoolData } from "../generated/schema"
+import { DailyPoolData, Day, Pool } from "../generated/schema"
 import { PoolMeta } from "../src/poolMetas"
 
 export function createDailyPoolData(poolMeta: PoolMeta, yesterday: string): DailyPoolData {
@@ -16,6 +16,7 @@ export function createDailyPoolData(poolMeta: PoolMeta, yesterday: string): Dail
     dailyPoolData.save()
     return dailyPoolData
 }
+
 export function addToDailyAggregate(day: Day, pool: Pool): void {
     day.reserve = day.reserve.plus(<BigInt>pool.reserve)
     day.totalDebt = day.totalDebt.plus(<BigInt>pool.totalDebt)

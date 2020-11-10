@@ -14,9 +14,8 @@ import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks, PoolMeta } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
 import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
-import { timestampToDate, createDay } from "./dateUtil"
-import { createDailyPoolData } from "./rewardUtil"
 import { timestampToDate, createDay, getToday } from "./dateUtil"
+import { createDailyPoolData, addToDailyAggregate } from "./dailyStats"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
