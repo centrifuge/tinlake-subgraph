@@ -16,6 +16,7 @@ import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
 import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
 import { timestampToDate, createDay } from "./dateUtil"
 import { createDailyPoolData } from "./rewardUtil"
+import { timestampToDate, createDay, getToday } from "./dateUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -23,7 +24,7 @@ const secondsInDay = 86400
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-const fastForwardUntilBlock = 11204470
+const fastForwardUntilBlock = 11224449
 const v3LaunchBlock = 11063000
 
 function createPool(poolId: string) : void {
@@ -60,6 +61,8 @@ function createPool(poolId: string) : void {
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
   pool.seniorTokenPrice = BigInt.fromI32(0)
   pool.juniorTokenPrice = BigInt.fromI32(0)
+  pool.reserve = BigInt.fromI32(0)
+  pool.assetValue = BigInt.fromI32(0)
   pool.shortName = poolMeta.shortName;
   pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3)
   pool.save()
@@ -84,12 +87,15 @@ function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
   return <Pool>pool    
 }
 
-function addToDailyAggregate(day: Day, dailyPoolData: DailyPoolData): void {
-  day.reserve = day.reserve.plus(<BigInt>dailyPoolData.reserve)
-  day.totalDebt = day.totalDebt.plus(<BigInt>dailyPoolData.totalDebt)
-  day.assetValue = day.assetValue.plus(<BigInt>dailyPoolData.assetValue)
-  day.seniorDebt = day.seniorDebt.plus(<BigInt>dailyPoolData.seniorDebt)
-  day.save()
+function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): void {
+  dailyPoolData.reserve = pool.reserve
+  dailyPoolData.assetValue = pool.assetValue
+  dailyPoolData.totalDebt = pool.totalDebt
+  dailyPoolData.seniorDebt = pool.seniorDebt
+  dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
+  dailyPoolData.juniorTokenPrice = pool.juniorTokenPrice
+  dailyPoolData.seniorTokenPrice = pool.seniorTokenPrice
+  dailyPoolData.save() 
 }
 
 function createDailySnapshot(block: EthereumBlock): void {
@@ -105,41 +111,22 @@ function createDailySnapshot(block: EthereumBlock): void {
     if (pool == null) {
       continue
     }
-
+    
     let dailyPoolData = createDailyPoolData(poolMeta, yesterday.id)
+    setDailyPoolValues(pool, dailyPoolData)
 
-    // only get these values in v3
-    if (poolMeta.version == 3) {
-      let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
-      let reserve = reserveContract.totalBalance()
-      dailyPoolData.reserve = reserve
 
-      let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
-      let currentNav = navFeedContract.currentNAV()
-      dailyPoolData.assetValue = currentNav
-    }
-    dailyPoolData.totalDebt = pool.totalDebt
-    dailyPoolData.seniorDebt = pool.seniorDebt
-    dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
-    dailyPoolData.save()
-
-    addToDailyAggregate(<Day>yesterday, dailyPoolData)
   }
 }
 
-function isNewDay(block: EthereumBlock): boolean {
-  let date = timestampToDate(block.timestamp)
-  let today = Day.load(date.toString())
-  
-  if(today == null) {
-    createDay(date.toString())
-    return true
-  }
-  else return false
-}
-
-function updatePoolLogic(block: EthereumBlock): void {
+function updatePoolLogic(block: EthereumBlock, today: Day): void {
   log.debug("handleBlock number {}", [block.number.toString()])
+  //resetting values for real time aggregation
+  today.reserve = BigInt.fromI32(0)
+  today.totalDebt = BigInt.fromI32(0)
+  today.assetValue = BigInt.fromI32(0)
+  today.seniorDebt = BigInt.fromI32(0)
+
   // iterate through all pools that are for the current network
   let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
   for (let i = 0; i < relevantPoolMetas.length; i++) {
@@ -209,6 +196,20 @@ function updatePoolLogic(block: EthereumBlock): void {
       pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
         ? seniorToJuniorRatio(currentSeniorRatioResult.value)
         : BigInt.fromI32(0);
+
+      let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+      let currentNav = navFeedContract.currentNAV()
+      pool.assetValue = currentNav
+
+      let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
+      let reserve = reserveContract.totalBalance()
+      pool.reserve = reserve
+
+      let juniorPrice = assessor_v3.try_calcJuniorTokenPrice(currentNav, reserve)
+      let seniorPrice = assessor_v3.try_calcSeniorTokenPrice(currentNav, reserve)
+
+      pool.seniorTokenPrice = seniorPrice.value
+      pool.juniorTokenPrice = juniorPrice.value 
     }
 
     // check if senior tranche exists
@@ -225,6 +226,8 @@ function updatePoolLogic(block: EthereumBlock): void {
       pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
       log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
     }
+
+    addToDailyAggregate(<Day>today, <Pool>pool)
 
     log.debug("will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}", [
       poolMeta.id, totalDebt.toString(), pool.minJuniorRatio.toString(), pool.currentJuniorRatio.toString(),
@@ -255,9 +258,17 @@ export function handleBlock(block: EthereumBlock): void {
   // and to only get daily snapshots for v3 pools
   let blockNum = block.number.toI32()
   let fastForward = blockNum < fastForwardUntilBlock
-  let newDay = isNewDay(block)
+  
+  let today = getToday(block)
+  let newDay = today === null 
+  if(today == null) {
+    today = createDay(timestampToDate(block.timestamp).toString())
+  }
+
   let v3Active = blockNum > v3LaunchBlock
-  if (!fastForward || (fastForward && newDay && v3Active) || (fastForward && poolStartBlock )) { updatePoolLogic(block) }
+  if (!fastForward || (fastForward && newDay && v3Active) || (fastForward && poolStartBlock )) { 
+    updatePoolLogic(block, today) 
+  }
   if (newDay && v3Active) { createDailySnapshot(block) }
 }
 
