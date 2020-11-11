@@ -7,4 +7,4 @@ export const blockTimeSeconds = 15
 // updated to the latest block before every new deployment
 // for optimal optimization
 // TODO: set dependent on dataSource.network()
-export const fastForwardUntilBlock = 11197245 
+export const fastForwardUntilBlock = 11197245
