@@ -1,7 +1,7 @@
 import { log, BigInt, Address } from "@graphprotocol/graph-ts"
 import { Pile } from '../../generated/Block/Pile'
-import { IssueCall, CloseCall, BorrowCall } from "../../generated/Shelf/Shelf"
-import { NftFeed } from "../../generated/NftFeed/NftFeed"
+import { IssueCall, CloseCall, BorrowCall } from "../../generated/Block/Shelf"
+import { NftFeed } from "../../generated/Block/NftFeed"
 import { Pool, Loan } from "../../generated/schema"
 import { loanIdFromPoolIdAndIndex } from "../util/typecasts"
 import { poolFromIdentifier } from "../util/pool"

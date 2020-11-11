@@ -1,4 +1,4 @@
-import { BigInt, EthereumBlock, Address, dataSource } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum, Address, dataSource } from "@graphprotocol/graph-ts"
 import { Reserve } from '../../generated/Block/Reserve'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Day, DailyPoolData } from "../../generated/schema"
@@ -7,7 +7,7 @@ import { timestampToDate } from "../util/date"
 import { loadOrCreatePool } from './Pool'
 import { secondsInDay } from '../config'
 
-export function createDailySnapshot(block: EthereumBlock): void {
+export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())

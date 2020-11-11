@@ -1,4 +1,4 @@
-import { BigInt, EthereumBlock, log } from "@graphprotocol/graph-ts";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import { PoolMeta, poolMetaByIdentifier } from "../poolMetas";
 
 // poolId or address

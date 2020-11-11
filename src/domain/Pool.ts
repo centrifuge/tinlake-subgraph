@@ -1,10 +1,10 @@
-import { log, BigInt, CallResult, EthereumBlock, Address } from "@graphprotocol/graph-ts"
+import { log, BigInt, ethereum, Address } from "@graphprotocol/graph-ts"
 import { Assessor } from "../../generated/Block/Assessor"
 import { Pool } from "../../generated/schema"
 import { PoolMeta } from "../poolMetas"
 import { poolFromIdentifier } from "../util/pool"
 
-export function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
+export function loadOrCreatePool(poolMeta: PoolMeta, block: ethereum.Block): Pool {
   let pool = Pool.load(poolMeta.id)
 
   log.debug("loadOrCreatePool: pool start block {}, current block {}", [
@@ -23,7 +23,7 @@ export function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool
 export function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
 
-  let interestRateResult = new CallResult<BigInt>()
+  let interestRateResult = new ethereum.CallResult<BigInt>()
   let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
   interestRateResult = assessor.try_seniorInterestRate()
 

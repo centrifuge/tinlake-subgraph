@@ -1,4 +1,4 @@
-import { BigInt, EthereumBlock } from "@graphprotocol/graph-ts";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { Day } from "../../generated/schema";
 import { secondsInDay } from "../config";
 
@@ -21,7 +21,7 @@ export function timestampToDate(timestamp: BigInt): BigInt {
   return daysSinceEpochStart * BigInt.fromI32(secondsInDay);
 }
 
-export function isNewDay(block: EthereumBlock): boolean {
+export function isNewDay(block: ethereum.Block): boolean {
   let date = timestampToDate(block.timestamp);
   let today = Day.load(date.toString());
 

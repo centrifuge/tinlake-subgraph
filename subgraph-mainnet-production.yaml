@@ -13,7 +13,7 @@ dataSources:
       startBlock: 11063000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -31,6 +31,10 @@ dataSources:
           file: ./abis/Reserve.json
         - name: NavFeed
           file: ./abis/NavFeed.json
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
@@ -45,7 +49,7 @@ dataSources:
       startBlock: 11063000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -68,7 +72,7 @@ dataSources:
       startBlock: 11063153
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -88,7 +92,7 @@ dataSources:
       startBlock: 11063052
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -123,7 +127,7 @@ dataSources:
       startBlock: 11063046
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -149,7 +153,7 @@ dataSources:
       startBlock: 11063000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Transfer
@@ -169,7 +173,7 @@ dataSources:
       startBlock: 11063000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Transfer
@@ -192,7 +196,7 @@ dataSources:
       startBlock: 11197221
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -212,7 +216,7 @@ dataSources:
       startBlock: 11197172
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -247,7 +251,7 @@ dataSources:
       startBlock: 11197170
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -273,7 +277,7 @@ dataSources:
       startBlock: 11197217
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Transfer
@@ -293,7 +297,7 @@ dataSources:
       startBlock: 11197212
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Transfer
