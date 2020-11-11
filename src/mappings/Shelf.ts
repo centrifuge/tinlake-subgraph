@@ -59,6 +59,7 @@ export function handleShelfIssue(call: IssueCall): void {
     pool.save();
   }
 
+  // TODO: move to createLoan() in ../domain/Loan.ts
   let loan = new Loan(loanId);
   loan.pool = poolId;
   loan.index = loanIndex.toI32();

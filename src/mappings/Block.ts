@@ -37,7 +37,6 @@ export function handleBlock(block: ethereum.Block): void {
   }
 
   // optimization to only update historical pool data once/day
-  // and to only get daily snapshots for v3 pools
   let blockNum = block.number.toI32();
   let fastForward = blockNum < fastForwardUntilBlock;
   let newDay = isNewDay(block);
