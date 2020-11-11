@@ -4,7 +4,7 @@ import { createDailySnapshot } from '../domain/DailyPoolData'
 import { Assessor } from "../../generated/Block/Assessor"
 import { Pool } from "../../generated/schema"
 import { poolMetas } from '../poolMetas'
-import { isNewDay } from '../util/date'
+import { isNewDay } from '../domain/Day'
 import { seniorToJuniorRatio } from '../util/pool'
 import { createPool } from '../domain/Pool'
 import { fastForwardUntilBlock, blockTimeSeconds, handleBlockFrequencyMinutes } from "../config";
