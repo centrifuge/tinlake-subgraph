@@ -1,13 +1,13 @@
-import { log, BigInt, Address, ethereum, dataSource } from "@graphprotocol/graph-ts"
-import { poolStartBlocks } from "../poolMetas"
+import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph-ts'
+import { poolStartBlocks } from '../poolMetas'
 import { createDailySnapshot } from '../domain/DailyPoolData'
-import { Assessor } from "../../generated/Block/Assessor"
-import { Pool } from "../../generated/schema"
+import { Assessor } from '../../generated/Block/Assessor'
+import { Pool } from '../../generated/schema'
 import { poolMetas } from '../poolMetas'
 import { isNewDay } from '../domain/Day'
 import { seniorToJuniorRatio } from '../util/pool'
 import { createPool } from '../domain/Pool'
-import { fastForwardUntilBlock, blockTimeSeconds, handleBlockFrequencyMinutes } from "../config";
+import { fastForwardUntilBlock, blockTimeSeconds, handleBlockFrequencyMinutes } from '../config'
 import { updateLoans } from '../domain/Loan'
 
 export function handleBlock(block: ethereum.Block): void {
@@ -21,50 +21,39 @@ export function handleBlock(block: ethereum.Block): void {
   // calls to just calculate the current debt off-chain using the same logic that is used on-chain (without calls into
   // the current debt value).
   // We do run handleBlock for poolStartBlocks though.
-  let poolStartBlock = poolStartBlocks.has(block.number.toI32());
+  let poolStartBlock = poolStartBlocks.has(block.number.toI32())
   if (
     !poolStartBlock &&
-    block.number
-      .mod(
-        BigInt.fromI32(
-          (handleBlockFrequencyMinutes * 60) / blockTimeSeconds
-        )
-      )
-      .notEqual(BigInt.fromI32(0))
+    block.number.mod(BigInt.fromI32((handleBlockFrequencyMinutes * 60) / blockTimeSeconds)).notEqual(BigInt.fromI32(0))
   ) {
-    log.debug("skip handleBlock at number {}", [block.number.toString()]);
-    return;
+    log.debug('skip handleBlock at number {}', [block.number.toString()])
+    return
   }
 
   // optimization to only update historical pool data once/day
-  let blockNum = block.number.toI32();
-  let fastForward = blockNum < fastForwardUntilBlock;
-  let newDay = isNewDay(block);
-  if (
-    !fastForward ||
-    (fastForward && newDay) ||
-    (fastForward && poolStartBlock)
-  ) {
-    updatePoolLogic(block);
+  let blockNum = block.number.toI32()
+  let fastForward = blockNum < fastForwardUntilBlock
+  let newDay = isNewDay(block)
+  if (!fastForward || (fastForward && newDay) || (fastForward && poolStartBlock)) {
+    updatePoolLogic(block)
   }
   if (newDay) {
-    createDailySnapshot(block);
+    createDailySnapshot(block)
   }
 }
 
-
 function updatePoolLogic(block: ethereum.Block): void {
-  log.debug("handleBlock number {}", [block.number.toString()])
+  log.debug('handleBlock number {}', [block.number.toString()])
   // iterate through all pools that are for the current network
-  let relevantPoolMetas = poolMetas.filter(poolMeta => poolMeta.networkId == dataSource.network())
+  let relevantPoolMetas = poolMetas.filter((poolMeta) => poolMeta.networkId == dataSource.network())
   for (let i = 0; i < relevantPoolMetas.length; i++) {
     let poolMeta = relevantPoolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
-    log.debug("updatePoolLogic: pool start block {}, current block {}", [
+    log.debug('updatePoolLogic: pool start block {}, current block {}', [
       poolMeta.startBlock.toString(),
       block.number.toString(),
-    ]);
+    ])
 
     if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
       createPool(poolMeta.id)
@@ -72,24 +61,24 @@ function updatePoolLogic(block: ethereum.Block): void {
     }
 
     if (pool == null) {
-      log.error("pool does not exist after creation", [poolMeta.id.toString()]);
+      log.error('pool does not exist after creation', [poolMeta.id.toString()])
       return
     }
 
-    log.debug("pool {} loaded", [poolMeta.id.toString()])
+    log.debug('pool {} loaded', [poolMeta.id.toString()])
 
     // update loans and return weightedInterestRate and totalDebt
     let loanValues = updateLoans(pool as Pool)
 
     // update pool values
-    pool.weightedInterestRate = loanValues[0];
-    pool.totalDebt = loanValues[1];
+    pool.weightedInterestRate = loanValues[0]
+    pool.totalDebt = loanValues[1]
 
     let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
     let currentSeniorRatioResult = assessor.try_seniorRatio()
     pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
       ? seniorToJuniorRatio(currentSeniorRatioResult.value)
-      : BigInt.fromI32(0);
+      : BigInt.fromI32(0)
 
     // check if senior tranche exists
     if (poolMeta.seniorTranche != '0x0000000000000000000000000000000000000000') {
@@ -97,20 +86,17 @@ function updatePoolLogic(block: ethereum.Block): void {
       let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
       seniorDebtResult = assessor.try_seniorDebt_()
 
-      pool.seniorDebt = (!seniorDebtResult.reverted) ? seniorDebtResult.value : BigInt.fromI32(0)
-      log.debug("will update seniorDebt {}", [pool.seniorDebt.toString()])
+      pool.seniorDebt = !seniorDebtResult.reverted ? seniorDebtResult.value : BigInt.fromI32(0)
+      log.debug('will update seniorDebt {}', [pool.seniorDebt.toString()])
     }
 
-    log.debug(
-      "will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}",
-      [
-        poolMeta.id,
-        pool.totalDebt.toString(),
-        pool.minJuniorRatio.toString(),
-        pool.currentJuniorRatio.toString(),
-        pool.weightedInterestRate.toString(),
-      ]
-    );
+    log.debug('will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}', [
+      poolMeta.id,
+      pool.totalDebt.toString(),
+      pool.minJuniorRatio.toString(),
+      pool.currentJuniorRatio.toString(),
+      pool.weightedInterestRate.toString(),
+    ])
     pool.save()
   }
 }
