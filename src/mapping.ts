@@ -21,12 +21,10 @@ const secondsInDay = 86400
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-const fastForwardUntilBlock = 11063000
-const v3LaunchBlock = 11063000
+const fastForwardUntilBlock = 11197245;
 
 // Kovan
 // const fastForwardUntilBlock = 21406294;
-// const v3LaunchBlock = 21406294;
 
 function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
@@ -243,9 +241,8 @@ export function handleBlock(block: EthereumBlock): void {
   let blockNum = block.number.toI32()
   let fastForward = blockNum < fastForwardUntilBlock
   let newDay = isNewDay(block)
-  let v3Active = blockNum > v3LaunchBlock
-  if (!fastForward || (fastForward && newDay && v3Active) || (fastForward && poolStartBlock )) { updatePoolLogic(block) }
-  if (newDay && v3Active) { createDailySnapshot(block) }
+  if (!fastForward || (fastForward && newDay) || (fastForward && poolStartBlock)) { updatePoolLogic(block) }
+  if (newDay) { createDailySnapshot(block) }
 }
 
 // handleShelfIssue handles creating a new/opening a loan
