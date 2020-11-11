@@ -59,22 +59,22 @@ export let poolMetas: PoolMeta[] = [
   },
 
   // Kovan Revolving Pool 1
-  {
-    shortName: "Kovan Revolving 1",
-    id: "0xc4084221fb5d0f28f817c795435c2d17eab6c389",
-    shelf: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af",
-    pile: "0x82ee3f4b872d2a53b7b5cf2bd88ebc8736914407",
-    nftFeed: "0x677b85998f15921982b1548763f01ac6c265b8eb",
-    assessor: "0x8b80927fca02566c29728c4a620c161f63116953",
-    seniorTranche: "0x88ad5b21a01d838b15619f36f88b618410797b95",
-    juniorTranche: null,
-    seniorToken: "0x085c3f24dc6b4131a5620a28702101d163ac7798",
-    juniorToken: "0x3173244a39d3e918f3e27f6765f2438006c90e73",
-    reserve: "0xa590f0f6b627b9e0a63e5062eed4dfcbbef7fced",
-    networkId: "kovan",
-    startBlock: 21406294,
-    version: 3,
-  },
+  // {
+  //   shortName: "Kovan Revolving 1",
+  //   id: "0xc4084221fb5d0f28f817c795435c2d17eab6c389",
+  //   shelf: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af",
+  //   pile: "0x82ee3f4b872d2a53b7b5cf2bd88ebc8736914407",
+  //   nftFeed: "0x677b85998f15921982b1548763f01ac6c265b8eb",
+  //   assessor: "0x8b80927fca02566c29728c4a620c161f63116953",
+  //   seniorTranche: "0x88ad5b21a01d838b15619f36f88b618410797b95",
+  //   juniorTranche: "0xd36fe8e53a25376014b0ea7b5533c2e0b0fcd227",
+  //   seniorToken: "0x085c3f24dc6b4131a5620a28702101d163ac7798",
+  //   juniorToken: "0x3173244a39d3e918f3e27f6765f2438006c90e73",
+  //   reserve: "0xa590f0f6b627b9e0a63e5062eed4dfcbbef7fced",
+  //   networkId: "kovan",
+  //   startBlock: 21406294,
+  //   version: 3,
+  // },
 ];
 
 // lookup that contains the pool by associated address or poolId

@@ -21,8 +21,12 @@ const secondsInDay = 86400
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-const fastForwardUntilBlock = 11204470
+const fastForwardUntilBlock = 11063000
 const v3LaunchBlock = 11063000
+
+// Kovan
+// const fastForwardUntilBlock = 21406294;
+// const v3LaunchBlock = 21406294;
 
 function createPool(poolId: string) : void {
   let poolMeta = poolFromIdentifier(poolId);
@@ -67,7 +71,10 @@ export function handleCreateProxy(event: Created): void {
 function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
   let pool = Pool.load(poolMeta.id)
 
-  log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
+  log.debug("loadOrCreatePool: pool start block {}, current block {}", [
+    poolMeta.startBlock.toString(),
+    block.number.toString(),
+  ]);
   if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
     createPool(poolMeta.id)
     pool = Pool.load(poolMeta.id)
@@ -137,7 +144,10 @@ function updatePoolLogic(block: EthereumBlock): void {
     let poolMeta = relevantPoolMetas[i]
     let pool = Pool.load(poolMeta.id)
 
-    log.debug("pool start block {}, current block {}", [poolMeta.startBlock.toString(), block.number.toString()])
+    log.debug("updatePoolLogic: pool start block {}, current block {}", [
+      poolMeta.startBlock.toString(),
+      block.number.toString(),
+    ]);
     if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
       createPool(poolMeta.id)
       pool = Pool.load(poolMeta.id)

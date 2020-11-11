@@ -60,7 +60,7 @@ dataSources:
 
   # Kovan Revolving Pool 1
   - kind: ethereum/contract
-    name: Assessor
+    name: RV1Assessor
     network: kovan
     source:
       address: "0x8b80927fca02566c29728c4a620c161f63116953"
@@ -80,7 +80,7 @@ dataSources:
           handler: handleAssessorFile
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: Shelf
+    name: RV1Shelf
     network: kovan
     source:
       address: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af"
@@ -115,7 +115,7 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mapping.ts
   - kind: ethereum/contract
-    name: NftFeed
+    name: RV1NftFeed
     network: kovan
     source:
       address: "0x677b85998f15921982b1548763f01ac6c265b8eb"
@@ -139,44 +139,4 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: RV1DRP
-    network: kovan
-    source:
-      address: "0x085C3f24dC6b4131A5620A28702101D163Ac7798"
-      abi: ERC20
-      startBlock: 21406440
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleERC20Transfer
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: RV1TIN
-    network: kovan
-    source:
-      address: "0x3173244a39D3E918f3E27F6765f2438006C90E73"
-      abi: ERC20
-      startBlock: 21406421
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleERC20Transfer
       file: ./src/mapping.ts
