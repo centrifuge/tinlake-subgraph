@@ -1,4 +1,4 @@
-## tinlake-subgraph
+# tinlake-subgraph
 Subgraph for the Tinlake applications.
 
 ## Deployment
