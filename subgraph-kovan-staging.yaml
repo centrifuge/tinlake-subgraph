@@ -13,7 +13,7 @@ dataSources:
       startBlock: 21406000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -31,9 +31,13 @@ dataSources:
           file: ./abis/Reserve.json
         - name: NavFeed
           file: ./abis/NavFeed.json
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
       blockHandlers:
         - handler: handleBlock
-      file: ./src/mapping.ts
+      file: ./src/mappings/Block.ts
 
   # Proxy registry across pools
   - kind: ethereum/contract
@@ -45,7 +49,7 @@ dataSources:
       startBlock: 21406000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -56,7 +60,7 @@ dataSources:
       eventHandlers:
         - event: Created(indexed address,indexed address,address,uint256)
           handler: handleCreateProxy
-      file: ./src/mapping.ts
+      file: ./src/mappings/ProxyRegistry.ts
 
   # Kovan Revolving Pool 1
   - kind: ethereum/contract
@@ -68,7 +72,7 @@ dataSources:
       startBlock: 21406450
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -78,7 +82,7 @@ dataSources:
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
-      file: ./src/mapping.ts
+      file: ./src/mappings/Assessor.ts
   - kind: ethereum/contract
     name: RV1Shelf
     network: kovan
@@ -88,7 +92,7 @@ dataSources:
       startBlock: 21406337
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -113,7 +117,7 @@ dataSources:
           handler: handleShelfBorrow
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
-      file: ./src/mapping.ts
+      file: ./src/mappings/Shelf.ts
   - kind: ethereum/contract
     name: RV1NftFeed
     network: kovan
@@ -123,7 +127,7 @@ dataSources:
       startBlock: 21406328
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -139,4 +143,4 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
+      file: ./src/mappings/NftFeed.ts
