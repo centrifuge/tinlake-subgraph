@@ -1,4 +1,4 @@
-import { BigInt, ethereum, Address, dataSource } from "@graphprotocol/graph-ts"
+import { log, BigInt, ethereum, Address, dataSource } from "@graphprotocol/graph-ts"
 import { Reserve } from '../../generated/Block/Reserve'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Day, DailyPoolData } from "../../generated/schema"
@@ -20,10 +20,10 @@ export function createDailySnapshot(block: ethereum.Block): void {
 
     let pool = loadOrCreatePool(poolMeta, block)
     if (pool == null) {
-      continue
+      return
     }
 
-    let dailyPoolData = createDailyPoolData(poolMeta, yesterday.id)
+    let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
 
     let reserveContract = Reserve.bind(
       <Address>Address.fromHexString(poolMeta.reserve)
@@ -46,10 +46,11 @@ export function createDailySnapshot(block: ethereum.Block): void {
   }
 }
 
-function createDailyPoolData(poolMeta: PoolMeta, yesterday: string): DailyPoolData {
-    let dailyPoolData = new DailyPoolData(poolMeta.id.concat(yesterday))
+function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
+    log.error("createDailyPoolData, poolMeta.id: {}, yesterday: {}", [poolId, yesterday]);
+    let dailyPoolData = new DailyPoolData(poolId.concat(yesterday))
     dailyPoolData.day = yesterday
-    dailyPoolData.pool = poolMeta.id
+    dailyPoolData.pool = poolId
     dailyPoolData.reserve = BigInt.fromI32(0)
     dailyPoolData.totalDebt = BigInt.fromI32(0)
     dailyPoolData.assetValue = BigInt.fromI32(0)
