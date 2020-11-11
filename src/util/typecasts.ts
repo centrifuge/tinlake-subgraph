@@ -1,5 +1,5 @@
 import { BigInt, Bytes, log } from "@graphprotocol/graph-ts"
-import { normalizeHexString } from './util'
+import { normalizeHexString } from '../util'
 
 export function bigIntToHex(bigInt: BigInt): string {
     return bigInt.toHex() // converts to big endian, 0x prefixed hex encoded string

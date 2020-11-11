@@ -33,7 +33,7 @@ dataSources:
           file: ./abis/NavFeed.json
       blockHandlers:
         - handler: handleBlock
-      file: ./src/mapping.ts
+      file: ./src/mappings/Block.ts
 
   # Proxy registry across pools
   - kind: ethereum/contract
@@ -56,7 +56,7 @@ dataSources:
       eventHandlers:
         - event: Created(indexed address,indexed address,address,uint256)
           handler: handleCreateProxy
-      file: ./src/mapping.ts
+      file: ./src/mappings/ProxyRegistry.ts
 
   # CF4
   - kind: ethereum/contract
@@ -78,7 +78,7 @@ dataSources:
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
-      file: ./src/mapping.ts
+      file: ./src/mappings/Assessor.ts
   - kind: ethereum/contract
     name: CF4Shelf
     network: mainnet
@@ -113,7 +113,7 @@ dataSources:
           handler: handleShelfBorrow
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
-      file: ./src/mapping.ts
+      file: ./src/mappings/Shelf.ts
   - kind: ethereum/contract
     name: CF4NftFeed
     network: mainnet
@@ -139,7 +139,7 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
+      file: ./src/mappings/NftFeed.ts
   - kind: ethereum/contract
     name: CF4DRP
     network: mainnet
@@ -159,7 +159,7 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
-      file: ./src/mapping.ts
+      file: ./src/mappings/ERC20.ts
   - kind: ethereum/contract
     name: CF4TIN
     network: mainnet
@@ -179,7 +179,7 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
-      file: ./src/mapping.ts
+      file: ./src/mappings/ERC20.ts
 
 
   # BL1
@@ -202,7 +202,7 @@ dataSources:
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
-      file: ./src/mapping.ts
+      file: ./src/mappings/Assessor.ts
   - kind: ethereum/contract
     name: BL1Shelf
     network: mainnet
@@ -237,7 +237,7 @@ dataSources:
           handler: handleShelfBorrow
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
-      file: ./src/mapping.ts
+      file: ./src/mappings/Shelf.ts
   - kind: ethereum/contract
     name: BL1NftFeed
     network: mainnet
@@ -263,7 +263,7 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
+      file: ./src/mappings/NftFeed.ts
   - kind: ethereum/contract
     name: BL1DRP
     network: mainnet
@@ -283,7 +283,7 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
-      file: ./src/mapping.ts
+      file: ./src/mappings/ERC20.ts
   - kind: ethereum/contract
     name: BL1TIN
     network: mainnet
@@ -303,4 +303,4 @@ dataSources:
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
-      file: ./src/mapping.ts
+      file: ./src/mappings/ERC20.ts
