@@ -5,14 +5,14 @@ import { seniorTokenAddresses } from "../src/poolMetas"
 const secondsInDay = 86400
 
 // todo: if the owner/account address is part of the pool, don't add it to rewards calcs
-export function loadOrCreateDailyInvestorTokenBalance(tokenBalance: TokenBalance, pool: Pool, date: string, timestamp: BigInt) : RewardDailyInvestorTokenBalance {
-    let id = tokenBalance.owner.concat(pool.id).concat(date)  //investor address + poolId + day
+export function loadOrCreateDailyInvestorTokenBalance(tokenBalance: TokenBalance, pool: Pool, timestamp: BigInt) : RewardDailyInvestorTokenBalance {
+    let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString())  //investor address + poolId + date
     
     let dailyInvestorTokenBalance = RewardDailyInvestorTokenBalance.load(id) 
     if (dailyInvestorTokenBalance == null) {
         dailyInvestorTokenBalance = new RewardDailyInvestorTokenBalance(id)        
         dailyInvestorTokenBalance.account = tokenBalance.owner
-        dailyInvestorTokenBalance.day = date
+        dailyInvestorTokenBalance.day = timestamp.toString()
         dailyInvestorTokenBalance.pool = pool.id
         dailyInvestorTokenBalance.seniorTokenAmount = BigInt.fromI32(0)
         dailyInvestorTokenBalance.seniorTokenValue = BigInt.fromI32(0)
@@ -36,7 +36,7 @@ export function loadOrCreateDailyInvestorTokenBalance(tokenBalance: TokenBalance
     return <RewardDailyInvestorTokenBalance>dailyInvestorTokenBalance
 }
 
-export function createDailyTokenBalances(token: Token, pool: Pool, date: string, timestamp: BigInt): void {
+export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
     for(let i = 0; i < token.owners.length; i++){
         let owners = token.owners
         let holderId = owners[i]
@@ -44,7 +44,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, date: string,
 
         let tb = TokenBalance.load(tbId)
         if(tb != null) {
-            loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, date, timestamp)
+            loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
         }
     }
 }

@@ -105,10 +105,10 @@ function createDailySnapshot(block: EthereumBlock): void {
     setDailyPoolValues(pool, dailyPoolData)
 
     let juniorToken = loadOrCreateToken(poolMeta.juniorToken)
-    createDailyTokenBalances(juniorToken, pool, yesterday.id, yesterdayTimeStamp)
+    createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
 
     let seniorToken = loadOrCreateToken(poolMeta.seniorToken)
-    createDailyTokenBalances(seniorToken, pool, yesterday.id, yesterdayTimeStamp)
+    createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
   }
 }
 
