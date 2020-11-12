@@ -9,13 +9,14 @@ import { Created } from '../generated/ProxyRegistry/ProxyRegistry'
 import { Transfer as TransferEvent } from '../generated/Block/ERC20'
 import { Reserve } from '../generated/Block/Reserve'
 import { NavFeed } from '../generated/Block/NavFeed'
-import { Pool, Loan, Proxy, ERC20Transfer, Day, DailyPoolData } from "../generated/schema"
+import { Pool, Loan, Proxy, ERC20Transfer, Day } from "../generated/schema"
 import { loanIdFromPoolIdAndIndex, loanIndexFromLoanId } from "./typecasts"
 import { poolMetas, poolStartBlocks, PoolMeta } from "./poolMetas"
 import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
-import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts } from "./transferUtil"
+import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts, loadOrCreateToken } from "./transferUtil"
 import { timestampToDate, createDay, getToday } from "./dateUtil"
-import { createDailyPoolData, addToDailyAggregate } from "./dailyStats"
+import { createDailyPoolData, addToDailyAggregate, setDailyPoolValues } from "./dailyStats"
+import { createDailyTokenBalances } from "./rewardUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -23,7 +24,7 @@ const secondsInDay = 86400
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-const fastForwardUntilBlock = 11224449
+const fastForwardUntilBlock = 11245219
 const v3LaunchBlock = 11063000
 
 function createPool(poolId: string) : void {
@@ -86,17 +87,6 @@ function loadOrCreatePool(poolMeta: PoolMeta, block: EthereumBlock): Pool {
   return <Pool>pool    
 }
 
-function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): void {
-  dailyPoolData.reserve = pool.reserve
-  dailyPoolData.assetValue = pool.assetValue
-  dailyPoolData.totalDebt = pool.totalDebt
-  dailyPoolData.seniorDebt = pool.seniorDebt
-  dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
-  dailyPoolData.juniorTokenPrice = pool.juniorTokenPrice
-  dailyPoolData.seniorTokenPrice = pool.seniorTokenPrice
-  dailyPoolData.save() 
-}
-
 function createDailySnapshot(block: EthereumBlock): void {
   let date = timestampToDate(block.timestamp)
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
@@ -114,13 +104,17 @@ function createDailySnapshot(block: EthereumBlock): void {
     let dailyPoolData = createDailyPoolData(poolMeta, yesterday.id)
     setDailyPoolValues(pool, dailyPoolData)
 
+    let juniorToken = loadOrCreateToken(poolMeta.juniorToken)
+    createDailyTokenBalances(juniorToken, pool, yesterday.id, yesterdayTimeStamp)
 
+    let seniorToken = loadOrCreateToken(poolMeta.seniorToken)
+    createDailyTokenBalances(seniorToken, pool, yesterday.id, yesterdayTimeStamp)
   }
 }
 
 function updatePoolLogic(block: EthereumBlock, today: Day): void {
   log.debug("handleBlock number {}", [block.number.toString()])
-  //resetting values for real time aggregation
+  // resetting values for real time aggregation
   today.reserve = BigInt.fromI32(0)
   today.totalDebt = BigInt.fromI32(0)
   today.assetValue = BigInt.fromI32(0)
@@ -594,7 +588,16 @@ export function handleAssessorFile(call: AssessorV3FileCall): void {
 }
 
 export function handleERC20Transfer(event: TransferEvent): void {
-  createToken(event)
+  let token = createToken(event.address.toHex())
+
+  if(!token.owners.includes(event.params.dst.toHex())) {
+    let owners = token.owners
+    // only push dst as owners 
+    owners.push(event.params.dst.toHex())
+    token.owners = owners
+    token.save()
+  }
+
   loadOrCreateTokenBalanceDst(event)
   loadOrCreateTokenBalanceSrc(event)
   updateAccounts(event)

@@ -10,10 +10,19 @@ export function createAccount(address: string): Account {
     return account;
 }
 
-export function createToken(event: TransferEvent): Token {
-    let token = new Token(event.address.toHex())
+export function createToken(address: string): Token {
+    let token = new Token(address)
+    token.owners = []
     token.save()
     return token;
+}
+
+export function loadOrCreateToken(tokenAddress: string): Token {
+    let token = Token.load(tokenAddress)
+    if(token == null){
+        token = createToken(tokenAddress)
+    }
+    return <Token>token
 }
 
 export function createERC20Transfer(id: string, event: TransferEvent, poolMeta: PoolMeta): ERC20Transfer {    

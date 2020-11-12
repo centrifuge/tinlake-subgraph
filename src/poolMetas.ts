@@ -247,6 +247,13 @@ for (let i = 0; i < poolMetas.length; i++) {
   poolMetaByIdentifier.set(poolMetas[i].reserve, poolMetas[i])
 }
 
+export let seniorTokenAddresses = new Array<string>(poolMetas.length)
+export let juniorTokenAddresses = new Array<string>(poolMetas.length)
+for (let i = 0; i < poolMetas.length; i++) {
+  seniorTokenAddresses[i] = poolMetas[i].seniorToken
+  juniorTokenAddresses[i] = poolMetas[i].juniorToken
+}
+
 export let poolStartBlocks = new Map<number, boolean>()
 for (let i = 0; i < poolMetas.length; i++) {
   poolStartBlocks.set(poolMetas[i].startBlock, true)

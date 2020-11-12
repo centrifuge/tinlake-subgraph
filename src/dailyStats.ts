@@ -24,3 +24,14 @@ export function addToDailyAggregate(day: Day, pool: Pool): void {
     day.seniorDebt = day.seniorDebt.plus(<BigInt>pool.seniorDebt)
     day.save()
 }
+
+export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): void {
+    dailyPoolData.reserve = <BigInt>pool.reserve
+    dailyPoolData.assetValue = <BigInt>pool.assetValue
+    dailyPoolData.totalDebt = <BigInt>pool.totalDebt
+    dailyPoolData.seniorDebt = <BigInt>pool.seniorDebt
+    dailyPoolData.currentJuniorRatio = <BigInt>pool.currentJuniorRatio
+    dailyPoolData.juniorTokenPrice = <BigInt>pool.juniorTokenPrice
+    dailyPoolData.seniorTokenPrice = <BigInt>pool.seniorTokenPrice
+    dailyPoolData.save() 
+}
