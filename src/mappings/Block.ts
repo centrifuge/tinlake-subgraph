@@ -30,6 +30,8 @@ export function handleBlock(block: ethereum.Block): void {
     return
   }
 
+  // TODO reg: if poolSeeds.has(block.number) { loadPoolFromIPFS(poolSeed.hash) }
+
   // optimization to only update historical pool data once/day
   let blockNum = block.number.toI32()
   let fastForward = blockNum < fastForwardUntilBlock

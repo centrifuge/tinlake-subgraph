@@ -12,32 +12,33 @@ export function createDailySnapshot(block: ethereum.Block): void {
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
-  let relevantPoolMetas = poolMetas.filter((poolMeta) => poolMeta.networkId == dataSource.network())
-  for (let i = 0; i < relevantPoolMetas.length; i++) {
-    let poolMeta = relevantPoolMetas[i]
+  // TODO reg: rebuild using Pool objects rather than poolMeta
+  // let relevantPoolMetas = poolMetas.filter((poolMeta) => poolMeta.networkId == dataSource.network())
+  // for (let i = 0; i < relevantPoolMetas.length; i++) {
+  //   let poolMeta = relevantPoolMetas[i]
 
-    let pool = loadOrCreatePool(poolMeta, block)
-    if (pool == null) {
-      return
-    }
+  //   let pool = loadOrCreatePool(poolMeta, block)
+  //   if (pool == null) {
+  //     return
+  //   }
 
-    let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
+  //   let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
 
-    let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
-    let reserve = reserveContract.totalBalance()
-    dailyPoolData.reserve = reserve
+  //   let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
+  //   let reserve = reserveContract.totalBalance()
+  //   dailyPoolData.reserve = reserve
 
-    let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
-    let currentNav = navFeedContract.currentNAV()
-    dailyPoolData.assetValue = currentNav
+  //   let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+  //   let currentNav = navFeedContract.currentNAV()
+  //   dailyPoolData.assetValue = currentNav
 
-    dailyPoolData.totalDebt = pool.totalDebt
-    dailyPoolData.seniorDebt = pool.seniorDebt
-    dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
-    dailyPoolData.save()
+  //   dailyPoolData.totalDebt = pool.totalDebt
+  //   dailyPoolData.seniorDebt = pool.seniorDebt
+  //   dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
+  //   dailyPoolData.save()
 
-    addToDailyAggregate(<Day>yesterday, dailyPoolData)
-  }
+  //   addToDailyAggregate(<Day>yesterday, dailyPoolData)
+  // }
 }
 
 function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {

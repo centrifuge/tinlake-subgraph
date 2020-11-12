@@ -102,6 +102,59 @@ dataSources:
           handler: handlePoolCreated
       file: ./src/mappings/PoolRegistry.ts
 
+templates:
+  - kind: ethereum/contract
+    name: Assessor
+    network: kovan
+    source:
+      abi: Assessor
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Assessor
+          file: ./abis/Assessor.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleAssessorFile
+      file: ./src/mappings/Assessor.ts
+  - kind: ethereum/contract
+    name: Shelf
+    network: kovan
+    source:
+      abi: Shelf
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mappings/Shelf.ts
+
 
   # Kovan Revolving Pool 1
   # - kind: ethereum/contract

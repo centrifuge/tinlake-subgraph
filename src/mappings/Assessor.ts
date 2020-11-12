@@ -1,16 +1,14 @@
-import { log } from '@graphprotocol/graph-ts'
+import { log, dataSource } from '@graphprotocol/graph-ts'
 import { FileCall as AssessorFileCall } from '../../generated/Block/Assessor'
 import { Pool } from '../../generated/schema'
-import { seniorToJuniorRatio, poolFromIdentifier } from '../util/pool'
+import { seniorToJuniorRatio } from '../util/pool'
 
 export function handleAssessorFile(call: AssessorFileCall): void {
   log.debug(`handle assessor file set`, [call.to.toHex()])
-  let assessor = call.to
   let name = call.inputs.name.toString()
   let value = call.inputs.value
 
-  let poolMeta = poolFromIdentifier(assessor.toHex())
-  let poolId = poolMeta.id
+  let poolId = dataSource.context().getString("id")
   log.debug(`handle assessor file pool Id {}`, [poolId])
 
   let pool = Pool.load(poolId)
