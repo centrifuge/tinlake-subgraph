@@ -1,6 +1,6 @@
 import { log, BigInt, ethereum, Address, DataSourceContext } from '@graphprotocol/graph-ts'
 import { Assessor } from '../../generated/Block/Assessor'
-import { Assessor as AssessorTemplate, Shelf as ShelfTemplate } from '../../generated/templates'
+import { Assessor as AssessorTemplate, Shelf as ShelfTemplate, NftFeed as NftFeedTemplate, DROP as DROPTemplate, TIN as TINTemplate } from '../../generated/templates'
 import { Pool } from '../../generated/schema'
 import { PoolMeta } from '../poolMetas'
 
@@ -70,4 +70,7 @@ export function createPoolHandlers(shortName: string, id: string, assessor: stri
 
   AssessorTemplate.createWithContext(Address.fromString(assessor), context)
   ShelfTemplate.createWithContext(Address.fromString(shelf), context)
+  NftFeedTemplate.createWithContext(Address.fromString(feed), context)
+  DROPTemplate.createWithContext(Address.fromString(seniorToken), context)
+  TINTemplate.createWithContext(Address.fromString(juniorToken), context)
 }

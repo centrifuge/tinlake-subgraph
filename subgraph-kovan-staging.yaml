@@ -154,87 +154,63 @@ templates:
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
       file: ./src/mappings/Shelf.ts
-
-
-  # Kovan Revolving Pool 1
-  # - kind: ethereum/contract
-  #   name: RV1Assessor
-  #   network: kovan
-  #   source:
-  #     address: "0x8b80927fca02566c29728c4a620c161f63116953"
-  #     abi: Assessor
-  #     startBlock: 21406450
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.4
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Pool
-  #     abis:
-  #       - name: Assessor
-  #         file: ./abis/Assessor.json
-  #     callHandlers:
-  #       - function: file(bytes32,uint256)
-  #         handler: handleAssessorFile
-  #     file: ./src/mappings/Assessor.ts
-  # - kind: ethereum/contract
-  #   name: RV1Shelf
-  #   network: kovan
-  #   source:
-  #     address: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af"
-  #     abi: Shelf
-  #     startBlock: 21406337
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.4
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Pool
-  #       - Loan
-  #     abis:
-  #       - name: Shelf
-  #         file: ./abis/Shelf.json
-  #       - name: Pile
-  #         file: ./abis/Pile.json
-  #       - name: NftFeed
-  #         file: ./abis/NFTFeed.json
-  #       - name: SeniorTranche
-  #         file: ./abis/SeniorTranche.json
-  #       - name: Assessor
-  #         file: ./abis/Assessor.json
-  #     callHandlers:
-  #       - function: issue(address,uint256)
-  #         handler: handleShelfIssue
-  #       - function: close(uint256)
-  #         handler: handleShelfClose
-  #       - function: borrow(uint256,uint256)
-  #         handler: handleShelfBorrow
-  #       - function: repay(uint256,uint256)
-  #         handler: handleShelfRepay
-  #     file: ./src/mappings/Shelf.ts
-  # - kind: ethereum/contract
-  #   name: RV1NftFeed
-  #   network: kovan
-  #   source:
-  #     address: "0x677b85998f15921982b1548763f01ac6c265b8eb"
-  #     abi: NftFeed
-  #     startBlock: 21406328
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.4
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Loan
-  #     abis:
-  #       - name: NftFeed
-  #         file: ./abis/NFTFeed.json
-  #       - name: Shelf
-  #         file: ./abis/Shelf.json
-  #       - name: Pile
-  #         file: ./abis/Pile.json
-  #     callHandlers:
-  #       - function: update(bytes32,uint256,uint256)
-  #         handler: handleNftFeedUpdate
-  #       - function: update(bytes32,uint256)
-  #         handler: handleNftFeedUpdate
-  #     file: ./src/mappings/NftFeed.ts
+  - kind: ethereum/contract
+    name: NftFeed
+    network: kovan
+    source:
+      abi: NftFeed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NFTFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mappings/NftFeed.ts
+  - kind: ethereum/contract
+    name: DROP
+    network: kovan
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+      file: ./src/mappings/ERC20.ts
+  - kind: ethereum/contract
+    name: TIN
+    network: kovan
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+      file: ./src/mappings/ERC20.ts
