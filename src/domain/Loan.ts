@@ -2,13 +2,11 @@ import { log, BigInt, Address } from '@graphprotocol/graph-ts'
 import { Pile } from '../../generated/Block/Pile'
 import { Loan, Pool } from '../../generated/schema'
 import { loanIndexFromLoanId } from '../util/typecasts'
-import { poolFromIdentifier } from '../util/pool'
 
-export function updateLoans(pool: Pool): BigInt[] {
+export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
   log.debug('updating loans', [pool.id])
-  let poolMeta = poolFromIdentifier(pool.id)
 
-  let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
+  let pile = Pile.bind(<Address>Address.fromHexString(pileAddress))
 
   let totalDebt = BigInt.fromI32(0)
   let totalWeightedDebt = BigInt.fromI32(0)

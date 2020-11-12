@@ -1,8 +1,8 @@
 import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers } from '../domain/Pool'
+import { Pool } from '../../generated/schema'
 
-// handlePoolCreated handles creating pools from the registry
 export function handlePoolCreated(call: PoolCreated): void {
   log.error('handlePoolCreated, pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
@@ -11,12 +11,20 @@ export function handlePoolCreated(call: PoolCreated): void {
     call.params.data,
   ])
 
-  // TODO: check if does not exist already (as in, was created by preloadedPools in handleBlock)
-
-  loadPoolFromIPFS(call.params.data)
+  // Only add if the pool wasn't already created before, through preloadedPools in handleBlock
+  let existingPool = Pool.load(call.params.pool.toHexString())
+  if (existingPool == null) {
+    loadPoolFromIPFS(call.params.data)
+  }
 }
 
-// TODO reg: handlePoolUpdated(call: PoolUpdated): void {}
+/**
+ * TODO handlePoolUpdated(call: PoolUpdated): void {}
+ * 
+ * Removing data source templates is not possible, so what we probably should do is to
+ * check which addresses changed, and if any did, then create new data source templates just for those which changed.
+ * This way, you don't get any duplicates, and the old + new addresses will both be handled.
+ */
 
 export function loadPoolFromIPFS(hash: string): void {
   log.debug('loading pool from IPFS: {}', [hash])
@@ -39,6 +47,7 @@ export function loadPoolFromIPFS(hash: string): void {
   let poolId = addresses.get("ROOT_CONTRACT").toString()
   let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
 
+  let coordinator = addresses.get('COORDINATOR').toString()
   let assessor = addresses.get('ASSESSOR').toString()
   let shelf = addresses.get('SHELF').toString()
   let pile = addresses.get('PILE').toString()
@@ -50,5 +59,5 @@ export function loadPoolFromIPFS(hash: string): void {
   let juniorTranche = addresses.get('JUNIOR_TRANCHE').toString()
 
   createPool(poolId, shortName, assessor)
-  createPoolHandlers(shortName, poolId, assessor, shelf, pile, feed, reserve, seniorToken, juniorToken, seniorTranche, juniorTranche)
+  createPoolHandlers(shortName, poolId, coordinator, assessor, shelf, pile, feed, reserve, seniorToken, juniorToken, seniorTranche, juniorTranche)
 }
