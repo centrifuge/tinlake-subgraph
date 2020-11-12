@@ -1,14 +1,15 @@
 import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph-ts'
 import { Assessor } from '../../generated/Block/Assessor'
 import { Pool } from '../../generated/schema'
+import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
 
-export function handleCoordinatorExecuteEpoch(): void {
+export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   let pool = Pool.load(poolId)
 
-  log.debug('handleCoordinatorExecuteEpoch: {}', [pool.id.toString()])
+  log.debug('handleCoordinatorExecuteEpoch: pool id {}, to {}', [pool.id.toString(), call.to.toString()])
 
   // update loans and return weightedInterestRate and totalDebt
   let loanValues = updateLoans(pool as Pool, dataSource.context().getString('pile'))
