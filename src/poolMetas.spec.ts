@@ -2,9 +2,7 @@ import { poolMetaByIdentifier } from './poolMetas'
 
 describe('poolMeta', () => {
   test('should retrieve poolMeta by identifier', () => {
-    expect(
-      poolMetaByIdentifier.get("0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4")
-    ).toStrictEqual({
+    expect(poolMetaByIdentifier.get('0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4')).toStrictEqual({
       shortName: 'ConsolFreight 1',
       id: '0xf8b4ef7781ba8e1b3df6370f71d526d00aad1ee2',
       shelf: '0x454c86ba7e0cbd959cfa76aa2db799f9d7a816e4',
@@ -18,11 +16,9 @@ describe('poolMeta', () => {
       reserve: null,
       networkId: 'mainnet',
       startBlock: 10002000,
-      version: 2
+      version: 2,
     })
-    
-    expect(
-      poolMetaByIdentifier.get("non existing")
-    ).toStrictEqual(undefined)
+
+    expect(poolMetaByIdentifier.get('non existing')).toStrictEqual(undefined)
   })
 })
