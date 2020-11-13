@@ -8,7 +8,7 @@ export function handleBlock(block: ethereum.Block): void {
   // Check if there's a preloaded pool for this block
   let ipfsHashByStartBlock = dataSource.network() == 'mainnet' ? ipfsHashByStartBlockMainnet : ipfsHashByStartBlockKovan
   if (ipfsHashByStartBlock.has(block.number.toI32())) {
-    log.debug('preload pool: pool id {}', [ipfsHashByStartBlock.get(block.number.toI32())])
+    log.debug('preload pool: IPFS hash {}', [ipfsHashByStartBlock.get(block.number.toI32())])
     loadPoolFromIPFS(ipfsHashByStartBlock.get(block.number.toI32()))
   }
 

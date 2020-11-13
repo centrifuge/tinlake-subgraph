@@ -31,7 +31,7 @@ export function loadPoolFromIPFS(hash: string): void {
   
   let data = ipfs.cat(hash)
   if (data == null) {
-    log.error('data is null', [])
+    log.error('IPFS data is null, hash {}', [hash])
     return
   }
 
@@ -39,8 +39,8 @@ export function loadPoolFromIPFS(hash: string): void {
   let metadata = obj.get('metadata').toObject()
   let addresses = obj.get('addresses').toObject()
 
-  if (addresses == null) {
-    log.error('addresses is null', [])
+  if (metadata == null || addresses == null) {
+    log.error('metadata or addresses is null', [])
     return
   }
 

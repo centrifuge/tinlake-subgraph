@@ -34,6 +34,8 @@ dataSources:
           file: ./abis/NftFeed.json
         - name: Shelf
           file: ./abis/Shelf.json
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
@@ -101,6 +103,10 @@ templates:
       abis:
         - name: Coordinator
           file: ./abis/Coordinator.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Pile
+          file: ./abis/Pile.json
       callHandlers:
         - function: executeEpoch()
           handler: handleCoordinatorExecuteEpoch
