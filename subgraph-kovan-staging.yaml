@@ -10,10 +10,10 @@ dataSources:
     source:
       address: "0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa"
       abi: Pile
-      startBlock: 20380456
+      startBlock: 21406000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -22,14 +22,22 @@ dataSources:
         - name: Pile
           file: ./abis/Pile.json
         - name: Assessor
-          file: ./abis/Assessor.json
-        - name: AssessorV3
           file: ./abis/v3/Assessor.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Reserve
+          file: ./abis/Reserve.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
       blockHandlers:
         - handler: handleBlock
-      file: ./src/mapping.ts
+      file: ./src/mappings/Block.ts
 
   # Proxy registry across pools
   - kind: ethereum/contract
@@ -38,10 +46,10 @@ dataSources:
     source:
       address: "0xb0cd959bbbe799ba7d18c7d28008553a7b47a04c"
       abi: ProxyRegistry
-      startBlock: 20606911
+      startBlock: 21406000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -52,112 +60,31 @@ dataSources:
       eventHandlers:
         - event: Created(indexed address,indexed address,address,uint256)
           handler: handleCreateProxy
-      file: ./src/mapping.ts
-
-  # Kovan Static NAV Pool 1
-  - kind: ethereum/contract
-    name: SeniorTranche
-    network: kovan
-    source:
-      address: "0x33f521cb1daeb96b1f7a99260ed6c2c68645fd97"
-      abi: SeniorTranche
-      startBlock: 20911954
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-      abis:
-        - name: SeniorTranche
-          file: ./abis/SeniorTranche.json
-      callHandlers:
-        - function: file(bytes32,uint256)
-          handler: handleSeniorTrancheFile
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: Shelf
-    network: kovan
-    source:
-      address: "0x838faae94ed562a9597634d558987c7b5acd6b84"
-      abi: Shelf
-      startBlock: 20911983
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Loan
-      abis:
-        - name: Shelf
-          file: ./abis/Shelf.json
-        - name: Pile
-          file: ./abis/Pile.json
-        - name: NftFeed
-          file: ./abis/NFTFeed.json
-        - name: SeniorTranche
-          file: ./abis/SeniorTranche.json
-      callHandlers:
-        - function: issue(address,uint256)
-          handler: handleShelfIssue
-        - function: close(uint256)
-          handler: handleShelfClose
-        - function: borrow(uint256,uint256)
-          handler: handleShelfBorrow
-        - function: repay(uint256,uint256)
-          handler: handleShelfRepay
-      file: ./src/mapping.ts
-  - kind: ethereum/contract
-    name: NftFeed
-    network: kovan
-    source:
-      address: "0x66390b34772c8e3665aba884b18c6365cef091b8"
-      abi: NftFeed
-      startBlock: 20911980
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.3
-      language: wasm/assemblyscript
-      entities:
-        - Loan
-      abis:
-        - name: NftFeed
-          file: ./abis/NFTFeed.json
-        - name: Shelf
-          file: ./abis/Shelf.json
-        - name: Pile
-          file: ./abis/Pile.json
-      callHandlers:
-        - function: update(bytes32,uint256,uint256)
-          handler: handleNftFeedUpdate
-        - function: update(bytes32,uint256)
-          handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
+      file: ./src/mappings/ProxyRegistry.ts
 
   # Kovan Revolving Pool 1
   - kind: ethereum/contract
-    name: Assessor2
+    name: RV1Assessor
     network: kovan
     source:
       address: "0x8b80927fca02566c29728c4a620c161f63116953"
-      abi: AssessorV3
+      abi: Assessor
       startBlock: 21406450
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
       abis:
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
-      file: ./src/mapping.ts
+      file: ./src/mappings/Assessor.ts
   - kind: ethereum/contract
-    name: Shelf2
+    name: RV1Shelf
     network: kovan
     source:
       address: "0xc7e4515fb85bb5ba1a76a8624e2ab563b4dea8af"
@@ -165,7 +92,7 @@ dataSources:
       startBlock: 21406337
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -179,7 +106,7 @@ dataSources:
           file: ./abis/NFTFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
-        - name: AssessorV3
+        - name: Assessor
           file: ./abis/v3/Assessor.json
       callHandlers:
         - function: issue(address,uint256)
@@ -190,9 +117,9 @@ dataSources:
           handler: handleShelfBorrow
         - function: repay(uint256,uint256)
           handler: handleShelfRepay
-      file: ./src/mapping.ts
+      file: ./src/mappings/Shelf.ts
   - kind: ethereum/contract
-    name: NftFeed2
+    name: RV1NftFeed
     network: kovan
     source:
       address: "0x677b85998f15921982b1548763f01ac6c265b8eb"
@@ -200,7 +127,7 @@ dataSources:
       startBlock: 21406328
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -216,4 +143,4 @@ dataSources:
           handler: handleNftFeedUpdate
         - function: update(bytes32,uint256)
           handler: handleNftFeedUpdate
-      file: ./src/mapping.ts
+      file: ./src/mappings/NftFeed.ts

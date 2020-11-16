@@ -1,8 +1,18 @@
 import { BigInt, Bytes, log } from "@graphprotocol/graph-ts"
-import { normalizeHexString } from './util'
 
 export function bigIntToHex(bigInt: BigInt): string {
     return bigInt.toHex() // converts to big endian, 0x prefixed hex encoded string
+}
+
+// normalizeHexString adds a "0x" prefix and makes the length of the supplied string even by prefixing a 0 if odd
+export function normalizeHexString(hex: string): string {
+    if (hex.startsWith("0x")) {
+        hex = hex.substr(2)
+    }
+    if (hex.length % 2 == 1) {
+        hex = "0" + hex
+    }
+    return "0x" + hex
 }
 
 export function hexToBigInt(id: string): BigInt {
