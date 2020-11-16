@@ -6,4 +6,4 @@ export const blockTimeSeconds = 15
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-export const fastForwardUntilBlock = 11197245 
+export const fastForwardUntilBlock = 11197245

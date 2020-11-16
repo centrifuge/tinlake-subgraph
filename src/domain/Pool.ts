@@ -1,38 +1,38 @@
-import { log, BigInt, ethereum, Address } from "@graphprotocol/graph-ts"
-import { Assessor } from "../../generated/Block/Assessor"
-import { Pool } from "../../generated/schema"
-import { PoolMeta } from "../poolMetas"
-import { poolFromIdentifier } from "../util/pool"
+import { log, BigInt, ethereum, Address } from '@graphprotocol/graph-ts'
+import { Assessor } from '../../generated/Block/Assessor'
+import { Pool } from '../../generated/schema'
+import { PoolMeta } from '../poolMetas'
+import { poolFromIdentifier } from '../util/pool'
 
 export function loadOrCreatePool(poolMeta: PoolMeta, block: ethereum.Block): Pool {
   let pool = Pool.load(poolMeta.id)
 
-  log.debug("loadOrCreatePool: pool start block {}, current block {}", [
+  log.debug('loadOrCreatePool: pool start block {}, current block {}', [
     poolMeta.startBlock.toString(),
     block.number.toString(),
-  ]);
+  ])
   if (pool == null && parseFloat(block.number.toString()) >= poolMeta.startBlock) {
     createPool(poolMeta.id)
     pool = Pool.load(poolMeta.id)
   }
 
-  log.debug("successfully using this for pool meta id: {}", [poolMeta.id.toString()])
-  return <Pool>pool    
+  log.debug('successfully using this for pool meta id: {}', [poolMeta.id.toString()])
+  return <Pool>pool
 }
 
-export function createPool(poolId: string) : void {
-  let poolMeta = poolFromIdentifier(poolId);
+export function createPool(poolId: string): void {
+  let poolMeta = poolFromIdentifier(poolId)
 
   let interestRateResult = new ethereum.CallResult<BigInt>()
   let assessor = Assessor.bind(<Address>Address.fromHexString(poolMeta.assessor))
   interestRateResult = assessor.try_seniorInterestRate()
 
   if (interestRateResult.reverted) {
-    log.warning("pool not deployed to the network yet {}", [poolId])
+    log.warning('pool not deployed to the network yet {}', [poolId])
     return
   }
 
-  log.debug("will create new pool poolId {}", [poolId])
+  log.debug('will create new pool poolId {}', [poolId])
   let pool = new Pool(poolId)
   pool.seniorInterestRate = interestRateResult.value
   pool.loans = []
@@ -49,7 +49,7 @@ export function createPool(poolId: string) : void {
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
   pool.seniorTokenPrice = BigInt.fromI32(0)
   pool.juniorTokenPrice = BigInt.fromI32(0)
-  pool.shortName = poolMeta.shortName;
+  pool.shortName = poolMeta.shortName
   pool.version = BigInt.fromI32(poolMeta.version == 2 ? 2 : 3)
   pool.save()
 }
