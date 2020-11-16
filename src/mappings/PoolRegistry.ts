@@ -49,7 +49,7 @@ export function loadPoolFromIPFS(hash: string): void {
   let addresses = obj.get('addresses').toObject()
 
   if (metadata == null || addresses == null) {
-    log.error('metadata or addresses is null', [])
+    log.error('metadata or addresses is null, hash {}', [hash])
     return
   }
 

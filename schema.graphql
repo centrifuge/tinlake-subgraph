@@ -17,7 +17,6 @@ type Pool @entity {
   juniorTokenPrice: BigInt # assessor
   shortName: String!
   version: BigInt!
-  registry: PoolRegistry!
   addresses: PoolAddresses!
 }
 
@@ -37,7 +36,7 @@ type PoolAddresses @entity {
 
 type PoolRegistry @entity {
   id: ID! # address
-  pools: [Pool!] @derivedFrom(field: "registry")
+  pools: [Pool!]!
 }
 
 type DailyPoolData @entity {

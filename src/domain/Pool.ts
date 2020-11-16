@@ -40,7 +40,6 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   pool.juniorTokenPrice = BigInt.fromI32(0)
   pool.shortName = shortName
   pool.version = BigInt.fromI32(3)
-  pool.registry = registryAddress
   pool.addresses = poolId
   pool.save()
 }
