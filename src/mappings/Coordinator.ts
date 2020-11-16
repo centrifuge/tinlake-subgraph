@@ -35,15 +35,18 @@ export function updatePoolValues(poolId: string): void {
     seniorDebtResult = assessor.try_seniorDebt_()
 
     pool.seniorDebt = !seniorDebtResult.reverted ? seniorDebtResult.value : BigInt.fromI32(0)
-    log.debug('will update seniorDebt {}', [pool.seniorDebt.toString()])
+    log.debug('updatePoolValues: will update seniorDebt {}', [pool.seniorDebt.toString()])
   }
 
-  log.debug('will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}', [
-    poolId,
-    pool.totalDebt.toString(),
-    pool.minJuniorRatio.toString(),
-    pool.currentJuniorRatio.toString(),
-    pool.weightedInterestRate.toString(),
-  ])
+  log.debug(
+    'updatePoolValues: will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}',
+    [
+      poolId,
+      pool.totalDebt.toString(),
+      pool.minJuniorRatio.toString(),
+      pool.currentJuniorRatio.toString(),
+      pool.weightedInterestRate.toString(),
+    ]
+  )
   pool.save()
 }

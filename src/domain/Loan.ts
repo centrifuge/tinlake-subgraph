@@ -4,7 +4,7 @@ import { Loan, Pool } from '../../generated/schema'
 import { loanIndexFromLoanId } from '../util/typecasts'
 
 export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
-  log.debug('updating loans', [pool.id])
+  log.debug('updateLoans: {}', [pool.id])
 
   let pile = Pile.bind(<Address>Address.fromHexString(pileAddress))
 
@@ -16,15 +16,18 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let loans = pool.loans
     let loanId = loans[j]
 
-    log.debug('will query debt for loanId {}, loanIndex {}', [loanId, loanIndexFromLoanId(loanId).toString()])
+    log.debug('updateLoans: will query debt for loanId {}, loanIndex {}', [
+      loanId,
+      loanIndexFromLoanId(loanId).toString(),
+    ])
 
     let debt = pile.debt(loanIndexFromLoanId(loanId))
-    log.debug('will update loan {}: debt {}', [loanId, debt.toString()])
+    log.debug('updateLoans: will update loan {}: debt {}', [loanId, debt.toString()])
 
     // update loan
     let loan = Loan.load(loanId)
     if (loan == null) {
-      log.critical('loan {} not found', [loanId])
+      log.critical('updateLoans: loan {} not found', [loanId])
     }
 
     loan.debt = debt
@@ -32,7 +35,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
 
     totalDebt = totalDebt.plus(debt)
     if (loan.interestRatePerSecond == null) {
-      log.warning('interestRatePerSecond on loan {} is null', [loanId])
+      log.warning('updateLoans: interestRatePerSecond on loan {} is null', [loanId])
       continue
     }
     totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))

@@ -6,7 +6,7 @@ import { addPoolToRegistry } from '../domain/PoolRegistry'
 import { createPoolAddresses } from '../domain/PoolAddresses'
 
 export function handlePoolCreated(call: PoolCreated): void {
-  log.debug('handlePoolCreated, pool: {}, live: {}, name: {},  data: {}', [
+  log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
@@ -26,7 +26,7 @@ export function handlePoolCreated(call: PoolCreated): void {
  * This way, you don't get any duplicates, and the old + new addresses will both be handled.
  */
 export function handlePoolUpdated(call: PoolUpdated): void {
-  log.debug('handlePoolUpdated, pool: {}, live: {}, name: {},  data: {}', [
+  log.debug('handlePoolUpdated: pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
@@ -36,11 +36,11 @@ export function handlePoolUpdated(call: PoolUpdated): void {
 
 
 export function loadPoolFromIPFS(hash: string): void {
-  log.debug('loading pool from IPFS: {}', [hash])
+  log.debug('loadPoolFromIPFS: {}', [hash])
 
   let data = ipfs.cat(hash)
   if (data == null) {
-    log.error('IPFS data is null, hash {}', [hash])
+    log.error('loadPoolFromIPFS: IPFS data is null, hash {}', [hash])
     return
   }
 
@@ -49,7 +49,7 @@ export function loadPoolFromIPFS(hash: string): void {
   let addresses = obj.get('addresses').toObject()
 
   if (metadata == null || addresses == null) {
-    log.error('metadata or addresses is null, hash {}', [hash])
+    log.error('loadPoolFromIPFS: metadata or addresses is null, hash {}', [hash])
     return
   }
 

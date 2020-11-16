@@ -9,7 +9,6 @@ import {
   TIN as TINTemplate,
 } from '../../generated/templates'
 import { Pool, PoolAddresses } from '../../generated/schema'
-import { registryAddress } from '../config'
 
 export function createPool(poolId: string, shortName: string, addresses: PoolAddresses): void {
   let interestRateResult = new ethereum.CallResult<BigInt>()
@@ -17,11 +16,11 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   interestRateResult = assessor.try_seniorInterestRate()
 
   if (interestRateResult.reverted) {
-    log.warning('pool not deployed to the network yet {}', [poolId])
+    log.warning('createPool: pool not deployed to the network yet {}', [poolId])
     return
   }
 
-  log.debug('will create new pool poolId {}', [poolId])
+  log.debug('createPool: will create new pool poolId {}', [poolId])
   let pool = new Pool(poolId)
   pool.seniorInterestRate = interestRateResult.value
   pool.loans = []
@@ -50,7 +49,7 @@ export function createPoolHandlers(
   let context = new DataSourceContext()
   context.setString('id', addresses.id)
 
-  log.debug('creating pool handlers: {}', [addresses.id])
+  log.debug('createPool: creating pool handlers: {}', [addresses.id])
 
   CoordinatorTemplate.createWithContext(Address.fromString(addresses.coordinator), context)
   AssessorTemplate.createWithContext(Address.fromString(addresses.assessor), context)

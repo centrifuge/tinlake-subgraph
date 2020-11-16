@@ -7,8 +7,6 @@ import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
 
 // handleNftFeedUpdate handles changing the collateral value and/or the risk group of the loan
 export function handleNftFeedUpdate(call: UpdateCall): void {
-  log.debug(`handle nftFeed update`, [call.to.toHex()])
-
   let nftFeedAddress = call.to
   let nftId = call.inputs.nftID_
 
@@ -28,7 +26,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   // get ratePerSecond for riskGroup
   let ratePerSecond = pile.rates(riskGroup).value2
 
-  log.debug('handleNFTFeedUpdated, nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}, interestRate {}', [
+  log.debug('handleNFTFeedUpdated: nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}, interestRate {}', [
     nftFeedAddress.toHex(),
     loanIndex.toString(),
     ceiling.toString(),
@@ -39,7 +37,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   // update loan
   let loan = Loan.load(loanId)
   if (loan == null) {
-    log.error('loan {} not found', [loanId])
+    log.error('handleNftFeedUpdate: loan {} not found', [loanId])
     return
   }
   loan.interestRatePerSecond = ratePerSecond
