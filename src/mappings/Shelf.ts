@@ -2,7 +2,7 @@ import { log, BigInt, Address, dataSource } from '@graphprotocol/graph-ts'
 import { Pile } from '../../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from '../../generated/Block/Shelf'
 import { NftFeed } from '../../generated/Block/NftFeed'
-import { Pool, Loan } from '../../generated/schema'
+import { Pool, PoolAddresses, Loan } from '../../generated/schema'
 import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
 
 // handleShelfIssue handles creating a new/opening a loan
@@ -69,8 +69,9 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftRegistry = nftRegistry
 
   // get risk group and interest rate from nftFeed
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(dataSource.context().getString('feed')))
-  let pile = Pile.bind(<Address>Address.fromHexString(dataSource.context().getString('pile')))
+  let addresses = PoolAddresses.load(poolId)
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
   // generate hash from nftId & registry
   let nftHash = nftFeed.try_nftID(loanIndex)
   if (nftHash.reverted) {
@@ -182,7 +183,8 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   // TODO add support for pools using creditLine ceilings – the following only supports principal, not creditLine
   // loan.ceiling = loan.ceiling.minus(amount)
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(dataSource.context().getString('feed')))
+  let addresses = PoolAddresses.load(poolId)
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
   loan.ceiling = nftFeed.ceiling(loanIndex)
   loan.save()
 

@@ -6,7 +6,7 @@ import { ipfsHashByStartBlockMainnet, ipfsHashByStartBlockKovan } from '../prelo
 import { loadPoolFromIPFS } from './PoolRegistry'
 import { fastForwardUntilBlock, registryAddress } from '../config'
 import { PoolRegistry } from '../../generated/schema'
-import { createPoolRegistry, addPoolToRegistry, getAllPools } from '../domain/PoolRegistry'
+import { createPoolRegistry, getAllPools } from '../domain/PoolRegistry'
 
 export function handleBlock(block: ethereum.Block): void {
   // Create PoolRegistry, which stores the list of pools, if it does not exist yet

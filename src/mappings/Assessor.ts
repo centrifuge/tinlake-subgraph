@@ -8,7 +8,7 @@ export function handleAssessorFile(call: AssessorFileCall): void {
   let name = call.inputs.name.toString()
   let value = call.inputs.value
 
-  let poolId = dataSource.context().getString("id")
+  let poolId = dataSource.context().getString('id')
   log.debug(`handle assessor file pool Id {}`, [poolId])
 
   let pool = Pool.load(poolId)
