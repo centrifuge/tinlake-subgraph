@@ -85,6 +85,8 @@ dataSources:
       eventHandlers:
         - event: PoolCreated(address,bool,string,string)
           handler: handlePoolCreated
+        - event: PoolUpdated(address,bool,string,string)
+          handler: handlePoolUpdated
       file: ./src/mappings/PoolRegistry.ts
 
 templates:
