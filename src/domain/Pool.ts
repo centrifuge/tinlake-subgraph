@@ -2,6 +2,7 @@ import { log, BigInt, ethereum, Address, DataSourceContext } from '@graphprotoco
 import { Assessor } from '../../generated/Block/Assessor'
 import { Assessor as AssessorTemplate, Coordinator as CoordinatorTemplate, Shelf as ShelfTemplate, NftFeed as NftFeedTemplate, DROP as DROPTemplate, TIN as TINTemplate } from '../../generated/templates'
 import { Pool } from '../../generated/schema'
+import { registryAddress } from '../config'
 
 export function createPool(poolId: string, shortName: string, assessorAddress: string): void {
   let interestRateResult = new ethereum.CallResult<BigInt>()
@@ -32,6 +33,7 @@ export function createPool(poolId: string, shortName: string, assessorAddress: s
   pool.juniorTokenPrice = BigInt.fromI32(0)
   pool.shortName = shortName
   pool.version = BigInt.fromI32(3)
+  pool.registry = registryAddress
   pool.save()
 }
 

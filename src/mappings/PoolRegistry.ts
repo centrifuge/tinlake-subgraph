@@ -2,6 +2,7 @@ import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers } from '../domain/Pool'
 import { Pool } from '../../generated/schema'
+import { addPoolToRegistry } from '../domain/PoolRegistry'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.error('handlePoolCreated, pool: {}, live: {}, name: {},  data: {}', [
@@ -60,4 +61,5 @@ export function loadPoolFromIPFS(hash: string): void {
 
   createPool(poolId, shortName, assessor)
   createPoolHandlers(shortName, poolId, coordinator, assessor, shelf, pile, feed, reserve, seniorToken, juniorToken, seniorTranche, juniorTranche)
+  addPoolToRegistry(poolId)
 }

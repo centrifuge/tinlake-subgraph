@@ -7,9 +7,12 @@ import { updateLoans } from '../domain/Loan'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
-  let pool = Pool.load(poolId)
+  log.debug('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
+  updatePoolValues(poolId)
+}
 
-  log.debug('handleCoordinatorExecuteEpoch: pool id {}, to {}', [pool.id.toString(), call.to.toString()])
+export function updatePoolValues(poolId: string): void {
+  let pool = Pool.load(poolId)
 
   // update loans and return weightedInterestRate and totalDebt
   let loanValues = updateLoans(pool as Pool, dataSource.context().getString('pile'))
