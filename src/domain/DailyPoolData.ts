@@ -1,10 +1,10 @@
-import { log, BigInt, ethereum } from '@graphprotocol/graph-ts'
-// import { Reserve } from '../../generated/Block/Reserve'
-// import { NavFeed } from '../../generated/Block/NavFeed'
+import { log, BigInt, ethereum, Address } from '@graphprotocol/graph-ts'
+import { Reserve } from '../../generated/Block/Reserve'
+import { NavFeed } from '../../generated/Block/NavFeed'
 import { Day, DailyPoolData } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
 import { secondsInDay } from '../config'
-import { Pool } from '../../generated/schema'
+import { Pool, PoolAddresses } from '../../generated/schema'
 import { getAllPools } from './PoolRegistry'
 
 export function createDailySnapshot(block: ethereum.Block): void {
@@ -15,17 +15,17 @@ export function createDailySnapshot(block: ethereum.Block): void {
   let pools = getAllPools()
   for (let i = 0; i < pools.length; i++) {
     let pool = Pool.load(pools[i])
+    let addresses = PoolAddresses.load(pool.id)
     log.debug('createDailySnapshot: loaded pool {}', [pool.shortName])
 
     let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
 
-    // TODO reg: re add this (we need to get the reserve and feed addresses from IPFS)
-    // let reserveContract = Reserve.bind(<Address>Address.fromHexString(poolMeta.reserve))
-    // let reserve = reserveContract.totalBalance()
-    // dailyPoolData.reserve = reserve
-    // let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
-    // let currentNav = navFeedContract.currentNAV()
-    // dailyPoolData.assetValue = currentNav
+    let reserveContract = Reserve.bind(<Address>Address.fromHexString(addresses.reserve))
+    let reserve = reserveContract.totalBalance()
+    dailyPoolData.reserve = reserve
+    let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
+    let currentNav = navFeedContract.currentNAV()
+    dailyPoolData.assetValue = currentNav
 
     dailyPoolData.totalDebt = pool.totalDebt
     dailyPoolData.seniorDebt = pool.seniorDebt

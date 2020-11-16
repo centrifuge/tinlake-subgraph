@@ -11,8 +11,6 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   updatePoolValues(poolId)
 }
 
-// TODO: all these dataSource.context() values are only available when triggered from handleCoordinatorExecuteEpoch,
-// but not when triggered from handleBlock. We should retrieve these addresses from somewhere else (probably by storing them on the Pool entity)
 export function updatePoolValues(poolId: string): void {
   let pool = Pool.load(poolId)
   let addresses = PoolAddresses.load(poolId)

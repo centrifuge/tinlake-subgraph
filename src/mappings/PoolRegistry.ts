@@ -1,12 +1,12 @@
 import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
-import { PoolCreated } from '../../generated/PoolRegistry/PoolRegistry'
+import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers } from '../domain/Pool'
 import { Pool } from '../../generated/schema'
 import { addPoolToRegistry } from '../domain/PoolRegistry'
 import { createPoolAddresses } from '../domain/PoolAddresses'
 
 export function handlePoolCreated(call: PoolCreated): void {
-  log.error('handlePoolCreated, pool: {}, live: {}, name: {},  data: {}', [
+  log.debug('handlePoolCreated, pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
@@ -27,6 +27,15 @@ export function handlePoolCreated(call: PoolCreated): void {
  * check which addresses changed, and if any did, then create new data source templates just for those which changed.
  * This way, you don't get any duplicates, and the old + new addresses will both be handled.
  */
+export function handlePoolUpdated(call: PoolUpdated): void {
+  log.debug('handlePoolUpdated, pool: {}, live: {}, name: {},  data: {}', [
+    call.params.pool.toHexString(),
+    call.params.live ? 'true' : 'false',
+    call.params.name,
+    call.params.data,
+  ])
+}
+
 
 export function loadPoolFromIPFS(hash: string): void {
   log.debug('loading pool from IPFS: {}', [hash])
