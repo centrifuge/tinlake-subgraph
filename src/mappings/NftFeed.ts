@@ -1,10 +1,9 @@
-import { log, Address } from '@graphprotocol/graph-ts'
+import { log, Address, dataSource } from '@graphprotocol/graph-ts'
 import { Pile } from '../../generated/Block/Pile'
 import { Shelf } from '../../generated/Block/Shelf'
 import { UpdateCall, NftFeed } from '../../generated/Block/NftFeed'
 import { Loan } from '../../generated/schema'
 import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
-import { poolFromIdentifier } from '../util/pool'
 
 // handleNftFeedUpdate handles changing the collateral value and/or the risk group of the loan
 export function handleNftFeedUpdate(call: UpdateCall): void {
@@ -12,13 +11,12 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
 
   let nftFeedAddress = call.to
   let nftId = call.inputs.nftID_
-  let pool = poolFromIdentifier(nftFeedAddress.toHex())
 
-  let shelf = Shelf.bind(<Address>Address.fromHexString(pool.shelf))
-  let pile = Pile.bind(<Address>Address.fromHexString(pool.pile))
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(pool.nftFeed))
+  let shelf = Shelf.bind(<Address>Address.fromHexString(dataSource.context().getString('shelf')))
+  let pile = Pile.bind(<Address>Address.fromHexString(dataSource.context().getString('pile')))
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(dataSource.context().getString('feed')))
 
-  let poolId = pool.id
+  let poolId = dataSource.context().getString('id')
   let loanIndex = shelf.nftlookup(nftId)
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 

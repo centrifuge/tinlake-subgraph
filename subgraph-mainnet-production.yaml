@@ -22,7 +22,7 @@ dataSources:
         - name: Pile
           file: ./abis/Pile.json
         - name: Assessor
-          file: ./abis/v3/Assessor.json
+          file: ./abis/Assessor.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: ERC20
@@ -62,14 +62,59 @@ dataSources:
           handler: handleCreateProxy
       file: ./src/mappings/ProxyRegistry.ts
 
-  # CF4
+  # Pool registry
   - kind: ethereum/contract
-    name: CF4Assessor
+    name: PoolRegistry
     network: mainnet
     source:
-      address: "0x6aaf2ee5b2b62fb9e29e021a1bf3b381454d900a"
+      address: "0xddf1c516cf87126c6c610b52fd8d609e67fb6033"
+      abi: PoolRegistry
+      startBlock: 11113233
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+      eventHandlers:
+        - event: PoolCreated(address,bool,string,string)
+          handler: handlePoolCreated
+      file: ./src/mappings/PoolRegistry.ts
+
+templates:
+  - kind: ethereum/contract
+    name: Coordinator
+    network: mainnet
+    source:
+      abi: Coordinator
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Coordinator
+          file: ./abis/Coordinator.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: executeEpoch()
+          handler: handleCoordinatorExecuteEpoch
+      file: ./src/mappings/Coordinator.ts
+  - kind: ethereum/contract
+    name: Assessor
+    network: mainnet
+    source:
       abi: Assessor
-      startBlock: 11063153
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -78,18 +123,16 @@ dataSources:
         - Pool
       abis:
         - name: Assessor
-          file: ./abis/v3/Assessor.json
+          file: ./abis/Assessor.json
       callHandlers:
         - function: file(bytes32,uint256)
           handler: handleAssessorFile
       file: ./src/mappings/Assessor.ts
   - kind: ethereum/contract
-    name: CF4Shelf
+    name: Shelf
     network: mainnet
     source:
-      address: "0xa0b0d8394adc79f5d1563a892abfc6186e519644"
       abi: Shelf
-      startBlock: 11063052
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -107,7 +150,7 @@ dataSources:
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: Assessor
-          file: ./abis/v3/Assessor.json
+          file: ./abis/Assessor.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue
@@ -119,12 +162,10 @@ dataSources:
           handler: handleShelfRepay
       file: ./src/mappings/Shelf.ts
   - kind: ethereum/contract
-    name: CF4NftFeed
+    name: NftFeed
     network: mainnet
     source:
-      address: "0x69504da6b2cd8320b9a62f3aed410a298d3e7ac6"
       abi: NftFeed
-      startBlock: 11063046
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -145,12 +186,10 @@ dataSources:
           handler: handleNftFeedUpdate
       file: ./src/mappings/NftFeed.ts
   - kind: ethereum/contract
-    name: CF4DRP
+    name: DROP
     network: mainnet
     source:
-      address: "0x5b2F0521875B188C0afc925B1598e1FF246F9306"
       abi: ERC20
-      startBlock: 11063000
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -165,136 +204,10 @@ dataSources:
           handler: handleERC20Transfer
       file: ./src/mappings/ERC20.ts
   - kind: ethereum/contract
-    name: CF4TIN
+    name: TIN
     network: mainnet
     source:
-      address: "0x05DD145AA26dBDcc7774E4118E34Bb67C64661c6"
       abi: ERC20
-      startBlock: 11063000
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleERC20Transfer
-      file: ./src/mappings/ERC20.ts
-
-
-  # BL1
-  - kind: ethereum/contract
-    name: BL1Assessor
-    network: mainnet
-    source:
-      address: "0x2b8fea4eedb43fca58ccb063221fae5858b47538"
-      abi: Assessor
-      startBlock: 11197221
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-      abis:
-        - name: Assessor
-          file: ./abis/v3/Assessor.json
-      callHandlers:
-        - function: file(bytes32,uint256)
-          handler: handleAssessorFile
-      file: ./src/mappings/Assessor.ts
-  - kind: ethereum/contract
-    name: BL1Shelf
-    network: mainnet
-    source:
-      address: "0xcfad06adacf221f8119995c8bca25184a6b5a268"
-      abi: Shelf
-      startBlock: 11197172
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Pool
-        - Loan
-      abis:
-        - name: Shelf
-          file: ./abis/Shelf.json
-        - name: Pile
-          file: ./abis/Pile.json
-        - name: NftFeed
-          file: ./abis/NFTFeed.json
-        - name: SeniorTranche
-          file: ./abis/SeniorTranche.json
-        - name: Assessor
-          file: ./abis/v3/Assessor.json
-      callHandlers:
-        - function: issue(address,uint256)
-          handler: handleShelfIssue
-        - function: close(uint256)
-          handler: handleShelfClose
-        - function: borrow(uint256,uint256)
-          handler: handleShelfBorrow
-        - function: repay(uint256,uint256)
-          handler: handleShelfRepay
-      file: ./src/mappings/Shelf.ts
-  - kind: ethereum/contract
-    name: BL1NftFeed
-    network: mainnet
-    source:
-      address: "0x1621b607a62dac0dc2e4044ff1235a30f135cbd2"
-      abi: NftFeed
-      startBlock: 11197170
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Loan
-      abis:
-        - name: NftFeed
-          file: ./abis/NFTFeed.json
-        - name: Shelf
-          file: ./abis/Shelf.json
-        - name: Pile
-          file: ./abis/Pile.json
-      callHandlers:
-        - function: update(bytes32,uint256,uint256)
-          handler: handleNftFeedUpdate
-        - function: update(bytes32,uint256)
-          handler: handleNftFeedUpdate
-      file: ./src/mappings/NftFeed.ts
-  - kind: ethereum/contract
-    name: BL1DRP
-    network: mainnet
-    source:
-      address: "0x1aefc15de9c2e1ebb97146c3c2cdc4fc0ad539bc"
-      abi: ERC20
-      startBlock: 11197217
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleERC20Transfer
-      file: ./src/mappings/ERC20.ts
-  - kind: ethereum/contract
-    name: BL1TIN
-    network: mainnet
-    source:
-      address: "0xac1c0f9e1fb54694f43754b044b464b981554d8d"
-      abi: ERC20
-      startBlock: 11197212
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4

@@ -1,11 +1,9 @@
-import { log, BigInt, Address } from '@graphprotocol/graph-ts'
+import { log, BigInt, Address, dataSource } from '@graphprotocol/graph-ts'
 import { Pile } from '../../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from '../../generated/Block/Shelf'
 import { NftFeed } from '../../generated/Block/NftFeed'
 import { Pool, Loan } from '../../generated/schema'
 import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
-import { poolFromIdentifier } from '../util/pool'
-import { createPool } from '../domain/Pool'
 
 // handleShelfIssue handles creating a new/opening a loan
 export function handleShelfIssue(call: IssueCall): void {
@@ -25,8 +23,7 @@ export function handleShelfIssue(call: IssueCall): void {
     nftRegistry.toHex(),
   ])
 
-  let poolMeta = poolFromIdentifier(shelf.toHex())
-  let poolId = poolMeta.id
+  let poolId = dataSource.context().getString('id')
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug('generated poolId {}, loanId {}', [poolId, loanId])
@@ -34,7 +31,8 @@ export function handleShelfIssue(call: IssueCall): void {
   let pool = Pool.load(poolId)
   let poolChanged = false
   if (pool == null) {
-    createPool(poolId)
+    // TOOD reg: this should be impossible, as the handlers are created on pool creation
+    // createPool(poolId)
     pool = Pool.load(poolId)
 
     if (pool == null) {
@@ -71,12 +69,12 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftRegistry = nftRegistry
 
   // get risk group and interest rate from nftFeed
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
-  let pile = Pile.bind(<Address>Address.fromHexString(poolMeta.pile))
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(dataSource.context().getString('feed')))
+  let pile = Pile.bind(<Address>Address.fromHexString(dataSource.context().getString('pile')))
   // generate hash from nftId & registry
   let nftHash = nftFeed.try_nftID(loanIndex)
   if (nftHash.reverted) {
-    if (poolMeta.id == '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
+    if (poolId == '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
       log.error('failed to find nft hash for loan idx {}', [loanIndex.toString()])
     } else {
       log.critical('failed to find nft hash for loan idx {}', [loanIndex.toString()])
@@ -86,7 +84,7 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let riskGroup = nftFeed.try_risk(nftHash.value)
   if (riskGroup.reverted) {
-    if (poolMeta.id == '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
+    if (poolId == '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
       log.error('failed to find risk group for nft hash {}', [nftHash.value.toString()])
     } else {
       log.critical('failed to find risk group for nft hash {}', [nftHash.value.toString()])
@@ -97,7 +95,7 @@ export function handleShelfIssue(call: IssueCall): void {
   // get ratePerSecond for riskgroup
   let ratePerSecond = pile.try_rates(riskGroup.value)
   if (ratePerSecond.reverted) {
-    if (poolMeta.id === '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
+    if (poolId === '0x382460db48ee1b84b23d7286cfd7d027c27bb885') {
       log.error('failed to find rates for risk group {}', [riskGroup.value.toString()])
     } else {
       log.critical('failed to find rates for risk group {}', [riskGroup.value.toString()])
@@ -133,7 +131,7 @@ export function handleShelfClose(call: CloseCall): void {
     loanIndex.toString(),
   ])
 
-  let poolId = poolFromIdentifier(shelf.toHex()).id
+  let poolId = dataSource.context().getString('id')
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug('generated poolId {}, loanId {}', [poolId, loanId])
@@ -164,8 +162,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
     amount.toString(),
   ])
 
-  let poolMeta = poolFromIdentifier(shelf.toHex())
-  let poolId = poolMeta.id
+  let poolId = dataSource.context().getString('id')
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug('generated poolId {}, loanId {}', [poolId, loanId])
@@ -185,7 +182,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   // TODO add support for pools using creditLine ceilings – the following only supports principal, not creditLine
   // loan.ceiling = loan.ceiling.minus(amount)
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(poolMeta.nftFeed))
+  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(dataSource.context().getString('feed')))
   loan.ceiling = nftFeed.ceiling(loanIndex)
   loan.save()
 
@@ -217,7 +214,7 @@ export function handleShelfRepay(call: BorrowCall): void {
     amount.toString(),
   ])
 
-  let poolId = poolFromIdentifier(shelf.toHex()).id
+  let poolId = dataSource.context().getString('id')
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   log.debug('generated poolId {}, loanId {}', [poolId, loanId])
