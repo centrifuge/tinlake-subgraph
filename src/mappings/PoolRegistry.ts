@@ -21,10 +21,8 @@ export function handlePoolCreated(call: PoolCreated): void {
 }
 
 /**
- * TODO handlePoolUpdated(call: PoolUpdated): void {}
- *
- * Removing data source templates is not possible, so what we probably should do is to
- * check which addresses changed, and if any did, then create new data source templates just for those which changed.
+ * TODO: removing data source templates is not possible, so what we probably should do is to check
+ * which addresses changed, and if any did, then create new data source templates just for those which changed.
  * This way, you don't get any duplicates, and the old + new addresses will both be handled.
  */
 export function handlePoolUpdated(call: PoolUpdated): void {
