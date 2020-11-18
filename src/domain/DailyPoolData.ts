@@ -14,7 +14,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
 
   let pools = getAllPools()
   for (let i = 0; i < pools.length; i++) {
-    let pool = Pool.load(pools[i])
+    let pool = Pool.load(pools[i]) as Pool
     let addresses = PoolAddresses.load(pool.id)
     log.debug('createDailySnapshot: loaded pool {}', [pool.shortName])
 

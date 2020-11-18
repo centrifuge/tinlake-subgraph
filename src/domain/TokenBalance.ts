@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { log, BigInt } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import {
   RewardDailyInvestorTokenBalance,
@@ -97,15 +97,18 @@ function loadOrCreateDailyInvestorTokenBalanceIds(poolId: string): RewardDailyIn
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
+  log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
   let ids = loadOrCreateDailyInvestorTokenBalanceIds(pool.id)
 
   for (let i = 0; i < token.owners.length; i++) {
     let owners = token.owners
     let holderId = owners[i]
     let tbId = holderId.concat(token.id)
+    log.debug('createDailyTokenBalances: token balance {}', [tbId])
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
       if (!ids.rewardIds.includes(ditb.id)) {
