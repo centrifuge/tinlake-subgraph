@@ -1,9 +1,11 @@
 import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers } from '../domain/Pool'
-import { addPoolToRegistry } from '../domain/PoolRegistry'
+import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
 import { createPoolAddresses } from '../domain/PoolAddresses'
 import { preloadedPoolByIPFSHash } from '../preloadedPools'
+import { PoolRegistry } from '../../generated/schema'
+import { registryAddress } from '../config'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -40,9 +42,14 @@ export function handlePoolUpdated(call: PoolUpdated): void {
 export function loadPoolFromIPFS(hash: string): void {
   log.debug('loadPoolFromIPFS: {}', [hash])
 
+  if (PoolRegistry.load(registryAddress) == null) {
+    log.debug('loadPoolFromIPFS: create pool registry {}', [registryAddress])
+    createPoolRegistry()
+  }
+
   let data = ipfs.cat(hash)
   if (data == null) {
-    log.error('loadPoolFromIPFS: IPFS data is null, hash {}', [hash])
+    log.error('loadPoolFromIPFS: IPFS data is null - hash {}', [hash])
     return
   }
 
@@ -51,7 +58,7 @@ export function loadPoolFromIPFS(hash: string): void {
   let addresses = obj.get('addresses').toObject()
 
   if (metadata == null || addresses == null) {
-    log.error('loadPoolFromIPFS: metadata or addresses is null, hash {}', [hash])
+    log.error('loadPoolFromIPFS: metadata or addresses is null - hash {}', [hash])
     return
   }
 
