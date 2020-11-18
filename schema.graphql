@@ -13,8 +13,12 @@ type Pool @entity {
   maxJuniorRatio: BigInt!
   currentJuniorRatio: BigInt!
   maxReserve: BigInt!
-  seniorTokenPrice: BigInt # assessor
-  juniorTokenPrice: BigInt # assessor
+  seniorTokenPrice: BigInt! # assessor
+  juniorTokenPrice: BigInt! # assessor
+  # seniorTokenAddress: string todo
+  # juniorTokenAddress: string todo
+  reserve: BigInt!
+  assetValue: BigInt!
   shortName: String!
   version: BigInt!
   addresses: PoolAddresses!
@@ -39,17 +43,34 @@ type PoolRegistry @entity {
   pools: [Pool!]!
 }
 
+type RewardDailyInvestorTokenBalance @entity {
+  id: ID! # investorAddress+poolId+day
+  account: Account!
+  day: Day!
+  pool: Pool!
+  seniorTokenAmount: BigInt!
+  seniorTokenValue: BigInt!
+  juniorTokenAmount: BigInt!
+  juniorTokenValue: BigInt!
+  nonZeroBalanceSince: BigInt! # investments have to be at least 60 days long for balances to accrue
+}
+
+type RewardDailyInvestorIdentifier @entity {
+  id: ID!
+  rewardIds: [String!]
+}
+
 type DailyPoolData @entity {
   id: ID! # poolId+day
   day: Day!
   pool: Pool!
-  reserve: BigInt # reserve.sol totalBalance()
-  totalDebt: BigInt # outstanding Volume (but also is already in the pool)
-  assetValue: BigInt # navfeed.sol currentNav()
-  seniorDebt: BigInt  
-  seniorTokenPrice: BigInt # assessor
-  juniorTokenPrice: BigInt # assessor
-  currentJuniorRatio: BigInt
+  reserve: BigInt! # reserve.sol totalBalance()
+  totalDebt: BigInt! # outstanding Volume (but also is already in the pool)
+  assetValue: BigInt! # navfeed.sol currentNav()
+  seniorDebt: BigInt!  
+  seniorTokenPrice: BigInt! # assessor
+  juniorTokenPrice: BigInt! # assessor
+  currentJuniorRatio: BigInt!
 }
 
 type Loan @entity {
@@ -78,22 +99,23 @@ type Proxy @entity {
 
 type Account @entity {
   id: ID! # address
-  tokenBalances: [TokenBalance!] @derivedFrom (field: "owner")
+  dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
   currentActiveInvestmentAmount: BigInt # not based on token balance
 }
 
 type ERC20Transfer @entity {
   id: ID!
-  transaction: String # txhash
+  transaction: String! # txhash
   token: Token!
-  from: String
-  to: String
-  amount: BigInt
+  from: String!
+  to: String!
+  amount: BigInt!
   pool: Pool!
 }
 
 type Token @entity {
   id: ID! # token address
+  owners: [Account!]!
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
 }
 
@@ -107,9 +129,16 @@ type TokenBalance @entity {
 
 type Day @entity {
   id: ID!
-  reserve: BigInt # sum for all pools active on this day
-  totalDebt: BigInt # sum for all pools active on this day
-  assetValue: BigInt # sum for all pools active on this day
-  seniorDebt: BigInt # sum for all pools active on this day
+  reserve: BigInt! # sum for all pools active on this day
+  totalDebt: BigInt! # sum for all pools active on this day
+  assetValue: BigInt! # sum for all pools active on this day
+  seniorDebt: BigInt! # sum for all pools active on this day
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
+}
+
+type RewardDayTotal @entity {
+  id: ID!
+  todayValue: BigInt!
+  toDateAggregateValue: BigInt!
+  rewardRate: BigInt!
 }

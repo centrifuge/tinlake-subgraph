@@ -1,11 +1,11 @@
-import { log, BigInt, ethereum, Address } from '@graphprotocol/graph-ts'
-import { Reserve } from '../../generated/Block/Reserve'
-import { NavFeed } from '../../generated/Block/NavFeed'
+import { log, BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { Day, DailyPoolData } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
 import { secondsInDay } from '../config'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { getAllPools } from './PoolRegistry'
+import { loadOrCreateToken } from './Token'
+import { createDailyTokenBalances, updateRewardDayTotal } from './TokenBalance'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
@@ -19,25 +19,19 @@ export function createDailySnapshot(block: ethereum.Block): void {
     log.debug('createDailySnapshot: loaded pool {}', [pool.shortName])
 
     let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
+    setDailyPoolValues(pool, dailyPoolData)
 
-    let reserveContract = Reserve.bind(<Address>Address.fromHexString(addresses.reserve))
-    let reserve = reserveContract.totalBalance()
-    dailyPoolData.reserve = reserve
-    let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
-    let currentNav = navFeedContract.currentNAV()
-    dailyPoolData.assetValue = currentNav
+    let juniorToken = loadOrCreateToken(addresses.juniorToken)
+    createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
 
-    dailyPoolData.totalDebt = pool.totalDebt
-    dailyPoolData.seniorDebt = pool.seniorDebt
-    dailyPoolData.currentJuniorRatio = pool.currentJuniorRatio
-    dailyPoolData.save()
+    let seniorToken = loadOrCreateToken(addresses.seniorToken)
+    createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
 
-    addToDailyAggregate(<Day>yesterday, dailyPoolData)
+    updateRewardDayTotal(yesterdayTimeStamp, pool)
   }
 }
 
-function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
-  log.debug('createDailyPoolData: poolMeta.id: {}, yesterday: {}', [poolId, yesterday])
+export function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
   let dailyPoolData = new DailyPoolData(poolId.concat(yesterday))
   dailyPoolData.day = yesterday
   dailyPoolData.pool = poolId
@@ -52,10 +46,23 @@ function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
   return dailyPoolData
 }
 
-function addToDailyAggregate(day: Day, dailyPoolData: DailyPoolData): void {
-  day.reserve = day.reserve.plus(<BigInt>dailyPoolData.reserve)
-  day.totalDebt = day.totalDebt.plus(<BigInt>dailyPoolData.totalDebt)
-  day.assetValue = day.assetValue.plus(<BigInt>dailyPoolData.assetValue)
-  day.seniorDebt = day.seniorDebt.plus(<BigInt>dailyPoolData.seniorDebt)
+// adds values from all active pools to the current day entity, an aggregate sum
+export function addToDailyAggregate(day: Day, pool: Pool): void {
+  day.reserve = day.reserve.plus(<BigInt>pool.reserve)
+  day.totalDebt = day.totalDebt.plus(<BigInt>pool.totalDebt)
+  day.assetValue = day.assetValue.plus(<BigInt>pool.assetValue)
+  day.seniorDebt = day.seniorDebt.plus(<BigInt>pool.seniorDebt)
   day.save()
+}
+
+// sets pool specific current day's values from pool
+export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): void {
+  dailyPoolData.reserve = <BigInt>pool.reserve
+  dailyPoolData.assetValue = <BigInt>pool.assetValue
+  dailyPoolData.totalDebt = <BigInt>pool.totalDebt
+  dailyPoolData.seniorDebt = <BigInt>pool.seniorDebt
+  dailyPoolData.currentJuniorRatio = <BigInt>pool.currentJuniorRatio
+  dailyPoolData.juniorTokenPrice = <BigInt>pool.juniorTokenPrice
+  dailyPoolData.seniorTokenPrice = <BigInt>pool.seniorTokenPrice
+  dailyPoolData.save()
 }

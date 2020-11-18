@@ -41,15 +41,15 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
   pool.seniorTokenPrice = BigInt.fromI32(0)
   pool.juniorTokenPrice = BigInt.fromI32(0)
+  pool.reserve = BigInt.fromI32(0)
+  pool.assetValue = BigInt.fromI32(0)
   pool.shortName = shortName
   pool.version = BigInt.fromI32(3)
   pool.addresses = poolId
   pool.save()
 }
 
-export function createPoolHandlers(
-  addresses: PoolAddresses
-): void {
+export function createPoolHandlers(addresses: PoolAddresses): void {
   let context = new DataSourceContext()
   context.setString('id', addresses.id)
 

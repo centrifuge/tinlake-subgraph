@@ -7,7 +7,16 @@ import { loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst } from '../dom
 import { updateAccounts } from '../domain/Account'
 
 export function handleERC20Transfer(event: TransferEvent): void {
-  createToken(event)
+  let token = createToken(event.address.toHex())
+
+  if (!token.owners.includes(event.params.dst.toHex())) {
+    let owners = token.owners
+    // only push dst as owners
+    owners.push(event.params.dst.toHex())
+    token.owners = owners
+    token.save()
+  }
+
   loadOrCreateTokenBalanceDst(event)
   loadOrCreateTokenBalanceSrc(event)
   updateAccounts(event)
@@ -16,7 +25,6 @@ export function handleERC20Transfer(event: TransferEvent): void {
     .toString()
     .concat('-')
     .concat(event.logIndex.toString())
-
   if (ERC20Transfer.load(id) == null) {
     createERC20Transfer(id, event, dataSource.context().getString('id'))
   }
