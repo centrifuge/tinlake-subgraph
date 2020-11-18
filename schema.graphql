@@ -35,6 +35,11 @@ type RewardDailyInvestorTokenBalance @entity {
   nonZeroBalanceSince: BigInt! # investments have to be at least 60 days long for balances to accrue
 }
 
+type RewardDailyInvestorIdentifier @entity {
+  id: ID!
+  rewardIds: [String!]
+}
+
 type DailyPoolData @entity {
   id: ID! # poolId+day
   day: Day!
@@ -105,9 +110,16 @@ type TokenBalance @entity {
 
 type Day @entity {
   id: ID!
-  reserve: BigInt # sum for all pools active on this day
-  totalDebt: BigInt # sum for all pools active on this day
-  assetValue: BigInt # sum for all pools active on this day
-  seniorDebt: BigInt # sum for all pools active on this day
+  reserve: BigInt! # sum for all pools active on this day
+  totalDebt: BigInt! # sum for all pools active on this day
+  assetValue: BigInt! # sum for all pools active on this day
+  seniorDebt: BigInt! # sum for all pools active on this day
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
+}
+
+type RewardDayTotal @entity {
+  id: ID!
+  todayValue: BigInt!
+  toDateAggregateValue: BigInt!
+  rewardRate: BigInt!
 }

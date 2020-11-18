@@ -1,5 +1,5 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import { RewardDailyInvestorTokenBalance, Token, TokenBalance, Pool } from "../generated/schema"
+import { RewardDailyInvestorTokenBalance, Token, TokenBalance, Pool, RewardDayTotal, RewardDailyInvestorIdentifier } from "../generated/schema"
 import { seniorTokenAddresses } from "../src/poolMetas"
 
 const secondsInDay = 86400
@@ -36,7 +36,19 @@ export function loadOrCreateDailyInvestorTokenBalance(tokenBalance: TokenBalance
     return <RewardDailyInvestorTokenBalance>dailyInvestorTokenBalance
 }
 
+function loadOrCreateDailyInvestorTokenBalanceIds(poolId: string): RewardDailyInvestorIdentifier { 
+    let ids = RewardDailyInvestorIdentifier.load(poolId) 
+    if (ids == null) {
+        ids = new RewardDailyInvestorIdentifier(poolId)
+        ids.rewardIds = []
+    }
+    ids.save()
+    return <RewardDailyInvestorIdentifier>ids
+}
+
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
+    let ids = loadOrCreateDailyInvestorTokenBalanceIds(pool.id)
+
     for(let i = 0; i < token.owners.length; i++){
         let owners = token.owners
         let holderId = owners[i]
@@ -44,7 +56,14 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
         let tb = TokenBalance.load(tbId)
         if(tb != null) {
-            loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
+            let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
+            // bit of a hack to get around lack of array support in assembly script
+            if(!ids.rewardIds.includes(ditb.id)){
+                let temp = ids.rewardIds
+                temp.push(ditb.id)
+                ids.rewardIds = temp
+                ids.save()
+            }     
         }
     }
 }
@@ -67,3 +86,38 @@ function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: B
         return
     }
 }
+
+export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
+    let rewardDayTotal = loadOrCreateRewardDayTotal(date)
+    // add current pool to today's value
+    rewardDayTotal.todayValue = rewardDayTotal.todayValue.plus(pool.assetValue)
+    let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))
+    let prevDayRewardTotal = loadOrCreateRewardDayTotal(prevDayRewardId)
+    // we really only want to run this at the end of all the pools..
+    // but it will still work this way..
+    rewardDayTotal.toDateAggregateValue = rewardDayTotal.todayValue.plus(prevDayRewardTotal.toDateAggregateValue)
+    rewardDayTotal.save()
+    return rewardDayTotal
+}
+
+export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
+    let rewardDayTotal = RewardDayTotal.load(date.toString())
+    if (rewardDayTotal == null) {
+        rewardDayTotal = new RewardDayTotal(date.toString())        
+        rewardDayTotal.todayValue = BigInt.fromI32(0)
+        rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
+        rewardDayTotal.rewardRate = BigInt.fromI32(0)
+    }
+    rewardDayTotal.save()
+    return <RewardDayTotal> rewardDayTotal
+}
+
+// function rewardRate()
+// {
+//     if toDateAggregateValue is less than 300 million Dai )
+//     then the reward is x rad per dai (is going to be constant)
+
+//     if more, then no rewards 
+//     when it expires, we will have a new reward function 
+
+// }

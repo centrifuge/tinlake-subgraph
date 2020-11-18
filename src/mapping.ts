@@ -16,7 +16,7 @@ import { seniorToJuniorRatio, poolFromIdentifier } from "./mappingUtil"
 import { createERC20Transfer, createToken, loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst, updateAccounts, loadOrCreateToken } from "./transferUtil"
 import { timestampToDate, createDay, getToday } from "./dateUtil"
 import { createDailyPoolData, addToDailyAggregate, setDailyPoolValues } from "./dailyStats"
-import { createDailyTokenBalances } from "./rewardUtil"
+import { createDailyTokenBalances, loadOrCreateRewardDayTotal, updateRewardDayTotal } from "./rewardUtil"
 
 const handleBlockFrequencyMinutes = 5
 const blockTimeSeconds = 15
@@ -24,7 +24,7 @@ const secondsInDay = 86400
 // the fast forward block should be
 // updated to the latest block before every new deployment
 // for optimal optimization
-const fastForwardUntilBlock = 11245219
+const fastForwardUntilBlock = 11281151
 const v3LaunchBlock = 11063000
 
 function createPool(poolId: string) : void {
@@ -109,6 +109,8 @@ function createDailySnapshot(block: EthereumBlock): void {
 
     let seniorToken = loadOrCreateToken(poolMeta.seniorToken)
     createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+
+    updateRewardDayTotal(yesterdayTimeStamp, pool)
   }
 }
 
@@ -255,7 +257,9 @@ export function handleBlock(block: EthereumBlock): void {
   let today = getToday(block)
   let newDay = today === null 
   if(today == null) {
-    today = createDay(timestampToDate(block.timestamp).toString())
+    let date = timestampToDate(block.timestamp)
+    today = createDay(date.toString())
+    loadOrCreateRewardDayTotal(date)
   }
 
   let v3Active = blockNum > v3LaunchBlock

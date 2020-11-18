@@ -17,6 +17,7 @@ export function createDailyPoolData(poolMeta: PoolMeta, yesterday: string): Dail
     return dailyPoolData
 }
 
+// adds values from all active pools to the current day entity, an aggregate sum
 export function addToDailyAggregate(day: Day, pool: Pool): void {
     day.reserve = day.reserve.plus(<BigInt>pool.reserve)
     day.totalDebt = day.totalDebt.plus(<BigInt>pool.totalDebt)
@@ -25,6 +26,7 @@ export function addToDailyAggregate(day: Day, pool: Pool): void {
     day.save()
 }
 
+// sets pool specific current day's values from pool
 export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): void {
     dailyPoolData.reserve = <BigInt>pool.reserve
     dailyPoolData.assetValue = <BigInt>pool.assetValue
