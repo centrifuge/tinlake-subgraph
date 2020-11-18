@@ -1,8 +1,8 @@
-import { log, ethereum, dataSource } from '@graphprotocol/graph-ts'
+import { log, ethereum } from '@graphprotocol/graph-ts'
 import { createDailySnapshot } from '../domain/DailyPoolData'
 import { isNewDay } from '../domain/Day'
 import { updatePoolValues } from './Coordinator'
-import { ipfsHashByStartBlockMainnet, ipfsHashByStartBlockKovan } from '../preloadedPools'
+import { preloadedPoolByStartBlock } from '../preloadedPools'
 import { loadPoolFromIPFS } from './PoolRegistry'
 import { fastForwardUntilBlock, registryAddress } from '../config'
 import { PoolRegistry } from '../../generated/schema'
@@ -16,10 +16,9 @@ export function handleBlock(block: ethereum.Block): void {
   }
 
   // Check if there's a preloaded pool for this block
-  let ipfsHashByStartBlock = dataSource.network() == 'mainnet' ? ipfsHashByStartBlockMainnet : ipfsHashByStartBlockKovan
-  if (ipfsHashByStartBlock.has(block.number.toI32())) {
-    log.debug('handleBlock: preload pool - IPFS hash {}', [ipfsHashByStartBlock.get(block.number.toI32())])
-    loadPoolFromIPFS(ipfsHashByStartBlock.get(block.number.toI32()))
+  if (preloadedPoolByStartBlock.has(block.number.toI32())) {
+    log.debug('handleBlock: preload pool - IPFS hash {}', [preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash])
+    loadPoolFromIPFS(preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash)
   }
 
   // Create a daily snapshot if the last one is from yesterday

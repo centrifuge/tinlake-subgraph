@@ -1,3 +1,5 @@
+import { dataSource } from '@graphprotocol/graph-ts'
+
 export class PreloadedPool {
   id: string
   ipfsHash: string
@@ -30,12 +32,31 @@ export let kovanPreloadedPools: PreloadedPool[] = [
   },
 ]
 
-export let ipfsHashByStartBlockMainnet = new Map<number, string>()
+// Lookup tables by start block
+export let preloadedPoolByStartBlockMainnet = new Map<number, PreloadedPool>()
 for (let i = 0; i < mainnetPreloadedPools.length; i++) {
-  ipfsHashByStartBlockMainnet.set(mainnetPreloadedPools[i].assessorStartBlock, mainnetPreloadedPools[i].ipfsHash)
+  preloadedPoolByStartBlockMainnet.set(mainnetPreloadedPools[i].assessorStartBlock, mainnetPreloadedPools[i])
 }
 
-export let ipfsHashByStartBlockKovan = new Map<number, string>()
+export let preloadedPoolByStartBlockKovan = new Map<number, PreloadedPool>()
 for (let i = 0; i < kovanPreloadedPools.length; i++) {
-  ipfsHashByStartBlockKovan.set(kovanPreloadedPools[i].assessorStartBlock, kovanPreloadedPools[i].ipfsHash)
+  preloadedPoolByStartBlockKovan.set(kovanPreloadedPools[i].assessorStartBlock, kovanPreloadedPools[i])
 }
+
+export let preloadedPoolByStartBlock =
+  dataSource.network() == 'mainnet' ? preloadedPoolByStartBlockMainnet : preloadedPoolByStartBlockKovan
+
+
+// Lookup tables by IPFS hash
+export let preloadedPoolByIPFSHashMainnet = new Map<string, PreloadedPool>()
+for (let i = 0; i < mainnetPreloadedPools.length; i++) {
+  preloadedPoolByIPFSHashMainnet.set(mainnetPreloadedPools[i].ipfsHash, mainnetPreloadedPools[i])
+}
+
+export let preloadedPoolByIPFSHashKovan = new Map<string, PreloadedPool>()
+for (let i = 0; i < kovanPreloadedPools.length; i++) {
+  preloadedPoolByIPFSHashKovan.set(kovanPreloadedPools[i].ipfsHash, kovanPreloadedPools[i])
+}
+
+export let preloadedPoolByIPFSHash =
+  dataSource.network() == 'mainnet' ? preloadedPoolByIPFSHashMainnet : preloadedPoolByIPFSHashKovan

@@ -37,7 +37,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
 }
 
 function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
-  log.error('createDailyPoolData: poolMeta.id: {}, yesterday: {}', [poolId, yesterday])
+  log.debug('createDailyPoolData: poolMeta.id: {}, yesterday: {}', [poolId, yesterday])
   let dailyPoolData = new DailyPoolData(poolId.concat(yesterday))
   dailyPoolData.day = yesterday
   dailyPoolData.pool = poolId

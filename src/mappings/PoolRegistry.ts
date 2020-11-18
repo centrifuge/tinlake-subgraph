@@ -1,9 +1,9 @@
 import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers } from '../domain/Pool'
-import { Pool } from '../../generated/schema'
 import { addPoolToRegistry } from '../domain/PoolRegistry'
 import { createPoolAddresses } from '../domain/PoolAddresses'
+import { preloadedPoolByIPFSHash } from '../preloadedPools'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -13,10 +13,12 @@ export function handlePoolCreated(call: PoolCreated): void {
     call.params.data,
   ])
 
-  // Only add if the pool wasn't already created before, through preloadedPools in handleBlock
-  let existingPool = Pool.load(call.params.pool.toHexString())
-  if (existingPool == null) {
+  // Only add if the pool isn't preloaded
+  if (!preloadedPoolByIPFSHash.has(call.params.data)) {
+    log.debug('handlePoolCreated: pool not preloaded {}', [call.params.data])
     loadPoolFromIPFS(call.params.data)
+  } else {
+    log.debug('handlePoolCreated: pool is preloaded, skipping {}', [call.params.data])
   }
 }
 
@@ -26,7 +28,7 @@ export function handlePoolCreated(call: PoolCreated): void {
  * This way, you don't get any duplicates, and the old + new addresses will both be handled.
  */
 export function handlePoolUpdated(call: PoolUpdated): void {
-  log.debug('handlePoolUpdated: pool: {}, live: {}, name: {},  data: {}', [
+  log.debug('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
