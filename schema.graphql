@@ -17,6 +17,26 @@ type Pool @entity {
   juniorTokenPrice: BigInt # assessor
   shortName: String!
   version: BigInt!
+  addresses: PoolAddresses!
+}
+
+type PoolAddresses @entity {
+  id: ID!
+  coordinator: ID!
+  assessor: ID!
+  shelf: ID!
+  pile: ID!
+  feed: ID!
+  reserve: ID!
+  seniorToken: ID!
+  juniorToken: ID!
+  seniorTranche: ID!
+  juniorTranche: ID!
+}
+
+type PoolRegistry @entity {
+  id: ID! # address
+  pools: [Pool!]!
 }
 
 type DailyPoolData @entity {

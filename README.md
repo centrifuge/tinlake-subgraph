@@ -1,41 +1,27 @@
-## Testing
-
-```
-yarn test
-```
+# tinlake-subgraph
+Subgraph for the Tinlake applications.
 
 ## Deployment
-
-In case you have made changes to the abi files or entities run
-
-```
-yarn run codegen ./subgraph-mainnet-production.yaml
-```
 
 ### Mainnet production
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
+yarn run codegen ./subgraph-mainnet-production.yaml
 yarn run deploy centrifuge/tinlake ./subgraph-mainnet-production.yaml
-```
-
-### Mainnet staging
-
-```
-graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run deploy centrifuge/tinlake-staging ./subgraph-mainnet-staging.yaml
 ```
 
 ### Kovan staging
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
+yarn run codegen ./subgraph-kovan-staging.yaml
 yarn run deploy centrifuge/tinlake-kovan-staging ./subgraph-kovan-staging.yaml
 ```
 
 ## Query data
 
-Mainnet staging playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake-staging
+Kovan staging playground: https://thegraph.com/explorer/subgraph/centrifuge/tinlake-kovan-staging
 
 ### Get all loans
 
