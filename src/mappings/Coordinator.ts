@@ -2,11 +2,13 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData } from '../../generated/schema'
 import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
 import { getAllPools } from '../domain/PoolRegistry'
+import { timestampToDate } from '../util/date'
+import { secondsInDay } from '../config'
 import { addToDailyAggregate } from '../domain/DailyPoolData'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
@@ -17,7 +19,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   // updatePoolValues(poolId, null)
 }
 
-export function updateAllPoolValues(today: Day | null): void {
+export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
   // resetting values for real time aggregation
   today.reserve = BigInt.fromI32(0)
   today.totalDebt = BigInt.fromI32(0)
@@ -27,11 +29,11 @@ export function updateAllPoolValues(today: Day | null): void {
   let pools = getAllPools()
   for (let i = 0; i < pools.length; i++) {
     log.debug('handleBlock: update pool values - pool {}', [pools[i]])
-    updatePoolValues(pools[i], today)
+    updatePoolValues(pools[i], block, today)
   }
 }
 
-export function updatePoolValues(poolId: string, today: Day): void {
+export function updatePoolValues(poolId: string, block: ethereum.Block, today: Day): void {
   let pool = Pool.load(poolId)
   let addresses = PoolAddresses.load(poolId)
 
@@ -62,6 +64,8 @@ export function updatePoolValues(poolId: string, today: Day): void {
   pool.seniorTokenPrice = seniorPrice.value
   pool.juniorTokenPrice = juniorPrice.value
 
+  pool = calculate30DayYields(pool, block, today)
+  
   // Check if senior tranche exists
   if (addresses.seniorTranche != '0x0000000000000000000000000000000000000000') {
     let seniorDebtResult = new ethereum.CallResult<BigInt>()
@@ -85,4 +89,39 @@ export function updatePoolValues(poolId: string, today: Day): void {
     ]
   )
   pool.save()
+}
+
+export function calculate30DayYields(pool: Pool, block: ethereum.Block, today: Day): Pool {
+  let date = timestampToDate(block.timestamp)
+  let thirtyDaysAgoTimeStamp = date.minus(BigInt.fromI32(secondsInDay * 30))
+  let thirtyDaysAgo = Day.load(thirtyDaysAgoTimeStamp.toString())
+
+  // If this pool is less than 30 days ago, we assume the initial token price is 1.0
+  let thirtyDaysAgoTokenPriceJunior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18))
+
+  if (thirtyDaysAgo == null) {
+    return pool
+  }
+
+  let thirtyDaysAgoDailyPoolData = DailyPoolData.load(pool.id.concat(thirtyDaysAgo.id))
+  let todayDailyPoolData = DailyPoolData.load(pool.id.concat(today.id))
+
+  if (thirtyDaysAgoDailyPoolData == null || todayDailyPoolData == null) {
+    return pool
+  }
+
+  // (1 + (token price 30 days ago - token price today))^12 - 1
+  pool.thirtyDayJuniorYield = BigInt.fromI32(1)
+    .times(BigInt.fromI32(10).pow(18))
+    .plus(thirtyDaysAgoDailyPoolData.juniorTokenPrice.minus(todayDailyPoolData.juniorTokenPrice))
+    .pow(BigInt.fromI32(12))
+    .minus(BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18)))
+
+  pool.thirtyDaySeniorYield = BigInt.fromI32(1)
+    .times(BigInt.fromI32(10).pow(18))
+    .plus(thirtyDaysAgoDailyPoolData.seniorTokenPrice.minus(todayDailyPoolData.seniorTokenPrice))
+    .pow(BigInt.fromI32(12))
+    .minus(BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18)))
+
+  return pool
 }
