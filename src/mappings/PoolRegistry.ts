@@ -38,7 +38,6 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   ])
 }
 
-
 export function loadPoolFromIPFS(hash: string): void {
   log.debug('loadPoolFromIPFS: {}', [hash])
 
@@ -62,11 +61,6 @@ export function loadPoolFromIPFS(hash: string): void {
     return
   }
 
-  /**
-   * TODO: once AssemblyScript is updated in @graphprotocol/graph-ts to >0.9.0, then we should call
-   * .toLowerCase() on poolId and on all addresses in createPoolAddresses(). This way the case is
-   * consistent, which helps for lookups from the UI.
-   */ 
   let poolId = addresses.get('ROOT_CONTRACT').toString()
   let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
 

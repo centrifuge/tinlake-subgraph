@@ -46,7 +46,6 @@ for (let i = 0; i < kovanPreloadedPools.length; i++) {
 export let preloadedPoolByStartBlock =
   dataSource.network() == 'mainnet' ? preloadedPoolByStartBlockMainnet : preloadedPoolByStartBlockKovan
 
-
 // Lookup tables by IPFS hash
 export let preloadedPoolByIPFSHashMainnet = new Map<string, PreloadedPool>()
 for (let i = 0; i < mainnetPreloadedPools.length; i++) {

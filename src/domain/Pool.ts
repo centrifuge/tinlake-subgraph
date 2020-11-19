@@ -5,8 +5,7 @@ import {
   Coordinator as CoordinatorTemplate,
   Shelf as ShelfTemplate,
   NftFeed as NftFeedTemplate,
-  DROP as DROPTemplate,
-  TIN as TINTemplate,
+  Token as TokenTemplate,
 } from '../../generated/templates'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { seniorToJuniorRatio } from '../util/pool'
@@ -41,15 +40,15 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
   pool.seniorTokenPrice = BigInt.fromI32(0)
   pool.juniorTokenPrice = BigInt.fromI32(0)
+  pool.reserve = BigInt.fromI32(0)
+  pool.assetValue = BigInt.fromI32(0)
   pool.shortName = shortName
   pool.version = BigInt.fromI32(3)
   pool.addresses = poolId
   pool.save()
 }
 
-export function createPoolHandlers(
-  addresses: PoolAddresses
-): void {
+export function createPoolHandlers(addresses: PoolAddresses): void {
   let context = new DataSourceContext()
   context.setString('id', addresses.id)
 
@@ -59,6 +58,14 @@ export function createPoolHandlers(
   AssessorTemplate.createWithContext(Address.fromString(addresses.assessor), context)
   ShelfTemplate.createWithContext(Address.fromString(addresses.shelf), context)
   NftFeedTemplate.createWithContext(Address.fromString(addresses.feed), context)
-  DROPTemplate.createWithContext(Address.fromString(addresses.seniorToken), context)
-  TINTemplate.createWithContext(Address.fromString(addresses.juniorToken), context)
+
+  let seniorTokenContext = new DataSourceContext()
+  seniorTokenContext.setString('id', addresses.id)
+  seniorTokenContext.setString('tokenAddress', addresses.seniorToken)
+  TokenTemplate.createWithContext(Address.fromString(addresses.seniorToken), seniorTokenContext)
+
+  let juniorTokenContext = new DataSourceContext()
+  juniorTokenContext.setString('id', addresses.id)
+  juniorTokenContext.setString('tokenAddress', addresses.juniorToken)
+  TokenTemplate.createWithContext(Address.fromString(addresses.juniorToken), juniorTokenContext)
 }

@@ -21,3 +21,8 @@ export function isNewDay(block: ethereum.Block): boolean {
     return true
   } else return false
 }
+
+export function getToday(block: ethereum.Block): Day {
+  let date = timestampToDate(block.timestamp)
+  return <Day>Day.load(date.toString())
+}
