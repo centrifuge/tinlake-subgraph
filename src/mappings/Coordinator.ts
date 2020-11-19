@@ -64,7 +64,7 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool.seniorTokenPrice = seniorPrice.value
   pool.juniorTokenPrice = juniorPrice.value
 
-  pool = calculate30DayYields(pool, block, today)
+  pool = calculate30DayYields(pool as Pool, block, today)
   
   // Check if senior tranche exists
   if (addresses.seniorTranche != '0x0000000000000000000000000000000000000000') {
@@ -97,31 +97,28 @@ export function calculate30DayYields(pool: Pool, block: ethereum.Block, today: D
   let thirtyDaysAgo = Day.load(thirtyDaysAgoTimeStamp.toString())
 
   // If this pool is less than 30 days ago, we assume the initial token price is 1.0
-  let thirtyDaysAgoTokenPriceJunior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18))
+  let thirtyDaysAgoTokenPriceJunior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(27))
+  let thirtyDaysAgoTokenPriceSenior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(27))
 
-  if (thirtyDaysAgo == null) {
-    return pool
+  if (thirtyDaysAgo != null) {
+    log.debug('calculate30DayYields: with 30 days ago', [])
+    let thirtyDaysAgoDailyPoolData = DailyPoolData.load(pool.id.concat(thirtyDaysAgo.id))
+
+    thirtyDaysAgoTokenPriceJunior = thirtyDaysAgoDailyPoolData.juniorTokenPrice
+    thirtyDaysAgoTokenPriceSenior = thirtyDaysAgoDailyPoolData.seniorTokenPrice
+  } else {
+    // TODO: load first day which exists
+    log.debug('calculate30DayYields: without 30 days ago', [])
   }
 
-  let thirtyDaysAgoDailyPoolData = DailyPoolData.load(pool.id.concat(thirtyDaysAgo.id))
-  let todayDailyPoolData = DailyPoolData.load(pool.id.concat(today.id))
+  // (token price today - token price 30 days ago) * 365/30
+  pool.thirtyDayJuniorYield = pool.juniorTokenPrice
+    .minus(thirtyDaysAgoTokenPriceJunior)
+    .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
 
-  if (thirtyDaysAgoDailyPoolData == null || todayDailyPoolData == null) {
-    return pool
-  }
-
-  // (1 + (token price 30 days ago - token price today))^12 - 1
-  pool.thirtyDayJuniorYield = BigInt.fromI32(1)
-    .times(BigInt.fromI32(10).pow(18))
-    .plus(thirtyDaysAgoDailyPoolData.juniorTokenPrice.minus(todayDailyPoolData.juniorTokenPrice))
-    .pow(BigInt.fromI32(12))
-    .minus(BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18)))
-
-  pool.thirtyDaySeniorYield = BigInt.fromI32(1)
-    .times(BigInt.fromI32(10).pow(18))
-    .plus(thirtyDaysAgoDailyPoolData.seniorTokenPrice.minus(todayDailyPoolData.seniorTokenPrice))
-    .pow(BigInt.fromI32(12))
-    .minus(BigInt.fromI32(1).times(BigInt.fromI32(10).pow(18)))
+  pool.thirtyDaySeniorYield = pool.seniorTokenPrice
+    .minus(thirtyDaysAgoTokenPriceSenior)
+    .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
 
   return pool
 }
