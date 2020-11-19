@@ -16,10 +16,10 @@ export function createToken(address: string): Token {
   return token
 }
 
-export function loadOrCreateToken(tokenAddress: string): Token {
-  let token = Token.load(Address.fromString(tokenAddress).toHex())
+export function loadOrCreateToken(address: string): Token {
+  let token = Token.load(address)
   if (token == null) {
-    token = createToken(tokenAddress)
+    token = createToken(address)
   }
   return <Token>token
 }
