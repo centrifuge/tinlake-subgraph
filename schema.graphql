@@ -15,8 +15,6 @@ type Pool @entity {
   maxReserve: BigInt!
   seniorTokenPrice: BigInt! # assessor
   juniorTokenPrice: BigInt! # assessor
-  # seniorTokenAddress: string todo
-  # juniorTokenAddress: string todo
   reserve: BigInt!
   assetValue: BigInt!
   shortName: String!

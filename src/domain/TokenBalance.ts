@@ -122,7 +122,6 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
   }
 }
 
-// TODO: should be moved to another file
 function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: BigInt): void {
   if (rwd.juniorTokenAmount.plus(rwd.seniorTokenAmount) == BigInt.fromI32(0)) {
     rwd.nonZeroBalanceSince = BigInt.fromI32(0)
@@ -142,7 +141,6 @@ function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: B
   }
 }
 
-// TODO: should be moved to another file
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   let rewardDayTotal = loadOrCreateRewardDayTotal(date)
   // add current pool to today's value
@@ -156,7 +154,6 @@ export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   return rewardDayTotal
 }
 
-// TODO: should be moved to another file
 export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
   let rewardDayTotal = RewardDayTotal.load(date.toString())
   if (rewardDayTotal == null) {
