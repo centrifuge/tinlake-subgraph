@@ -115,6 +115,7 @@ type ERC20Transfer @entity {
 
 type Token @entity {
   id: ID! # token address
+  symbol: String
   owners: [Account!]!
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
 }

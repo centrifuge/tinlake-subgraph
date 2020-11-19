@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts'
+import { log, dataSource } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { ERC20Transfer } from '../../generated/schema'
 import { createERC20Transfer } from '../domain/ERC20Transfer'
@@ -7,7 +7,9 @@ import { loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst } from '../dom
 import { updateAccounts } from '../domain/Account'
 
 export function handleERC20Transfer(event: TransferEvent): void {
-  let token = createToken(event.address.toHex())
+  let address = dataSource.context().getString('tokenAddress')
+  log.debug('handleERC20Transfer: {}', [address])
+  let token = createToken(address)
 
   if (!token.owners.includes(event.params.dst.toHex())) {
     let owners = token.owners

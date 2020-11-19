@@ -17,7 +17,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   // updatePoolValues(poolId, null)
 }
 
-export function updateAllPoolValues(today: Day | null): void {
+export function updateAllPoolValues(today: Day): void {
   // resetting values for real time aggregation
   today.reserve = BigInt.fromI32(0)
   today.totalDebt = BigInt.fromI32(0)

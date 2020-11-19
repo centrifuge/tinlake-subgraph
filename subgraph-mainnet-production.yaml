@@ -188,25 +188,7 @@ templates:
           handler: handleNftFeedUpdate
       file: ./src/mappings/NftFeed.ts
   - kind: ethereum/contract
-    name: DROP
-    network: mainnet
-    source:
-      abi: ERC20
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - Transfer
-      abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
-      eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleERC20Transfer
-      file: ./src/mappings/ERC20.ts
-  - kind: ethereum/contract
-    name: TIN
+    name: Token
     network: mainnet
     source:
       abi: ERC20
