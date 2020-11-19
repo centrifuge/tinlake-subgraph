@@ -23,8 +23,8 @@ export function createTokenBalance(id: string, event: TransferEvent, owner: stri
   return tokenBalance
 }
 
-export function loadOrCreateTokenBalanceDst(event: TransferEvent): TokenBalance {
-  let tokenBalanceDstId = event.params.dst.toHex() + event.address.toHex()
+export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string): TokenBalance {
+  let tokenBalanceDstId = event.params.dst.toHex() + tokenAddress
   let tokenBalanceDst = TokenBalance.load(tokenBalanceDstId)
 
   if (tokenBalanceDst == null) {
@@ -36,8 +36,8 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent): TokenBalance 
   return tokenBalanceDst as TokenBalance
 }
 
-export function loadOrCreateTokenBalanceSrc(event: TransferEvent): TokenBalance {
-  let tokenBalanceSrcId = event.params.src.toHex() + event.address.toHex()
+export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string): TokenBalance {
+  let tokenBalanceSrcId = event.params.src.toHex() + tokenAddress
   let tokenBalanceSrc = TokenBalance.load(tokenBalanceSrcId)
 
   if (tokenBalanceSrc == null) {
@@ -104,6 +104,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
     let owners = token.owners
     let holderId = owners[i]
     let tbId = holderId.concat(token.id)
+
     log.debug('createDailyTokenBalances: token balance {}', [tbId])
 
     let tb = TokenBalance.load(tbId)
@@ -121,7 +122,6 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
   }
 }
 
-// TODO: should be moved to another file
 function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: BigInt): void {
   if (rwd.juniorTokenAmount.plus(rwd.seniorTokenAmount) == BigInt.fromI32(0)) {
     rwd.nonZeroBalanceSince = BigInt.fromI32(0)
@@ -141,7 +141,6 @@ function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: B
   }
 }
 
-// TODO: should be moved to another file
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   let rewardDayTotal = loadOrCreateRewardDayTotal(date)
   // add current pool to today's value
@@ -155,7 +154,6 @@ export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   return rewardDayTotal
 }
 
-// TODO: should be moved to another file
 export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
   let rewardDayTotal = RewardDayTotal.load(date.toString())
   if (rewardDayTotal == null) {
