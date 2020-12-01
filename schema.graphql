@@ -139,7 +139,7 @@ type RewardDayTotal @entity {
   id: ID!
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
-  rewardRate: BigInt!
+  rewardRate: BigDecimal!
 }
 
 # initial cent address is nothing?
@@ -155,7 +155,7 @@ type RewardClaim @entity {
 type RewardBalance @entity {
   id: ID! # ethAddress
   claims: [RewardClaim!]!
-  pendingRewards: BigInt!
-  claimableRewards: BigInt!
-  totalRewards: BigInt! # sum of the above 2
+  pendingRewards: BigDecimal!
+  claimableRewards: BigDecimal!
+  totalRewards: BigDecimal! # sum of the above 2
 }

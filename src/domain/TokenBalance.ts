@@ -1,4 +1,4 @@
-import { log, BigInt } from '@graphprotocol/graph-ts'
+import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import {
   RewardDailyInvestorTokenBalance,
@@ -160,11 +160,14 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
-    rewardDayTotal.rewardRate = BigInt.fromI32(0)
+    // 0.0042 RAD/DAI up to 1M RAD
+    rewardDayTotal.rewardRate = BigDecimal.fromString("0.0042")
   }
   rewardDayTotal.save()
   return <RewardDayTotal>rewardDayTotal
 }
+
+
 
 // function rewardRate()
 // {
