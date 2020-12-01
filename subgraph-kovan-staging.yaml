@@ -190,7 +190,7 @@ templates:
       file: ./src/mappings/NftFeed.ts
   - kind: ethereum/contract
     name: Token
-    network: mainnet
+    network: kovan
     source:
       abi: ERC20
     mapping:
