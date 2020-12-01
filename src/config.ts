@@ -2,6 +2,8 @@ import { dataSource } from '@graphprotocol/graph-ts'
 
 export const secondsInDay = 86400
 
+export const secondsInSixtyDays = 5184000
+
 export const handleBlockFrequencyMinutes = 5
 
 export const blockTimeSeconds = 15
@@ -13,7 +15,7 @@ export const blockTimeSeconds = 15
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 11280904
+const fastForwardUntilBlockMainnet = 11361890
 const fastForwardUntilBlockKovan = 22162921
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan

@@ -1,6 +1,7 @@
 import { BigInt, ethereum } from '@graphprotocol/graph-ts'
 import { Day } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
+import { secondsInSixtyDays } from '../config'
 
 export function createDay(dateString: string): Day {
   let day = new Day(dateString)
@@ -25,4 +26,10 @@ export function isNewDay(block: ethereum.Block): boolean {
 export function getToday(block: ethereum.Block): Day {
   let date = timestampToDate(block.timestamp)
   return <Day>Day.load(date.toString())
+}
+
+// if the difference between days since nonzerobalance
+// and today's timestamp are greater than or equal to sixty days in seconds
+export function sixtyDays(today: BigInt, nonzerosince: BigInt): boolean {
+  return nonzerosince.minus(BigInt.fromI32(secondsInSixtyDays)) >= today
 }

@@ -86,13 +86,13 @@ export function loadOrCreateDailyInvestorTokenBalance(
   return <RewardDailyInvestorTokenBalance>dailyInvestorTokenBalance
 }
 
-function loadOrCreateDailyInvestorTokenBalanceIds(poolId: string): RewardDailyInvestorIdentifier {
+export function loadOrCreateDailyInvestorTokenBalanceIds(poolId: string): RewardDailyInvestorIdentifier {
   let ids = RewardDailyInvestorIdentifier.load(poolId)
   if (ids == null) {
     ids = new RewardDailyInvestorIdentifier(poolId)
     ids.rewardIds = []
+    ids.save()
   }
-  ids.save()
   return <RewardDailyInvestorIdentifier>ids
 }
 
