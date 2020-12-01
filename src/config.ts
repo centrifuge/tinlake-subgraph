@@ -8,6 +8,8 @@ export const handleBlockFrequencyMinutes = 5
 
 export const blockTimeSeconds = 15
 
+export const tierOneRewards = '1000000000000000000000000000000000000000000000000000'
+
 /**
  * The pool values will only be updated in daily until fastForwardUntilBlock.
  * After fastForwardUntilBlock, they will be updated every block, so that the
@@ -15,7 +17,7 @@ export const blockTimeSeconds = 15
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 11361890
+const fastForwardUntilBlockMainnet = 11367775
 const fastForwardUntilBlockKovan = 22162921
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan

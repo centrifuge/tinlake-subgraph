@@ -5,8 +5,8 @@ import { secondsInDay } from '../config'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { getAllPools } from './PoolRegistry'
 import { loadOrCreateToken } from './Token'
-import { createDailyTokenBalances, updateRewardDayTotal } from './TokenBalance'
-import { calculateRewards } from './Reward'
+import { createDailyTokenBalances } from './TokenBalance'
+import { calculateRewards, updateRewardDayTotal } from './Reward'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)

@@ -140,9 +140,11 @@ type RewardDayTotal @entity {
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
   rewardRate: BigDecimal!
+  todayReward: BigDecimal!
+  toDateRewardAggregateValue: BigDecimal!
 }
 
-# initial cent address is nothing?
+# initial cent address is nothing
 type RewardClaim @entity {
   id: ID! #eth address and cent address
   ethAddress: String!
