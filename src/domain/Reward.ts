@@ -85,10 +85,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 }
 
 function checkRewardRate(checker: RewardDayTotal): void {
-  let testMilly = BigDecimal.fromString(tierOneRewards)
-  log.debug('pending rewards > 1 MILLY:  {}', [testMilly.toString()])
-
-  if (checker.toDateRewardAggregateValue.gt(testMilly)) {
+  if (checker.toDateRewardAggregateValue.gt(BigDecimal.fromString(tierOneRewards))) {
     log.debug('pending rewards > 1 MILL:  {}', [checker.toDateRewardAggregateValue.toString()])
 
     // todo: update this with correct value
