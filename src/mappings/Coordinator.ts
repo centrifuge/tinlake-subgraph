@@ -65,7 +65,7 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool.juniorTokenPrice = juniorPrice.value
 
   pool = calculate30DayYields(pool as Pool, block)
-  
+
   // Check if senior tranche exists
   if (addresses.seniorTranche != '0x0000000000000000000000000000000000000000') {
     let seniorDebtResult = new ethereum.CallResult<BigInt>()
@@ -116,15 +116,18 @@ export function calculate30DayYields(pool: Pool, block: ethereum.Block): Pool {
     .minus(thirtyDaysAgoTokenPriceJunior)
     .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
 
-  log.debug('calculate30DayYields: junior token price - 30 days ago {}, today {}, yield {}', [
-    thirtyDaysAgoTokenPriceJunior.toString(),
-    pool.juniorTokenPrice.toString(),
-    pool.thirtyDayJuniorYield.toString()
-  ])
-
   pool.thirtyDaySeniorYield = pool.seniorTokenPrice
     .minus(thirtyDaysAgoTokenPriceSenior)
     .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
+
+  log.debug('calculate30DayYields: junior token price: 30 days ago {}, today {}, yield {}; senior token price: 30 days ago {}, today {}, yield {}; ', [
+    thirtyDaysAgoTokenPriceJunior.toString(),
+    pool.juniorTokenPrice.toString(),
+    pool.thirtyDayJuniorYield.toString(),
+    thirtyDaysAgoTokenPriceSenior.toString(),
+    pool.seniorTokenPrice.toString(),
+    pool.thirtyDaySeniorYield.toString()
+  ])
 
   return pool
 }
