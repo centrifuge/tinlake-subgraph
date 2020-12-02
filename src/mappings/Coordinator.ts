@@ -35,6 +35,11 @@ export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
 
 export function updatePoolValues(poolId: string, block: ethereum.Block, today: Day): void {
   let pool = Pool.load(poolId)
+
+  if (pool == null) {
+    log.debug("updatePoolValues: could not load pool", [])
+  }
+
   let addresses = PoolAddresses.load(poolId)
 
   // Update loans and return weightedInterestRate and totalDebt
@@ -64,7 +69,7 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool.seniorTokenPrice = seniorPrice.value
   pool.juniorTokenPrice = juniorPrice.value
 
-  pool = calculate30DayYields(pool as Pool, block)
+  pool = addYields(pool as Pool, block)
 
   // Check if senior tranche exists
   if (addresses.seniorTranche != '0x0000000000000000000000000000000000000000') {
@@ -91,43 +96,60 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool.save()
 }
 
-export function calculate30DayYields(pool: Pool, block: ethereum.Block): Pool {
-  let date = timestampToDate(block.timestamp)
-  let thirtyDaysAgoTimeStamp = date.minus(BigInt.fromI32(secondsInDay * 30))
-  let thirtyDaysAgo = Day.load(thirtyDaysAgoTimeStamp.toString())
+export function addYields(pool: Pool, block: ethereum.Block): Pool {
+  let dateNow = timestampToDate(block.timestamp)
 
-  // If this pool is less than 30 days ago, we assume the initial token price is 1.0
-  let thirtyDaysAgoTokenPriceJunior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(27))
-  let thirtyDaysAgoTokenPriceSenior = BigInt.fromI32(1).times(BigInt.fromI32(10).pow(27))
+  let date14Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 14))
+  let day14Ago = Day.load(date14Ago.toString())
 
-  if (thirtyDaysAgo != null) {
-    log.debug('calculate30DayYields: with 30 days ago', [])
-    let thirtyDaysAgoDailyPoolData = DailyPoolData.load(pool.id.concat(thirtyDaysAgo.id))
-
-    thirtyDaysAgoTokenPriceJunior = thirtyDaysAgoDailyPoolData.juniorTokenPrice
-    thirtyDaysAgoTokenPriceSenior = thirtyDaysAgoDailyPoolData.seniorTokenPrice
-  } else {
-    // TODO: load first day which exists
-    log.debug('calculate30DayYields: without 30 days ago', [])
+  if (day14Ago != null) {
+    let pool14Ago = DailyPoolData.load(pool.id.concat(day14Ago.id))
+    let yields = calculateYields(pool.juniorTokenPrice, pool14Ago.juniorTokenPrice, pool.seniorTokenPrice, pool14Ago.seniorTokenPrice, 14)
+    pool.juniorYield14Days = yields.junior
+    pool.seniorYield14Days = yields.senior
   }
 
-  // (token price today - token price 30 days ago) * 365/30
-  pool.thirtyDayJuniorYield = pool.juniorTokenPrice
-    .minus(thirtyDaysAgoTokenPriceJunior)
-    .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
+  let date30Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 30))
+  let day30Ago = Day.load(date30Ago.toString())
 
-  pool.thirtyDaySeniorYield = pool.seniorTokenPrice
-    .minus(thirtyDaysAgoTokenPriceSenior)
-    .times(BigInt.fromI32(365).div(BigInt.fromI32(30)))
-
-  log.debug('calculate30DayYields: junior token price: 30 days ago {}, today {}, yield {}; senior token price: 30 days ago {}, today {}, yield {}; ', [
-    thirtyDaysAgoTokenPriceJunior.toString(),
-    pool.juniorTokenPrice.toString(),
-    pool.thirtyDayJuniorYield.toString(),
-    thirtyDaysAgoTokenPriceSenior.toString(),
-    pool.seniorTokenPrice.toString(),
-    pool.thirtyDaySeniorYield.toString()
-  ])
+  if (day30Ago != null) {
+    let pool30Ago = DailyPoolData.load(pool.id.concat(day30Ago.id))
+    let yields = calculateYields(pool.juniorTokenPrice, pool30Ago.juniorTokenPrice, pool.seniorTokenPrice, pool30Ago.seniorTokenPrice, 30)
+    pool.juniorYield30Days = yields.junior
+    pool.seniorYield30Days = yields.senior
+  }
 
   return pool
+}
+
+class Yields {
+  junior: BigInt
+  senior: BigInt
+}
+
+function calculateYields(juniorCurrent: BigInt, juniorFormer: BigInt, seniorCurrent: BigInt, seniorFormer: BigInt, days: i32): Yields {
+  let juniorYield = juniorCurrent
+    .minus(juniorFormer)
+    .times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
+
+  let seniorYield = seniorCurrent
+    .minus(seniorFormer)
+    .times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
+
+  log.debug('addYields {}: junior token price: {} days ago {}, today {}, yield {}; senior token price: {} days ago {}, today {}, yield {}; ', [
+    days.toString(),
+    days.toString(),
+    juniorFormer.toString(),
+    juniorCurrent.toString(),
+    juniorYield.toString(),
+    days.toString(),
+    seniorFormer.toString(),
+    seniorCurrent.toString(),
+    seniorYield.toString()
+  ])
+
+  return {
+    junior: juniorYield,
+    senior: seniorYield,
+  }
 }
