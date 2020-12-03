@@ -1,10 +1,10 @@
 import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
-import { createPool, createPoolHandlers } from '../domain/Pool'
+import { createPool, createPoolHandlers, createUpdatedPoolHandlers } from '../domain/Pool'
 import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
-import { createPoolAddresses } from '../domain/PoolAddresses'
+import { updatePoolAddresses } from '../domain/PoolAddresses'
 import { preloadedPoolByIPFSHash } from '../preloadedPools'
-import { PoolRegistry } from '../../generated/schema'
+import { Pool, PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 
 export function handlePoolCreated(call: PoolCreated): void {
@@ -36,6 +36,23 @@ export function handlePoolUpdated(call: PoolUpdated): void {
     call.params.name,
     call.params.data,
   ])
+  let poolId = call.params.pool.toHexString()
+  let hash = call.params.data
+  let oldPoolAddresses = PoolAddresses.load(poolId)
+
+  // Update pool addresses
+  let data = ipfs.cat(hash)
+  if (data == null) {
+    log.error('handlePoolUpdated: IPFS data is null - hash {}', [hash])
+    return
+  }
+
+  let obj = json.fromBytes(data as Bytes).toObject()
+  let addresses = obj.get('addresses').toObject()
+  let newPoolAddresses = updatePoolAddresses(poolId, addresses)
+
+  // Create new pool handlers for the addresses that changed
+  createUpdatedPoolHandlers(oldPoolAddresses, newPoolAddresses)
 }
 
 export function loadPoolFromIPFS(hash: string): void {
@@ -64,7 +81,7 @@ export function loadPoolFromIPFS(hash: string): void {
   let poolId = addresses.get('ROOT_CONTRACT').toString()
   let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
 
-  let poolAddresses = createPoolAddresses(poolId, addresses)
+  let poolAddresses = updatePoolAddresses(poolId, addresses)
   createPool(poolId, shortName, poolAddresses)
   createPoolHandlers(poolAddresses)
   addPoolToRegistry(poolId)
