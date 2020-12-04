@@ -100,7 +100,11 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     // but they'll have one entity tracking rewardsBalance across system
     let reward = loadOrCreateRewardBalance(ditb.account)
 
-    updateInvestorRewardsByToken(addresses, ditb, todayRewards.rewardRate)
+    updateInvestorRewardsByToken(
+      <PoolAddresses>addresses,
+      <RewardDailyInvestorTokenBalance>ditb,
+      todayRewards.rewardRate
+    )
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
     let balance = tokenValues.times(todayRewards.rewardRate)
