@@ -1,5 +1,12 @@
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
-import { RewardDailyInvestorTokenBalance, Pool, RewardBalance, RewardDayTotal } from '../../generated/schema'
+import {
+  RewardDailyInvestorTokenBalance,
+  Pool,
+  PoolAddresses,
+  RewardBalance,
+  RewardDayTotal,
+  RewardByToken,
+} from '../../generated/schema'
 import { loadOrCreateDailyInvestorTokenBalanceIds } from './TokenBalance'
 import { sixtyDays } from './Day'
 import { secondsInDay, tierOneRewards } from '../config'
@@ -45,18 +52,56 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
   return <RewardBalance>rb
 }
 
+export function loadOrCreateRewardByToken(account: string, token: string): RewardByToken {
+  let id = account.concat(token)
+  let rbt = RewardByToken.load(id)
+  if (rbt == null) {
+    rbt = new RewardByToken(id)
+    rbt.account = account
+    rbt.token = token
+    rbt.rewards = BigDecimal.fromString('0')
+    rbt.save()
+  }
+
+  return <RewardByToken>rbt
+}
+
+// query RewardByToken where account = current account
+function updateInvestorRewardsByToken(
+  addresses: PoolAddresses,
+  ditb: RewardDailyInvestorTokenBalance,
+  rate: BigDecimal
+): void {
+  // and an entity per token that they have invested in
+  if (ditb.seniorTokenValue.gt(BigInt.fromI32(0))) {
+    let rbt = loadOrCreateRewardByToken(ditb.account, addresses.seniorToken)
+    rbt.rewards = rbt.rewards.plus(ditb.seniorTokenValue.toBigDecimal().times(rate))
+    rbt.save()
+  }
+  if (ditb.juniorTokenValue.gt(BigInt.fromI32(0))) {
+    let rbt = loadOrCreateRewardByToken(ditb.account, addresses.juniorToken)
+    rbt.rewards = rbt.rewards.plus(ditb.juniorTokenValue.toBigDecimal().times(rate))
+    rbt.save()
+  }
+}
+
 export function calculateRewards(date: BigInt, pool: Pool): void {
   let ids = loadOrCreateDailyInvestorTokenBalanceIds(pool.id)
   let todayRewards = loadOrCreateRewardDayTotal(date)
   checkRewardRate(todayRewards)
 
+  let addresses = PoolAddresses.load(pool.id)
+
   for (let i = 0; i < ids.rewardIds.length; i++) {
     let rewardIdentifiers = ids.rewardIds
     let id = rewardIdentifiers[i]
-    // the ditbs are by pool so an investor can have multiple
+    // the ditb are by pool so an investor can have multiple
     let ditb = RewardDailyInvestorTokenBalance.load(id)
     // but they'll have one entity tracking rewardsBalance across system
     let reward = loadOrCreateRewardBalance(ditb.account)
+
+    updateInvestorRewardsByToken(addresses, ditb, todayRewards.rewardRate)
+
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
     let balance = tokenValues.times(todayRewards.rewardRate)
 

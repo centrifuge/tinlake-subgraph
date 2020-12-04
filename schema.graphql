@@ -79,8 +79,9 @@ type Proxy @entity {
 }
 
 type Account @entity {
-  id: ID! # address
+  id: ID! # account address
   dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
+  # todo: can safely delete this and associated logic
   currentActiveInvestmentAmount: BigInt # not based on token balance
 }
 
@@ -119,7 +120,7 @@ type Day @entity {
 }
 
 type RewardDailyInvestorTokenBalance @entity {
-  id: ID! # investorAddress+poolId+day
+  id: ID! # investorAddress + poolId + day
   account: Account!
   day: Day!
   pool: Pool!
@@ -131,12 +132,13 @@ type RewardDailyInvestorTokenBalance @entity {
 }
 
 type RewardDailyInvestorIdentifier @entity {
-  id: ID!
+  id: ID! # poolId
   rewardIds: [String!]!
 }
 
+# system wide by day
 type RewardDayTotal @entity {
-  id: ID!
+  id: ID! # date
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
   rewardRate: BigDecimal!
@@ -150,6 +152,16 @@ type RewardClaim @entity {
   ethAddress: String!
   centAddress: String!
   reward: BigInt!
+}
+
+# this is a historical value and will not be responsible
+# for keeping track of claims made on cent chain
+# rewards earned from token investment
+type RewardByToken @entity {
+  id: ID! # investorAddress + token address
+  token: Token!
+  account: Account!
+  rewards: BigDecimal!
 }
 
 # on claim changed event from contract
