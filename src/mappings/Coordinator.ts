@@ -36,10 +36,6 @@ export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
 export function updatePoolValues(poolId: string, block: ethereum.Block, today: Day): void {
   let pool = Pool.load(poolId)
 
-  if (pool == null) {
-    log.debug("updatePoolValues: could not load pool", [])
-  }
-
   let addresses = PoolAddresses.load(poolId)
 
   // Update loans and return weightedInterestRate and totalDebt
@@ -101,23 +97,39 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
 
   let date14Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 14))
   let day14Ago = Day.load(date14Ago.toString())
-
-  if (day14Ago != null) {
-    let pool14Ago = DailyPoolData.load(pool.id.concat(day14Ago.id))
-    let yields = calculateYields(pool.juniorTokenPrice, pool14Ago.juniorTokenPrice, pool.seniorTokenPrice, pool14Ago.seniorTokenPrice, 14)
-    pool.juniorYield14Days = yields.junior
-    pool.seniorYield14Days = yields.senior
+  if (day14Ago == null) {
+    // can return early here, if we don't have data for 14 days ago, we won't have data for more than 14 days
+    return pool
   }
+
+  let pool14Ago = DailyPoolData.load(pool.id.concat(day14Ago.id))
+  if (pool14Ago == null) {
+    // can return early here, if we don't have data for 14 days ago, we won't have data for more than 14 days
+    return pool
+  }
+
+  let yields14 = calculateYields(pool.juniorTokenPrice, pool14Ago.juniorTokenPrice, pool.seniorTokenPrice,
+    pool14Ago.seniorTokenPrice, 14)
+  pool.juniorYield14Days = yields14.junior
+  pool.seniorYield14Days = yields14.senior
 
   let date30Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 30))
   let day30Ago = Day.load(date30Ago.toString())
-
-  if (day30Ago != null) {
-    let pool30Ago = DailyPoolData.load(pool.id.concat(day30Ago.id))
-    let yields = calculateYields(pool.juniorTokenPrice, pool30Ago.juniorTokenPrice, pool.seniorTokenPrice, pool30Ago.seniorTokenPrice, 30)
-    pool.juniorYield30Days = yields.junior
-    pool.seniorYield30Days = yields.senior
+  if (day30Ago == null) {
+    // can return early here, if we don't have data for 30 days ago, we won't have data for more than 30 days
+    return pool
   }
+
+  let pool30Ago = DailyPoolData.load(pool.id.concat(day30Ago.id))
+  if (pool30Ago == null) {
+    // can return early here, if we don't have data for 30 days ago, we won't have data for more than 30 days
+    return pool
+  }
+
+  let yields30 = calculateYields(pool.juniorTokenPrice, pool30Ago.juniorTokenPrice, pool.seniorTokenPrice,
+    pool30Ago.seniorTokenPrice, 30)
+  pool.juniorYield30Days = yields30.junior
+  pool.seniorYield30Days = yields30.senior
 
   return pool
 }
@@ -127,7 +139,8 @@ class Yields {
   senior: BigInt
 }
 
-function calculateYields(juniorCurrent: BigInt, juniorFormer: BigInt, seniorCurrent: BigInt, seniorFormer: BigInt, days: i32): Yields {
+function calculateYields(juniorCurrent: BigInt, juniorFormer: BigInt, seniorCurrent: BigInt, seniorFormer: BigInt,
+  days: i32): Yields {
   let juniorYield = juniorCurrent
     .minus(juniorFormer)
     .times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
