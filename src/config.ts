@@ -14,7 +14,7 @@ export const blockTimeSeconds = 15
  * Therefore, this value should be set to the latest block before every new deployment.
  */
 const fastForwardUntilBlockMainnet = 11280904
-const fastForwardUntilBlockKovan = 22162921
+const fastForwardUntilBlockKovan = 22470278
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 
