@@ -17,13 +17,8 @@ export const tierOneRewards = '1000000000000000000000000000000000000000000000000
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-<<<<<<< HEAD
-const fastForwardUntilBlockMainnet = 11367775
-const fastForwardUntilBlockKovan = 22162921
-=======
-const fastForwardUntilBlockMainnet = 11280904
+const fastForwardUntilBlockMainnet = 11412421
 const fastForwardUntilBlockKovan = 22470278
->>>>>>> upstream/main
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 

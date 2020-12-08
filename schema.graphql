@@ -81,8 +81,7 @@ type Proxy @entity {
 type Account @entity {
   id: ID! # account address
   dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
-  # todo: can safely delete this and associated logic
-  currentActiveInvestmentAmount: BigInt # not based on token balance
+  currentActiveInvestmentAmount: BigInt!
 }
 
 type ERC20Transfer @entity {
@@ -103,7 +102,7 @@ type Token @entity {
 }
 
 type TokenBalance @entity {
-  id: ID! # account address + token address 
+  id: ID! # account address + token address
   owner: Account!
   balance: BigInt!
   value: BigInt!
@@ -128,12 +127,16 @@ type RewardDailyInvestorTokenBalance @entity {
   seniorTokenValue: BigInt!
   juniorTokenAmount: BigInt!
   juniorTokenValue: BigInt!
-  nonZeroBalanceSince: BigInt! # investments have to be at least 60 days long for balances to accrue
 }
 
-type RewardDailyInvestorIdentifier @entity {
+type PoolInvestor @entity {
   id: ID! # poolId
-  rewardIds: [String!]!
+  accounts: [String!]! # account addresses in pool
+}
+
+type GlobalAccountId @entity {
+  id: ID! # systemwide '1'
+  accounts: [String!]! # account addresses in system
 }
 
 # system wide by day
@@ -146,12 +149,15 @@ type RewardDayTotal @entity {
   toDateRewardAggregateValue: BigDecimal!
 }
 
-# initial cent address is nothing
-type RewardClaim @entity {
-  id: ID! #eth address and cent address
-  ethAddress: String!
-  centAddress: String!
-  reward: BigInt!
+# on claim changed event from contract
+# create new reward claim for the eth address
+type RewardBalance @entity {
+  id: ID! # account address
+  claims: [RewardClaim!]!
+  pendingRewards: BigDecimal!
+  claimableRewards: BigDecimal!
+  totalRewards: BigDecimal! # sum of the above 2
+  nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
 
 # this is a historical value and will not be responsible
@@ -164,12 +170,10 @@ type RewardByToken @entity {
   rewards: BigDecimal!
 }
 
-# on claim changed event from contract
-# create new reward claim for the address
-type RewardBalance @entity {
-  id: ID! # ethAddress
-  claims: [RewardClaim!]!
-  pendingRewards: BigDecimal!
-  claimableRewards: BigDecimal!
-  totalRewards: BigDecimal! # sum of the above 2
+# initial cent address is nothing
+type RewardClaim @entity {
+  id: ID! #eth address + cent address
+  ethAddress: String!
+  centAddress: String!
+  reward: BigInt!
 }

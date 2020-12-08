@@ -5,10 +5,10 @@ import {
   Token,
   TokenBalance,
   Pool,
-  RewardDailyInvestorIdentifier,
+  PoolInvestor,
   PoolAddresses,
 } from '../../generated/schema'
-import { secondsInDay } from '../config'
+import { loadOrCreateGlobalAccounts } from './Account'
 
 export function createTokenBalance(id: string, event: TransferEvent, owner: string): TokenBalance {
   let tb = new TokenBalance(id)
@@ -22,10 +22,10 @@ export function createTokenBalance(id: string, event: TransferEvent, owner: stri
 
 export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string): TokenBalance {
   let dst = event.params.dst.toHex()
-  let tokenBalanceDstId = dst + tokenAddress
-  let tokenBalanceDst = TokenBalance.load(tokenBalanceDstId)
+  let tokenBalanceId = dst + tokenAddress
+  let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
   if (tokenBalanceDst == null) {
-    tokenBalanceDst = createTokenBalance(tokenBalanceDstId, event, dst)
+    tokenBalanceDst = createTokenBalance(tokenBalanceId, event, dst)
   }
   tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
   tokenBalanceDst.save()
@@ -34,10 +34,10 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: 
 
 export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string): TokenBalance {
   let src = event.params.src.toHex()
-  let tokenBalanceSrcId = src + tokenAddress
-  let tokenBalanceSrc = TokenBalance.load(tokenBalanceSrcId)
+  let tokenBalanceId = src + tokenAddress
+  let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
   if (tokenBalanceSrc == null) {
-    tokenBalanceSrc = createTokenBalance(tokenBalanceSrcId, event, src)
+    tokenBalanceSrc = createTokenBalance(tokenBalanceId, event, src)
   }
   tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
   tokenBalanceSrc.save()
@@ -62,9 +62,9 @@ export function loadOrCreateDailyInvestorTokenBalance(
     ditb.seniorTokenValue = BigInt.fromI32(0)
     ditb.juniorTokenAmount = BigInt.fromI32(0)
     ditb.juniorTokenValue = BigInt.fromI32(0)
-    ditb.nonZeroBalanceSince = BigInt.fromI32(0)
   }
 
+  // update token values
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
@@ -73,25 +73,24 @@ export function loadOrCreateDailyInvestorTokenBalance(
     ditb.juniorTokenAmount = tokenBalance.balance
     ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance)
   }
-
-  updateNonZeroBalance(<RewardDailyInvestorTokenBalance>ditb, timestamp)
   ditb.save()
   return <RewardDailyInvestorTokenBalance>ditb
 }
 
-export function loadOrCreateDailyInvestorTokenBalanceIds(poolId: string): RewardDailyInvestorIdentifier {
-  let ids = RewardDailyInvestorIdentifier.load(poolId)
+export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
+  let ids = PoolInvestor.load(poolId)
   if (ids == null) {
-    ids = new RewardDailyInvestorIdentifier(poolId)
-    ids.rewardIds = []
+    ids = new PoolInvestor(poolId)
+    ids.accounts = []
     ids.save()
   }
-  return <RewardDailyInvestorIdentifier>ids
+  return <PoolInvestor>ids
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
-  let ids = loadOrCreateDailyInvestorTokenBalanceIds(pool.id)
+  let globalAccounts = loadOrCreateGlobalAccounts('1')
+  let poolInvestors = loadOrCreatePoolInvestors(pool.id)
 
   for (let i = 0; i < token.owners.length; i++) {
     let owners = token.owners
@@ -105,31 +104,18 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
-      if (!ids.rewardIds.includes(ditb.id)) {
-        let temp = ids.rewardIds
-        temp.push(ditb.id)
-        ids.rewardIds = temp
-        ids.save()
+      if (!globalAccounts.accounts.includes(ditb.account)) {
+        let temp = globalAccounts.accounts
+        temp.push(ditb.account)
+        globalAccounts.accounts = temp
+        globalAccounts.save()
+      }
+      if (!poolInvestors.accounts.includes(ditb.account)) {
+        let temp = poolInvestors.accounts
+        temp.push(ditb.account)
+        poolInvestors.accounts = temp
+        poolInvestors.save()
       }
     }
-  }
-}
-
-function updateNonZeroBalance(rwd: RewardDailyInvestorTokenBalance, timestamp: BigInt): void {
-  if (rwd.juniorTokenAmount.plus(rwd.seniorTokenAmount) == BigInt.fromI32(0)) {
-    rwd.nonZeroBalanceSince = BigInt.fromI32(0)
-    return
-  }
-
-  let yesterdayTimeStamp = timestamp.minus(BigInt.fromI32(secondsInDay))
-  let yesterdayId = rwd.account.concat(rwd.pool).concat(yesterdayTimeStamp.toString())
-  let yesterdayRewardTokenBalance = RewardDailyInvestorTokenBalance.load(yesterdayId)
-  if (yesterdayRewardTokenBalance == null) {
-    rwd.nonZeroBalanceSince = timestamp
-    return
-  }
-  if (yesterdayRewardTokenBalance.nonZeroBalanceSince != BigInt.fromI32(0)) {
-    rwd.nonZeroBalanceSince = yesterdayRewardTokenBalance.nonZeroBalanceSince
-    return
   }
 }

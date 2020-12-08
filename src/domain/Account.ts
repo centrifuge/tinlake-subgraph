@@ -1,5 +1,5 @@
 import { BigInt } from '@graphprotocol/graph-ts'
-import { Account } from '../../generated/schema'
+import { Account, GlobalAccountId } from '../../generated/schema'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 
 export function createAccount(address: string): Account {
@@ -25,4 +25,14 @@ export function updateAccounts(event: TransferEvent): void {
   }
   accountFrom.currentActiveInvestmentAmount = accountFrom.currentActiveInvestmentAmount.minus(event.params.wad)
   accountFrom.save()
+}
+
+export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
+  let ids = GlobalAccountId.load(id)
+  if (ids == null) {
+    ids = new GlobalAccountId(id)
+    ids.accounts = []
+    ids.save()
+  }
+  return <GlobalAccountId>ids
 }
