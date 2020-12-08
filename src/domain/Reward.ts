@@ -85,8 +85,8 @@ function updateInvestorRewardsByToken(
 
 export function calculateRewards(date: BigInt, pool: Pool): void {
   let investorIds = loadOrCreatePoolInvestors(pool.id)
-  let todayRewards = loadOrCreateRewardDayTotal(date)
-  checkRewardRate(todayRewards)
+  let systemRewards = loadOrCreateRewardDayTotal(date)
+  checkRewardRate(systemRewards)
   let tokenAddresses = PoolAddresses.load(pool.id)
 
   for (let i = 0; i < investorIds.accounts.length; i++) {
@@ -98,11 +98,11 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
       <RewardDailyInvestorTokenBalance>ditb,
-      todayRewards.rewardRate
+      systemRewards.rewardRate
     )
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-    let balance = tokenValues.times(todayRewards.rewardRate)
+    let balance = tokenValues.times(systemRewards.rewardRate)
     reward.pendingRewards = reward.pendingRewards.plus(balance)
 
     if (sixtyDays(date, reward.nonZeroBalanceSince)) {
@@ -114,15 +114,15 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     reward.totalRewards = reward.pendingRewards.plus(reward.claimableRewards)
 
     // add this user's pending rewards to today's rewards obj
-    todayRewards.todayReward = todayRewards.todayReward.plus(reward.pendingRewards)
-    todayRewards.save()
+    systemRewards.todayReward = systemRewards.todayReward.plus(reward.pendingRewards)
+    systemRewards.save()
     reward.save()
   }
   // add yesterday's aggregate value to today's toDate aggregate
   let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))
   let prevDayRewards = loadOrCreateRewardDayTotal(prevDayRewardId)
-  todayRewards.toDateRewardAggregateValue = todayRewards.todayReward.plus(prevDayRewards.toDateRewardAggregateValue)
-  todayRewards.save()
+  systemRewards.toDateRewardAggregateValue = systemRewards.todayReward.plus(prevDayRewards.toDateRewardAggregateValue)
+  systemRewards.save()
 }
 
 function checkRewardRate(checker: RewardDayTotal): void {

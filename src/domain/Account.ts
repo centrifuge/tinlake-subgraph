@@ -9,6 +9,7 @@ export function createAccount(address: string): Account {
   return account
 }
 
+// used for determining nzbs across system for user
 export function updateAccounts(event: TransferEvent): void {
   // increase accountTo balance
   let accountTo = Account.load(event.params.dst.toHex())
