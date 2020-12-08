@@ -40,6 +40,11 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   let hash = call.params.data
   let oldPoolAddresses = PoolAddresses.load(poolId)
 
+  if (oldPoolAddresses == null) {
+    log.error('handlePoolUpdated: could not load old pool addresses', [])
+    return
+  }
+
   // Update pool addresses
   let data = ipfs.cat(hash)
   if (data == null) {
@@ -52,7 +57,7 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed
-  createUpdatedPoolHandlers(oldPoolAddresses, newPoolAddresses)
+  createUpdatedPoolHandlers(oldPoolAddresses as PoolAddresses, newPoolAddresses)
 }
 
 export function loadPoolFromIPFS(hash: string): void {
