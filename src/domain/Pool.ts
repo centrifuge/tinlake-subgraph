@@ -76,16 +76,34 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
 
   log.debug('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
 
-  if (prevAddresses.coordinator != newAddresses.coordinator)
+  if (prevAddresses.coordinator != newAddresses.coordinator) {
+    log.debug('createUpdatedPoolHandlers: swapping coordinator {} => {}', [
+      prevAddresses.coordinator,
+      newAddresses.coordinator,
+    ])
     CoordinatorTemplate.createWithContext(Address.fromString(newAddresses.coordinator), context)
-  if (prevAddresses.assessor != newAddresses.assessor)
+  }
+
+  if (prevAddresses.assessor != newAddresses.assessor) {
+    log.debug('createUpdatedPoolHandlers: swapping assessor {} => {}', [prevAddresses.assessor, newAddresses.assessor])
     AssessorTemplate.createWithContext(Address.fromString(newAddresses.assessor), context)
-  if (prevAddresses.shelf != newAddresses.shelf)
+  }
+
+  if (prevAddresses.shelf != newAddresses.shelf) {
+    log.debug('createUpdatedPoolHandlers: swapping shelf {} => {}', [prevAddresses.shelf, newAddresses.shelf])
     ShelfTemplate.createWithContext(Address.fromString(newAddresses.shelf), context)
-  if (prevAddresses.feed != newAddresses.feed)
+  }
+
+  if (prevAddresses.feed != newAddresses.feed) {
+    log.debug('createUpdatedPoolHandlers: swapping feed {} => {}', [prevAddresses.feed, newAddresses.feed])
     NftFeedTemplate.createWithContext(Address.fromString(newAddresses.feed), context)
+  }
 
   if (prevAddresses.seniorToken != newAddresses.seniorToken) {
+    log.debug('createUpdatedPoolHandlers: swapping seniorToken {} => {}', [
+      prevAddresses.seniorToken,
+      newAddresses.seniorToken,
+    ])
     let seniorTokenContext = new DataSourceContext()
     seniorTokenContext.setString('id', newAddresses.id)
     seniorTokenContext.setString('tokenAddress', newAddresses.seniorToken)
@@ -93,6 +111,10 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.juniorToken != newAddresses.juniorToken) {
+    log.debug('createUpdatedPoolHandlers: swapping juniorToken {} => {}', [
+      prevAddresses.juniorToken,
+      newAddresses.assessor,
+    ])
     let juniorTokenContext = new DataSourceContext()
     juniorTokenContext.setString('id', newAddresses.id)
     juniorTokenContext.setString('tokenAddress', newAddresses.juniorToken)
