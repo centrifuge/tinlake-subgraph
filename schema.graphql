@@ -165,8 +165,8 @@ type RewardBalance @entity {
 # rewards earned from token investment
 type RewardByToken @entity {
   id: ID! # investorAddress + token address
-  token: Token!
-  account: Account!
+  token: String!
+  account: String!
   rewards: BigDecimal!
 }
 
