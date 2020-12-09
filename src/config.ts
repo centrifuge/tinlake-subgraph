@@ -10,6 +10,8 @@ export const blockTimeSeconds = 15
 
 export const tierOneRewards = '1000000000000000000000000000000000000000000000000000'
 
+export const initialRewardRate = '0.0042'
+
 /**
  * The pool values will only be updated in daily until fastForwardUntilBlock.
  * After fastForwardUntilBlock, they will be updated every block, so that the

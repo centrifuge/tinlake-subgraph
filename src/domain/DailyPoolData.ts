@@ -30,7 +30,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
     createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
   }
 
-  systemWideZeroBalances(yesterdayTimeStamp)
+  updateSystemWideNonZeroBalances(yesterdayTimeStamp)
 
   // another pool loop to now update rewards
   for (let i = 0; i < pools.length; i++) {
@@ -77,8 +77,8 @@ export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): vo
 }
 
 // if an investor's system wide amount goes to 0,
-// then reset their non zero balance since (nzbs) reward accumulation date
-function systemWideZeroBalances(date: BigInt): void {
+// then reset their nonZeroBalanceSince (nzbs) reward accumulation date
+function updateSystemWideNonZeroBalances(date: BigInt): void {
   let accounts = loadOrCreateGlobalAccounts('1')
   for (let i = 0; i < accounts.accounts.length; i++) {
     let investors = accounts.accounts

@@ -8,8 +8,8 @@ import {
   RewardByToken,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
-import { sixtyDays } from './Day'
-import { secondsInDay, tierOneRewards } from '../config'
+import { haveSixtyDaysPassed } from './Day'
+import { initialRewardRate, secondsInDay, tierOneRewards } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -29,7 +29,7 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
     // 0.0042 RAD/DAI up to 1M RAD
-    rewardDayTotal.rewardRate = BigDecimal.fromString('0.0042')
+    rewardDayTotal.rewardRate = BigDecimal.fromString(initialRewardRate)
     rewardDayTotal.todayReward = BigDecimal.fromString('0')
     rewardDayTotal.toDateRewardAggregateValue = BigDecimal.fromString('0')
   }
@@ -105,7 +105,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     let balance = tokenValues.times(systemRewards.rewardRate)
     reward.pendingRewards = reward.pendingRewards.plus(balance)
 
-    if (sixtyDays(date, reward.nonZeroBalanceSince)) {
+    if (haveSixtyDaysPassed(date, reward.nonZeroBalanceSince)) {
       log.debug('transfer pending rewards to claimable:  {}', [date.toString()])
       reward.claimableRewards = reward.pendingRewards
       // reset pending rewards

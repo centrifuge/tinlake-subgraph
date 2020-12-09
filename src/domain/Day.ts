@@ -30,6 +30,6 @@ export function getToday(block: ethereum.Block): Day {
 
 // if the difference between days since nonzerobalance
 // and today's timestamp are greater than or equal to sixty days in seconds
-export function sixtyDays(today: BigInt, nonzerosince: BigInt): boolean {
-  return nonzerosince.minus(BigInt.fromI32(secondsInSixtyDays)) >= today
+export function haveSixtyDaysPassed(today: BigInt, nonZeroSince: BigInt): boolean {
+  return nonZeroSince.minus(BigInt.fromI32(secondsInSixtyDays)) >= today
 }
