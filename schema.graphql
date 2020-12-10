@@ -181,3 +181,8 @@ type RewardClaim @entity {
   centAddress: String!
   reward: BigInt!
 }
+
+type PendingOrder @entity {
+  id: ID! # account address
+  amountPending: BigInt! 
+}

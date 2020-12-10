@@ -108,8 +108,13 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
     return pool
   }
 
-  let yields14 = calculateYields(pool.juniorTokenPrice, pool14Ago.juniorTokenPrice, pool.seniorTokenPrice,
-    pool14Ago.seniorTokenPrice, 14)
+  let yields14 = calculateYields(
+    pool.juniorTokenPrice,
+    pool14Ago.juniorTokenPrice,
+    pool.seniorTokenPrice,
+    pool14Ago.seniorTokenPrice,
+    14
+  )
   pool.juniorYield14Days = yields14.junior
   pool.seniorYield14Days = yields14.senior
 
@@ -126,8 +131,13 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
     return pool
   }
 
-  let yields30 = calculateYields(pool.juniorTokenPrice, pool30Ago.juniorTokenPrice, pool.seniorTokenPrice,
-    pool30Ago.seniorTokenPrice, 30)
+  let yields30 = calculateYields(
+    pool.juniorTokenPrice,
+    pool30Ago.juniorTokenPrice,
+    pool.seniorTokenPrice,
+    pool30Ago.seniorTokenPrice,
+    30
+  )
   pool.juniorYield30Days = yields30.junior
   pool.seniorYield30Days = yields30.senior
 
@@ -139,27 +149,31 @@ class Yields {
   senior: BigInt
 }
 
-function calculateYields(juniorCurrent: BigInt, juniorFormer: BigInt, seniorCurrent: BigInt, seniorFormer: BigInt,
-  days: i32): Yields {
-  let juniorYield = juniorCurrent
-    .minus(juniorFormer)
-    .times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
+function calculateYields(
+  juniorCurrent: BigInt,
+  juniorFormer: BigInt,
+  seniorCurrent: BigInt,
+  seniorFormer: BigInt,
+  days: i32
+): Yields {
+  let juniorYield = juniorCurrent.minus(juniorFormer).times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
 
-  let seniorYield = seniorCurrent
-    .minus(seniorFormer)
-    .times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
+  let seniorYield = seniorCurrent.minus(seniorFormer).times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
 
-  log.debug('addYields {}: junior token price: {} days ago {}, today {}, yield {}; senior token price: {} days ago {}, today {}, yield {}; ', [
-    days.toString(),
-    days.toString(),
-    juniorFormer.toString(),
-    juniorCurrent.toString(),
-    juniorYield.toString(),
-    days.toString(),
-    seniorFormer.toString(),
-    seniorCurrent.toString(),
-    seniorYield.toString()
-  ])
+  log.debug(
+    'addYields {}: junior token price: {} days ago {}, today {}, yield {}; senior token price: {} days ago {}, today {}, yield {}; ',
+    [
+      days.toString(),
+      days.toString(),
+      juniorFormer.toString(),
+      juniorCurrent.toString(),
+      juniorYield.toString(),
+      days.toString(),
+      seniorFormer.toString(),
+      seniorCurrent.toString(),
+      seniorYield.toString(),
+    ]
+  )
 
   return {
     junior: juniorYield,
