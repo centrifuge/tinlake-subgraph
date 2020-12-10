@@ -148,7 +148,7 @@ templates:
         - name: Pile
           file: ./abis/Pile.json
         - name: NftFeed
-          file: ./abis/NFTFeed.json
+          file: ./abis/NftFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: Assessor
@@ -176,7 +176,7 @@ templates:
         - Loan
       abis:
         - name: NftFeed
-          file: ./abis/NFTFeed.json
+          file: ./abis/NftFeed.json
         - name: Shelf
           file: ./abis/Shelf.json
         - name: Pile

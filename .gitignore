@@ -4,3 +4,5 @@ SECRET.md
 generated
 env
 .DS_Store
+yarn.lock
+.vscode
