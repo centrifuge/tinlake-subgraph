@@ -10,12 +10,12 @@ import {
 } from '../../generated/schema'
 import { loadOrCreateGlobalAccounts } from './Account'
 
-export function createTokenBalance(id: string, event: TransferEvent, owner: string): TokenBalance {
+export function createTokenBalance(id: string, address: string, owner: string): TokenBalance {
   let tb = new TokenBalance(id)
   tb.owner = owner
   tb.balance = BigInt.fromI32(0)
   tb.value = BigInt.fromI32(0)
-  tb.token = event.address.toHex()
+  tb.token = address
   tb.save()
   return tb
 }
@@ -25,7 +25,7 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: 
   let tokenBalanceId = dst + tokenAddress
   let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
   if (tokenBalanceDst == null) {
-    tokenBalanceDst = createTokenBalance(tokenBalanceId, event, dst)
+    tokenBalanceDst = createTokenBalance(tokenBalanceId, tokenAddress, dst)
   }
   tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
   tokenBalanceDst.save()
@@ -37,7 +37,7 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
   let tokenBalanceId = src + tokenAddress
   let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
   if (tokenBalanceSrc == null) {
-    tokenBalanceSrc = createTokenBalance(tokenBalanceId, event, src)
+    tokenBalanceSrc = createTokenBalance(tokenBalanceId, tokenAddress, src)
   }
   tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
   tokenBalanceSrc.save()
