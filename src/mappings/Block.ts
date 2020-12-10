@@ -39,6 +39,6 @@ export function handleBlock(block: ethereum.Block): void {
   // Update all pool values if the fast forward phase has passed, or if it's a new day
   let fastForwardEnabled = block.number.toI32() < fastForwardUntilBlock
   if (!fastForwardEnabled || (fastForwardEnabled && newDay)) {
-    updateAllPoolValues(today)
+    updateAllPoolValues(block, today)
   }
 }
