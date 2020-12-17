@@ -6,6 +6,7 @@ import {
   Shelf as ShelfTemplate,
   NftFeed as NftFeedTemplate,
   Token as TokenTemplate,
+  Tranche as TrancheTemplate,
 } from '../../generated/templates'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { seniorToJuniorRatio } from '../util/pool'
@@ -62,6 +63,8 @@ export function createPoolHandlers(addresses: PoolAddresses): void {
   AssessorTemplate.createWithContext(Address.fromString(addresses.assessor), context)
   ShelfTemplate.createWithContext(Address.fromString(addresses.shelf), context)
   NftFeedTemplate.createWithContext(Address.fromString(addresses.feed), context)
+  TrancheTemplate.createWithContext(Address.fromString(addresses.seniorTranche), context)
+  TrancheTemplate.createWithContext(Address.fromString(addresses.juniorTranche), context)
 
   let seniorTokenContext = new DataSourceContext()
   seniorTokenContext.setString('id', addresses.id)

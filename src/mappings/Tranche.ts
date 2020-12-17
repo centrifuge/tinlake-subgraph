@@ -1,43 +1,60 @@
-import { log, BigInt, Address, dataSource } from '@graphprotocol/graph-ts'
+import { log, dataSource } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
-import { PendingOrder } from '../../generated/schema'
+import { Account } from '../../generated/schema'
 import { loadOrCreatePendingOrder } from '../domain/PendingOrder'
+import { createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
 
-// i think these are data sources...
-// needs data source context
-
-// the supply order is the first thing that someone does
-// in tinlake
+// the supply order is the first thing that someone does in tinlake
 // so they will not have a token balance..
+// but the supply order is only interesting the rewards context
 
-// i think i want the pending orders by pool?
-// because it will have the token price
-// so i can calculate their pre-disburse rewards
-
+// possibly change the pending orders from global to by pool so that it's easier to
+// get the token price to calculate the pre-disburse reward
+// harder to find when their pending amount goes to 0 though
 export function handleSupplyOrder(call: SupplyOrderCall): void {
-  let from = call.from
-  let to = call.to
+  // the token address...
+  let to = call.to.toHex()
+  let poolId = dataSource.context().getString('id')
 
   log.debug('handle supply order: to {}', [to.toString()])
+  log.debug('handle supply order: poolId {}', [poolId.toString()])
 
-  let account = call.inputs.usr
-  let amount = call.inputs.newSupplyAmount
+  let account = call.inputs.usr.toHex()
 
-  let pendingOrder = loadOrCreatePendingOrder(account.toString())
-  pendingOrder.amountPending = pendingOrder.amountPending.plus(amount)
-  pendingOrder.save()
+  // protection from adding system account to internal tracking
+  // todo: but i think that none of the tinlake accounts would be doing supply orders..
+  if (!isSystemAccount(poolId, account)) {
+    let amount = call.inputs.newSupplyAmount
+
+    if (Account.load(account) == null) {
+      createAccount(account)
+    }
+    let globalAccounts = loadOrCreateGlobalAccounts('1')
+
+    if (!globalAccounts.accounts.includes(account)) {
+      let temp = globalAccounts.accounts
+      temp.push(account)
+      globalAccounts.accounts = temp
+      globalAccounts.save()
+    }
+
+    let pendingOrder = loadOrCreatePendingOrder(account)
+    pendingOrder.amountPending = pendingOrder.amountPending.plus(amount)
+    pendingOrder.save()
+  }
 }
 
+// todo: delete the pending order
+// if the pending amount becomes 0 after we minus
 export function handleRedeemOrder(call: RedeemOrderCall): void {
-  let from = call.from
-  let to = call.to
-
+  let to = call.to.toHex()
+  let poolId = dataSource.context().getString('id')
   log.debug('handle redeem order: to {}', [to.toString()])
+  log.debug('handle redeem order: poolId {}', [poolId.toString()])
 
-  let account = call.inputs.usr
+  let account = call.inputs.usr.toHex()
   let amount = call.inputs.newRedeemAmount
-
-  let pendingOrder = loadOrCreatePendingOrder(account.toString())
+  let pendingOrder = loadOrCreatePendingOrder(account)
   pendingOrder.amountPending = pendingOrder.amountPending.minus(amount)
   pendingOrder.save()
 }

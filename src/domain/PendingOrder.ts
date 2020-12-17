@@ -1,4 +1,4 @@
-import { BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts'
 import { PendingOrder } from '../../generated/schema'
 
 export function loadOrCreatePendingOrder(address: string): PendingOrder {
