@@ -1,6 +1,7 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { Account, GlobalAccountId, PoolAddresses } from '../../generated/schema'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
+import { zeroAddress } from '../config'
 
 export function createAccount(address: string): Account {
   let account = new Account(address)
@@ -60,5 +61,6 @@ export function isSystemAccount(poolId: string, account: string): boolean {
   let result = false
   if (addresses.seniorToken == account) result = true
   if (addresses.juniorToken == account) result = true
+  if (account == zeroAddress) result = true
   return result
 }
