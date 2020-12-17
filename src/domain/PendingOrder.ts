@@ -7,8 +7,15 @@ export function loadOrCreatePendingOrder(address: string, poolId: string): Pendi
     pending = new PendingOrder(address.concat(poolId))
     pending.pool = poolId
     pending.account = address
-    pending.amountPending = BigInt.fromI32(0)
+    pending.amountPendingSenior = BigInt.fromI32(0)
+    pending.amountPendingJunior = BigInt.fromI32(0)
     pending.save()
   }
   return <PendingOrder>pending
+}
+
+// if the user has a pending order in this pool
+// need the senior or junior token value
+export function checkPendingOrders(user: string, pool: string): void {
+  let po = loadOrCreatePendingOrder(user, pool)
 }

@@ -188,5 +188,6 @@ type PendingOrder @entity {
   id: ID! # account address + pool address
   pool: String!
   account: String!
-  amountPending: BigInt! 
+  amountPendingSenior: BigInt!
+  amountPendingJunior: BigInt!
 }

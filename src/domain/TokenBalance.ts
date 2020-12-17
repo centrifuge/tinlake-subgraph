@@ -104,8 +104,6 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     log.debug('createDailyTokenBalances: token balance {}', [tbId])
 
-    // a system account should no have a token balance, so this should be fine
-    // we also push token.owners on token dst, but is not excluded if isSystemAccount
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])

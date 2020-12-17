@@ -10,6 +10,7 @@ import {
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
 import { initialRewardRate, secondsInDay, tierOneRewards } from '../config'
+import { checkPendingOrders } from './PendingOrder'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -64,6 +65,7 @@ export function loadOrCreateRewardByToken(account: string, token: string): Rewar
   return <RewardByToken>rbt
 }
 
+// todo: this is broken by the pending orders
 // query RewardByToken where account = current account
 function updateInvestorRewardsByToken(
   addresses: PoolAddresses,
@@ -95,6 +97,8 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     let ditb = RewardDailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     let reward = loadOrCreateRewardBalance(ditb.account)
 
+    checkPendingOrders(ditb.account, pool.id)
+
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
       <RewardDailyInvestorTokenBalance>ditb,
@@ -102,8 +106,9 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     )
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-    let balance = tokenValues.times(systemRewards.rewardRate)
-    reward.pendingRewards = reward.pendingRewards.plus(balance)
+
+    // add token values x rate to user rewards
+    reward.pendingRewards = reward.pendingRewards.plus(tokenValues.times(systemRewards.rewardRate))
 
     if (rewardsAreEligible(date, reward.nonZeroBalanceSince)) {
       log.debug('transfer pending rewards to claimable:  {}', [date.toString()])
