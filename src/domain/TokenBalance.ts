@@ -8,6 +8,7 @@ import {
   PoolInvestor,
   PoolAddresses,
 } from '../../generated/schema'
+import { fixed27 } from '../config'
 import { isSystemAccount, loadOrCreateGlobalAccounts } from './Account'
 
 export function createTokenBalance(id: string, address: string, owner: string): TokenBalance {
@@ -49,6 +50,7 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
 }
 
 // TODO: if the owner/account address is part of the pool, don't add it to rewards calcs
+// currently testing this assumption - i think 0 address will still be in here?
 export function loadOrCreateDailyInvestorTokenBalance(
   tokenBalance: TokenBalance,
   pool: Pool,
@@ -72,16 +74,16 @@ export function loadOrCreateDailyInvestorTokenBalance(
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
-    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance) // need to divide by 10^27
+    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance).div(fixed27)
   } else {
     ditb.juniorTokenAmount = tokenBalance.balance
-    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance) // need to divide by 10^27
+    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance).div(fixed27)
   }
   ditb.save()
   return <RewardDailyInvestorTokenBalance>ditb
 }
 
-// made up currently of token.owners..
+// made up currently junior and senior token.owners
 export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   let ids = PoolInvestor.load(poolId)
   if (ids == null) {

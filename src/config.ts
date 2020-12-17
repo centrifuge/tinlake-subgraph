@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts'
+import { dataSource, BigInt } from '@graphprotocol/graph-ts'
 
 export const secondsInDay = 86400
 
@@ -8,7 +8,9 @@ export const handleBlockFrequencyMinutes = 5
 
 export const blockTimeSeconds = 15
 
-export const tierOneRewards = '1000000000000000000000000000000000000000000000000000'
+export let fixed27 = BigInt.fromI32(10).pow(27)
+
+export const tierOneRewards = '1000000000000000000000000000000000'
 
 export const initialRewardRate = '0.0042'
 
