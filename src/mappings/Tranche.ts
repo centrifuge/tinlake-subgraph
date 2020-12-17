@@ -1,4 +1,4 @@
-import { log, dataSource } from '@graphprotocol/graph-ts'
+import { log, dataSource, store } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
 import { Account } from '../../generated/schema'
 import { loadOrCreatePendingOrder } from '../domain/PendingOrder'
@@ -38,14 +38,12 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
       globalAccounts.save()
     }
 
-    let pendingOrder = loadOrCreatePendingOrder(account)
+    let pendingOrder = loadOrCreatePendingOrder(account, poolId)
     pendingOrder.amountPending = pendingOrder.amountPending.plus(amount)
     pendingOrder.save()
   }
 }
 
-// todo: delete the pending order
-// if the pending amount becomes 0 after we minus
 export function handleRedeemOrder(call: RedeemOrderCall): void {
   let to = call.to.toHex()
   let poolId = dataSource.context().getString('id')
@@ -54,7 +52,15 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
 
   let account = call.inputs.usr.toHex()
   let amount = call.inputs.newRedeemAmount
-  let pendingOrder = loadOrCreatePendingOrder(account)
+  let pendingOrder = loadOrCreatePendingOrder(account, poolId)
   pendingOrder.amountPending = pendingOrder.amountPending.minus(amount)
-  pendingOrder.save()
+  
+  // if the amount becomes 0, remove the pending order from the store
+  if(pendingOrder.amountPending.isZero()) {
+    log.debug('handle redeem order: removing from store {}', [pendingOrder.amountPending.toString()])
+    store.remove('PendingOrder', account.concat(poolId))
+  }
+  else {
+    pendingOrder.save()
+  }
 }
