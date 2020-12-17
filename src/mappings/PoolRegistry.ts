@@ -15,6 +15,11 @@ export function handlePoolCreated(call: PoolCreated): void {
     call.params.data,
   ])
 
+  if (!call.params.live || call.params.name == 'registry') {
+    log.debug('handlePoolCreated: pool not live or registry {}', [call.params.data])
+    return
+  }
+
   // Only add if the pool isn't preloaded
   if (!preloadedPoolByIPFSHash.has(call.params.data)) {
     log.debug('handlePoolCreated: pool not preloaded {}', [call.params.data])
