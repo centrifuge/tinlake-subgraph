@@ -34,7 +34,7 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: 
   }
 }
 
-export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string, poolId: string): TokenBalance {
+export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string, poolId: string): void {
   let src = event.params.src.toHex()
 
   if (!isSystemAccount(poolId, src)) {
@@ -45,7 +45,6 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
     }
     tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
     tokenBalanceSrc.save()
-    return tokenBalanceSrc as TokenBalance
   }
 }
 
