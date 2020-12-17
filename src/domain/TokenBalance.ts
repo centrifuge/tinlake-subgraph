@@ -8,7 +8,7 @@ import {
   PoolInvestor,
   PoolAddresses,
 } from '../../generated/schema'
-import { loadOrCreateGlobalAccounts } from './Account'
+import { isSystemAccount, loadOrCreateGlobalAccounts } from './Account'
 
 export function createTokenBalance(id: string, address: string, owner: string): TokenBalance {
   let tb = new TokenBalance(id)
@@ -20,28 +20,33 @@ export function createTokenBalance(id: string, address: string, owner: string): 
   return tb
 }
 
-export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string): TokenBalance {
+export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string, poolId: string): void {
   let dst = event.params.dst.toHex()
-  let tokenBalanceId = dst + tokenAddress
-  let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
-  if (tokenBalanceDst == null) {
-    tokenBalanceDst = createTokenBalance(tokenBalanceId, tokenAddress, dst)
+
+  if (!isSystemAccount(poolId, dst)) {
+    let tokenBalanceId = dst + tokenAddress
+    let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
+    if (tokenBalanceDst == null) {
+      tokenBalanceDst = createTokenBalance(tokenBalanceId, tokenAddress, dst)
+    }
+    tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
+    tokenBalanceDst.save()
   }
-  tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
-  tokenBalanceDst.save()
-  return tokenBalanceDst as TokenBalance
 }
 
-export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string): TokenBalance {
+export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string, poolId: string): TokenBalance {
   let src = event.params.src.toHex()
-  let tokenBalanceId = src + tokenAddress
-  let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
-  if (tokenBalanceSrc == null) {
-    tokenBalanceSrc = createTokenBalance(tokenBalanceId, tokenAddress, src)
+
+  if (!isSystemAccount(poolId, src)) {
+    let tokenBalanceId = src + tokenAddress
+    let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
+    if (tokenBalanceSrc == null) {
+      tokenBalanceSrc = createTokenBalance(tokenBalanceId, tokenAddress, src)
+    }
+    tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
+    tokenBalanceSrc.save()
+    return tokenBalanceSrc as TokenBalance
   }
-  tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
-  tokenBalanceSrc.save()
-  return tokenBalanceSrc as TokenBalance
 }
 
 // TODO: if the owner/account address is part of the pool, don't add it to rewards calcs
@@ -68,15 +73,16 @@ export function loadOrCreateDailyInvestorTokenBalance(
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
-    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance)
+    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance) // need to divide by 10^27
   } else {
     ditb.juniorTokenAmount = tokenBalance.balance
-    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance)
+    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance) // need to divide by 10^27
   }
   ditb.save()
   return <RewardDailyInvestorTokenBalance>ditb
 }
 
+// made up currently of token.owners..
 export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   let ids = PoolInvestor.load(poolId)
   if (ids == null) {
@@ -99,6 +105,8 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     log.debug('createDailyTokenBalances: token balance {}', [tbId])
 
+    // a system account should no have a token balance, so this should be fine
+    // we also push token.owners on token dst, but is not excluded if isSystemAccount
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
@@ -110,6 +118,8 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
         globalAccounts.accounts = temp
         globalAccounts.save()
       }
+
+      // todo: move this to where i add them to token.owners..
       if (!poolInvestors.accounts.includes(ditb.account)) {
         let temp = poolInvestors.accounts
         temp.push(ditb.account)

@@ -98,6 +98,7 @@ type ERC20Transfer @entity {
   pool: Pool!
 }
 
+# used in reward calc
 type Token @entity {
   id: ID! # token address
   symbol: String
@@ -105,9 +106,10 @@ type Token @entity {
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
 }
 
+# excludes system addresses
 type TokenBalance @entity {
   id: ID! # account address + token address
-  owner: Account!
+  owner: Account! 
   balance: BigInt!
   value: BigInt!
   token: Token!
