@@ -8,7 +8,7 @@ import {
   RewardByToken,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
-import { haveSixtyDaysPassed } from './Day'
+import { rewardsAreEligible } from './Day'
 import { initialRewardRate, secondsInDay, tierOneRewards } from '../config'
 
 // add current pool's value to today's system value
@@ -70,7 +70,7 @@ function updateInvestorRewardsByToken(
   ditb: RewardDailyInvestorTokenBalance,
   rate: BigDecimal
 ): void {
-  // and an entity per token that they have invested in
+  // add an entity per token that they have invested in
   if (ditb.seniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.seniorToken)
     rbt.rewards = rbt.rewards.plus(ditb.seniorTokenValue.toBigDecimal().times(rate))
@@ -105,7 +105,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     let balance = tokenValues.times(systemRewards.rewardRate)
     reward.pendingRewards = reward.pendingRewards.plus(balance)
 
-    if (haveSixtyDaysPassed(date, reward.nonZeroBalanceSince)) {
+    if (rewardsAreEligible(date, reward.nonZeroBalanceSince)) {
       log.debug('transfer pending rewards to claimable:  {}', [date.toString()])
       reward.claimableRewards = reward.pendingRewards
       // reset pending rewards
