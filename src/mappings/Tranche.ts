@@ -54,13 +54,12 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let amount = call.inputs.newRedeemAmount
   let pendingOrder = loadOrCreatePendingOrder(account, poolId)
   pendingOrder.amountPending = pendingOrder.amountPending.minus(amount)
-  
+
   // if the amount becomes 0, remove the pending order from the store
-  if(pendingOrder.amountPending.isZero()) {
+  if (pendingOrder.amountPending.isZero()) {
     log.debug('handle redeem order: removing from store {}', [pendingOrder.amountPending.toString()])
     store.remove('PendingOrder', account.concat(poolId))
-  }
-  else {
+  } else {
     pendingOrder.save()
   }
 }

@@ -54,8 +54,6 @@ export function addToGlobalAccounts(account: string): void {
   }
 }
 
-export function firstEntryPointAccountManagement(): void {}
-
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
   let result = false

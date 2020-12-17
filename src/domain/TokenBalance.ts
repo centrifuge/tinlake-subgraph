@@ -49,8 +49,6 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
   }
 }
 
-// TODO: if the owner/account address is part of the pool, don't add it to rewards calcs
-// currently testing this assumption - i think 0 address will still be in here?
 export function loadOrCreateDailyInvestorTokenBalance(
   tokenBalance: TokenBalance,
   pool: Pool,
