@@ -44,30 +44,3 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     pendingOrder.save()
   }
 }
-
-export function handleRedeemOrder(call: RedeemOrderCall): void {
-  let to = call.to.toHex()
-  let poolId = dataSource.context().getString('id')
-  log.debug('handle redeem order: to {}', [to.toString()])
-  log.debug('handle redeem order: poolId {}', [poolId.toString()])
-
-  let addresses = PoolAddresses.load(poolId)
-  let account = call.inputs.usr.toHex()
-  let amount = call.inputs.newRedeemAmount
-  let pendingOrder = loadOrCreatePendingOrder(account, poolId)
-
-  if (to == addresses.seniorToken) {
-    pendingOrder.amountPendingSenior = pendingOrder.amountPendingSenior.minus(amount)
-  } else {
-    pendingOrder.amountPendingJunior = pendingOrder.amountPendingJunior.minus(amount)
-  }
-
-  // if the amount becomes 0, remove the pending order from the store
-  if (pendingOrder.amountPendingSenior.plus(pendingOrder.amountPendingJunior).isZero()) {
-    log.debug('handle redeem order: removing from store {}', [pendingOrder.amountPendingSenior.toString()])
-    log.debug('handle redeem order: removing from store {}', [pendingOrder.amountPendingJunior.toString()])
-    store.remove('PendingOrder', account.concat(poolId))
-  } else {
-    pendingOrder.save()
-  }
-}
