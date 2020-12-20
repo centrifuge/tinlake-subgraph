@@ -1,25 +1,23 @@
 import { log, dataSource, store } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
 import { Account, PoolAddresses } from '../../generated/schema'
-import { loadOrCreatePendingOrder } from '../domain/PendingOrder'
 import { createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
+import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
 
 // the supply order is the first thing that someone does in tinlake
 // so they will not have a token balance..
-// but the supply order is only interesting the rewards context
 export function handleSupplyOrder(call: SupplyOrderCall): void {
   // the token address...
-  let to = call.to.toHex()
+  let token = call.to.toHex()
   let poolId = dataSource.context().getString('id')
   let addresses = PoolAddresses.load(poolId)
 
-  log.debug('handle supply order: to {}', [to.toString()])
+  log.debug('handle supply order: to {}', [token.toString()])
   log.debug('handle supply order: poolId {}', [poolId.toString()])
 
   let account = call.inputs.usr.toHex()
 
   // protection from adding system account to internal tracking
-  // todo: but i think that none of the tinlake accounts would be doing supply orders..
   if (!isSystemAccount(poolId, account)) {
     let amount = call.inputs.newSupplyAmount
 
@@ -35,12 +33,8 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
       globalAccounts.save()
     }
 
-    let pendingOrder = loadOrCreatePendingOrder(account, poolId)
-    if (to == addresses.seniorToken) {
-      pendingOrder.amountPendingSenior = pendingOrder.amountPendingSenior.plus(amount)
-    } else {
-      pendingOrder.amountPendingJunior = pendingOrder.amountPendingJunior.plus(amount)
-    }
-    pendingOrder.save()
+    let tokenBalance = loadOrCreateTokenBalance(account.concat(token), token, account)
+    tokenBalance.pendingSupplyCurrency = tokenBalance.pendingSupplyCurrency.plus(amount)
+    tokenBalance.save()
   }
 }

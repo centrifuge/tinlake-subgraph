@@ -11,13 +11,19 @@ import {
 import { fixed27 } from '../config'
 import { isSystemAccount, loadOrCreateGlobalAccounts } from './Account'
 
-export function createTokenBalance(id: string, address: string, owner: string): TokenBalance {
-  let tb = new TokenBalance(id)
-  tb.owner = owner
-  tb.balance = BigInt.fromI32(0)
-  tb.value = BigInt.fromI32(0)
-  tb.token = address
-  tb.save()
+export function loadOrCreateTokenBalance(id: string, address: string, owner: string): TokenBalance {
+  let tb = TokenBalance.load(id)
+  {
+    if (tb == null) {
+      tb.owner = owner
+      tb.balance = BigInt.fromI32(0)
+      tb.value = BigInt.fromI32(0)
+      tb.token = address
+      tb.pendingSupplyCurrency = BigInt.fromI32(0)
+      tb.pendingSupplyCurrency = BigInt.fromI32(0)
+      tb.save()
+    }
+  }
   return tb
 }
 
@@ -28,7 +34,7 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: 
     let tokenBalanceId = dst + tokenAddress
     let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
     if (tokenBalanceDst == null) {
-      tokenBalanceDst = createTokenBalance(tokenBalanceId, tokenAddress, dst)
+      tokenBalanceDst = loadOrCreateTokenBalance(tokenBalanceId, tokenAddress, dst)
     }
     tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
     tokenBalanceDst.save()
@@ -42,7 +48,7 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
     let tokenBalanceId = src + tokenAddress
     let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
     if (tokenBalanceSrc == null) {
-      tokenBalanceSrc = createTokenBalance(tokenBalanceId, tokenAddress, src)
+      tokenBalanceSrc = loadOrCreateTokenBalance(tokenBalanceId, tokenAddress, src)
     }
     tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
     tokenBalanceSrc.save()

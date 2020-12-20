@@ -11,7 +11,6 @@ import {
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
 import { initialRewardRate, secondsInDay, tierOneRewards, zeroAddress } from '../config'
-import { checkPendingOrders } from './PendingOrder'
 import { loadOrCreateRewardClaim } from './Claim'
 
 // add current pool's value to today's system value
@@ -68,8 +67,6 @@ export function loadOrCreateRewardByToken(account: string, token: string): Rewar
   return <RewardByToken>rbt
 }
 
-// todo: this is broken by the pending orders
-// query RewardByToken where account = current account
 function updateInvestorRewardsByToken(
   addresses: PoolAddresses,
   ditb: RewardDailyInvestorTokenBalance,
@@ -78,12 +75,14 @@ function updateInvestorRewardsByToken(
   // add an entity per token that they have invested in
   if (ditb.seniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.seniorToken)
-    rbt.rewards = rbt.rewards.plus(ditb.seniorTokenValue.toBigDecimal().times(rate))
+    let val = ditb.seniorTokenValue.toBigDecimal().times(rate)
+    rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
   if (ditb.juniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.juniorToken)
-    rbt.rewards = rbt.rewards.plus(ditb.juniorTokenValue.toBigDecimal().times(rate))
+    let val = ditb.juniorTokenValue.toBigDecimal().times(rate)
+    rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
 }
@@ -99,8 +98,6 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     let account = accounts[i]
     let ditb = RewardDailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     let reward = loadOrCreateRewardBalance(ditb.account)
-
-    checkPendingOrders(ditb.account, pool.id)
 
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
