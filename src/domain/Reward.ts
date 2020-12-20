@@ -6,7 +6,6 @@ import {
   RewardBalance,
   RewardDayTotal,
   RewardByToken,
-  RewardClaim,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
@@ -45,8 +44,9 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
     rb = new RewardBalance(address)
     let rc = loadOrCreateRewardClaim(address, zeroAddress)
     rb.claims = [rc.id]
-    rb.pendingRewards = BigDecimal.fromString('0')
+    rb.eligible = false
     rb.claimableRewards = BigDecimal.fromString('0')
+    rb.previousRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')
     rb.nonZeroBalanceSince = BigInt.fromI32(0)
     rb.save()
@@ -106,20 +106,17 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     )
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-
+    let r = tokenValues.times(systemRewards.rewardRate)
     // add token values x rate to user rewards
-    reward.pendingRewards = reward.pendingRewards.plus(tokenValues.times(systemRewards.rewardRate))
+    reward.claimableRewards = reward.claimableRewards.plus(r)
 
     if (rewardsAreEligible(date, reward.nonZeroBalanceSince)) {
-      log.debug('transfer pending rewards to claimable:  {}', [date.toString()])
-      reward.claimableRewards = reward.pendingRewards
-      // reset pending rewards
-      reward.pendingRewards = BigDecimal.fromString('0')
+      reward.eligible = true
     }
-    reward.totalRewards = reward.pendingRewards.plus(reward.claimableRewards)
+    reward.totalRewards = reward.previousRewards.plus(reward.claimableRewards)
 
-    // add this user's pending rewards to today's rewards obj
-    systemRewards.todayReward = systemRewards.todayReward.plus(reward.pendingRewards)
+    // add user's today reward to today's rewards obj
+    systemRewards.todayReward = systemRewards.todayReward.plus(r)
     systemRewards.save()
     reward.save()
   }

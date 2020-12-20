@@ -24,7 +24,7 @@ export function loadOrCreateTokenBalance(id: string, address: string, owner: str
       tb.save()
     }
   }
-  return tb
+  return <TokenBalance>tb
 }
 
 export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string, poolId: string): void {

@@ -171,8 +171,9 @@ type RewardDayTotal @entity {
 type RewardBalance @entity {
   id: ID! # account address
   claims: [RewardClaim!]!
-  pendingRewards: BigDecimal! # supplied but not disbursed + awaiting 60 consecutive days
-  claimableRewards: BigDecimal! # rewards become claimable after investment length is greater than 60 consecutive days
+  eligible: Boolean! # rewards become eligible after investment length is greater than 60 consecutive days
+  claimableRewards: BigDecimal! 
+  previousRewards: BigDecimal! # rewards on previously linked address
   totalRewards: BigDecimal! # sum of the above 2
   nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
@@ -187,10 +188,10 @@ type RewardByToken @entity {
   rewards: BigDecimal!
 }
 
-# initial cent address is nothing
+# initial cent address is zero address
 type RewardClaim @entity {
   id: ID! #eth address + cent address
   ethAddress: String!
   centAddress: String!
-  reward: BigInt!
+  rewardsAccumulated: BigDecimal!
 }

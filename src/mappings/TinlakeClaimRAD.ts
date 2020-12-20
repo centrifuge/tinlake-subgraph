@@ -1,21 +1,29 @@
-import { log, dataSource, store } from '@graphprotocol/graph-ts'
+import { log, dataSource, store, BigDecimal } from '@graphprotocol/graph-ts'
 import { Claimed } from '../../generated/templates/Claim/TinlakeClaimRAD'
-import { RewardClaim } from '../../generated/schema'
 import { loadOrCreateRewardClaim } from '../domain/Claim'
+import { loadOrCreateRewardBalance } from '../domain/Reward'
 
 export function handleClaimed(claimed: Claimed): void {
-  let msgsender = claimed.params.claimer.toHex()
-
-  log.debug('handle update claim address {}', [msgsender.toString()])
+  let sender = claimed.params.claimer.toHex()
+  log.debug('handle update claim address {}', [sender.toString()])
 
   // this is bytes32...
   let substrateAccount = claimed.params.account.toHex()
   log.debug('handle update claim substrate address {}', [substrateAccount.toString()])
 
-  loadOrCreateRewardClaim(msgsender, substrateAccount)
+  let link = loadOrCreateRewardClaim(sender, substrateAccount)
+  let balance = loadOrCreateRewardBalance(sender)
 
-  // todo:
-  // get their reward balance object
-  // update the amount of their reward balance
-  // push the new reward claim to the array
+  // transfer claimable to linked address
+  link.rewardsAccumulated = balance.claimableRewards
+  link.save()
+
+  let temp = balance.claims
+  temp.push(link.id)
+  balance.claims = temp
+
+  // set previous rewards
+  balance.previousRewards = balance.previousRewards.plus(balance.claimableRewards)
+  balance.claimableRewards = BigDecimal.fromString('0')
+  balance.save()
 }
