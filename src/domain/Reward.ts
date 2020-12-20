@@ -6,11 +6,13 @@ import {
   RewardBalance,
   RewardDayTotal,
   RewardByToken,
+  RewardClaim,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
-import { initialRewardRate, secondsInDay, tierOneRewards } from '../config'
+import { initialRewardRate, secondsInDay, tierOneRewards, zeroAddress } from '../config'
 import { checkPendingOrders } from './PendingOrder'
+import { loadOrCreateRewardClaim } from './Claim'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -42,7 +44,8 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
   let rb = RewardBalance.load(address)
   if (rb == null) {
     rb = new RewardBalance(address)
-    rb.claims = []
+    let rc = loadOrCreateRewardClaim(address, zeroAddress)
+    rb.claims = [rc.id]
     rb.pendingRewards = BigDecimal.fromString('0')
     rb.claimableRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')

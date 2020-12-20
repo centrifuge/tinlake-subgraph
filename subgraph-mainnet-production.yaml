@@ -225,3 +225,21 @@ templates:
         - function: redeemOrder(address,uint256)
           handler: handleRedeemOrder
       file: ./src/mappings/Tranche.ts
+  - kind: ethereum/contract
+    name: Claim
+    network: mainnet
+    source: 
+      abi: TinlakeClaimRAD
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - RewardClaim
+      abis:
+        - name: TinlakeClaimRAD
+          file: ./abis/TinlakeClaimRAD.json
+      eventHandlers:
+        - event: Claimed(address,bytes32)
+          handler: handleClaimed
+      file: ./src/mappings/TinlakeClaimRAD.ts
