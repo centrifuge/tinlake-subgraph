@@ -220,6 +220,8 @@ templates:
       abis:
         - name: Tranche
           file: ./abis/Tranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       callHandlers:
         - function: supplyOrder(address,uint256)
           handler: handleSupplyOrder

@@ -1,6 +1,6 @@
 import { log, dataSource, store } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall } from '../../generated/templates/Tranche/Tranche'
-import { Account, PoolAddresses, Token } from '../../generated/schema'
+import { Account, PoolAddresses } from '../../generated/schema'
 import { createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { loadOrCreateRewardDayTotal } from '../domain/Reward'
