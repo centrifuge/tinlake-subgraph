@@ -63,8 +63,6 @@ export function loadOrCreateDailyInvestorTokenBalance(
 ): RewardDailyInvestorTokenBalance {
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
-  // todo: add tb.supplyAmount
-  // tb.pending to token values
   let ditb = RewardDailyInvestorTokenBalance.load(id)
   if (ditb == null) {
     ditb = new RewardDailyInvestorTokenBalance(id)
@@ -86,18 +84,34 @@ export function loadOrCreateDailyInvestorTokenBalance(
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
     ditb.seniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
     ditb.seniorTokenValue = pool.seniorTokenPrice
       .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
       .div(fixed27)
   } else {
     ditb.juniorTokenAmount = tokenBalance.balance
     ditb.juniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
     ditb.juniorTokenValue = pool.juniorTokenPrice
       .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
       .div(fixed27)
   }
   ditb.save()
   return <RewardDailyInvestorTokenBalance>ditb
+}
+
+// calcDisburse returns (payoutCurrencyAmount, payoutTokenAmount, remainingSupplyCurrency, remainingRedeemToken)
+function calculateDisburse(tokenBalance: TokenBalance, poolAddresses: PoolAddresses): void {
+  let tranche: Tranche
+  if (tokenBalance.token == poolAddresses.seniorToken) {
+    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.seniorTranche))
+  } else {
+    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
+  }
+  let result = tranche.calcDisburse(<Address>Address.fromHexString(tokenBalance.owner))
+  tokenBalance.pendingSupplyCurrency = result.value2
+  tokenBalance.supplyAmount = result.value1
+  tokenBalance.save()
 }
 
 // made up currently junior and senior token.owners
@@ -125,19 +139,12 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
-      // todo: calculate disburse on the token balance
-      // and put the results into
-      // tb.pendingSupplyCurrency
-      // tb.supplyAmount
-      let seniorTranche = Tranche.bind(<Address>Address.fromHexString(addresses.seniorTranche))
-
-      let juniorTranche = Tranche.bind(<Address>Address.fromHexString(addresses.juniorTranche))
+      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
       addToGlobalAccounts(ditb.account)
-
       poolInvestors.accounts = push(poolInvestors.accounts, ditb.account)
       poolInvestors.save()
     }

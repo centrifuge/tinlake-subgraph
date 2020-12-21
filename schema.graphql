@@ -113,16 +113,11 @@ type TokenBalance @entity {
   balance: BigInt!
   value: BigInt!
   token: Token!
-
   # payoutCurrencyAmount, # how much dai you get back - redemption
   # remainingRedeemToken); # how much drop the tranche has that it is trying to redeem to you
-  # payoutTokenAmount, # drop you already own
-  # remainingSupplyCurrency, # amount of dai you want to invest
-
-  # todo: add to rewards based on calc disburse
   # todo: on disburse event, reset pending
-  pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet
-  supplyAmount: BigInt! # converted, but not disbursed yet
+  pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet (remainingSupplyCurrency)
+  supplyAmount: BigInt! # converted, but not disbursed yet (payoutTokenAmount)
   
 }
 
