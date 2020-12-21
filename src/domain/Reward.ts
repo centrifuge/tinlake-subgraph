@@ -1,6 +1,6 @@
 import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
-  RewardDailyInvestorTokenBalance,
+  DailyInvestorTokenBalance,
   Pool,
   PoolAddresses,
   RewardBalance,
@@ -69,7 +69,7 @@ export function loadOrCreateRewardByToken(account: string, token: string): Rewar
 
 function updateInvestorRewardsByToken(
   addresses: PoolAddresses,
-  ditb: RewardDailyInvestorTokenBalance,
+  ditb: DailyInvestorTokenBalance,
   rate: BigDecimal
 ): void {
   // add an entity per token that they have invested in
@@ -96,12 +96,12 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   for (let i = 0; i < investorIds.accounts.length; i++) {
     let accounts = investorIds.accounts
     let account = accounts[i]
-    let ditb = RewardDailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
+    let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     let reward = loadOrCreateRewardBalance(ditb.account)
 
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
-      <RewardDailyInvestorTokenBalance>ditb,
+      <DailyInvestorTokenBalance>ditb,
       systemRewards.rewardRate
     )
 

@@ -2,7 +2,7 @@ import { log, BigInt, Address } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import {
-  RewardDailyInvestorTokenBalance,
+  DailyInvestorTokenBalance,
   Token,
   TokenBalance,
   Pool,
@@ -60,12 +60,12 @@ export function loadOrCreateDailyInvestorTokenBalance(
   tokenBalance: TokenBalance,
   pool: Pool,
   timestamp: BigInt
-): RewardDailyInvestorTokenBalance {
+): DailyInvestorTokenBalance {
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
-  let ditb = RewardDailyInvestorTokenBalance.load(id)
+  let ditb = DailyInvestorTokenBalance.load(id)
   if (ditb == null) {
-    ditb = new RewardDailyInvestorTokenBalance(id)
+    ditb = new DailyInvestorTokenBalance(id)
     ditb.account = tokenBalance.owner
     ditb.day = timestamp.toString()
     ditb.pool = pool.id
@@ -97,7 +97,7 @@ export function loadOrCreateDailyInvestorTokenBalance(
       .div(fixed27)
   }
   ditb.save()
-  return <RewardDailyInvestorTokenBalance>ditb
+  return <DailyInvestorTokenBalance>ditb
 }
 
 // calcDisburse returns (payoutCurrencyAmount, payoutTokenAmount, remainingSupplyCurrency, remainingRedeemToken)

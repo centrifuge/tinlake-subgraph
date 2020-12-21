@@ -84,7 +84,7 @@ type Proxy @entity {
 
 type Account @entity {
   id: ID! # account address
-  dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
+  dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom (field: "account")
   currentActiveInvestmentAmount: BigInt!
 }
 
@@ -130,7 +130,7 @@ type Day @entity {
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
 }
 
-type RewardDailyInvestorTokenBalance @entity {
+type DailyInvestorTokenBalance @entity {
   id: ID! # investorAddress + poolId + day
   account: Account!
   day: Day!
