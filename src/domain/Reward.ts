@@ -1,4 +1,4 @@
-import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
 import {
   DailyInvestorTokenBalance,
   Pool,
@@ -9,7 +9,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
-import { initialRewardRate, secondsInDay, tierOneRewards, zeroAddress } from '../config'
+import { secondsInDay, tierOneRewards, zeroAddress } from '../config'
 import { loadOrCreateRewardClaim } from './Claim'
 
 // add current pool's value to today's system value
@@ -29,8 +29,7 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
-    // 0.0042 RAD/DAI up to 1M RAD
-    rewardDayTotal.rewardRate = BigDecimal.fromString(initialRewardRate)
+    rewardDayTotal.rewardRate = BigDecimal.fromString('0')
     rewardDayTotal.todayReward = BigDecimal.fromString('0')
     rewardDayTotal.toDateRewardAggregateValue = BigDecimal.fromString('0')
   }
@@ -90,8 +89,8 @@ function updateInvestorRewardsByToken(
 export function calculateRewards(date: BigInt, pool: Pool): void {
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  checkRewardRate(systemRewards)
   let tokenAddresses = PoolAddresses.load(pool.id)
+  setRewardRate(systemRewards)
 
   for (let i = 0; i < investorIds.accounts.length; i++) {
     let accounts = investorIds.accounts
@@ -127,12 +126,9 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function checkRewardRate(checker: RewardDayTotal): void {
-  if (checker.toDateRewardAggregateValue.gt(BigDecimal.fromString(tierOneRewards))) {
-    log.debug('pending rewards > 1 MILL:  {}', [checker.toDateRewardAggregateValue.toString()])
-
-    // TODO: update this with correct value
-    checker.rewardRate = BigDecimal.fromString('0')
-    checker.save()
+function setRewardRate(systemRewards: RewardDayTotal): void {
+  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(tierOneRewards))) {
+    systemRewards.rewardRate = BigDecimal.fromString('0.0042')
+    systemRewards.save()
   }
 }

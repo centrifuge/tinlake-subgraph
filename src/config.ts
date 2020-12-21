@@ -12,8 +12,6 @@ export let fixed27 = BigInt.fromI32(10).pow(27)
 
 export const tierOneRewards = '1000000000000000000000000000000000'
 
-export const initialRewardRate = '0.0042'
-
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
 /**
