@@ -1,8 +1,10 @@
 import { log, dataSource, store } from '@graphprotocol/graph-ts'
-import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
-import { Account, PoolAddresses } from '../../generated/schema'
+import { SupplyOrderCall } from '../../generated/templates/Tranche/Tranche'
+import { Account, PoolAddresses, Token } from '../../generated/schema'
 import { createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
+import { loadOrCreateRewardDayTotal } from '../domain/Reward'
+import { loadOrCreateToken } from '../domain/Token'
 
 // the supply order is the first thing that someone does in tinlake
 // so they will not have a token balance..
@@ -33,8 +35,18 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
       globalAccounts.save()
     }
 
+    // add to token owners
+    // todo: stop RepeatingYourself
+    let tk = loadOrCreateToken(token)
+    if (!tk.owners.includes(account)) {
+      let temp = tk.owners
+      temp.push(account)
+      tk.owners = temp
+      tk.save()
+    }
+
     let tokenBalance = loadOrCreateTokenBalance(account.concat(token), token, account)
-    tokenBalance.pendingSupplyCurrency = tokenBalance.pendingSupplyCurrency.plus(amount)
+    tokenBalance.pendingSupplyCurrency = amount
     tokenBalance.save()
   }
 }

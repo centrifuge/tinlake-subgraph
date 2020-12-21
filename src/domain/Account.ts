@@ -46,6 +46,7 @@ export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
 export function addToGlobalAccounts(account: string): void {
   let globalAccounts = loadOrCreateGlobalAccounts('1')
 
+  // todo: stop RepeatingYourself
   if (!globalAccounts.accounts.includes(account)) {
     let temp = globalAccounts.accounts
     temp.push(account)

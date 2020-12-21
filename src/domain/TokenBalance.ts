@@ -15,12 +15,13 @@ export function loadOrCreateTokenBalance(id: string, address: string, owner: str
   let tb = TokenBalance.load(id)
   {
     if (tb == null) {
+      tb = new TokenBalance(id)
       tb.owner = owner
       tb.balance = BigInt.fromI32(0)
       tb.value = BigInt.fromI32(0)
       tb.token = address
       tb.pendingSupplyCurrency = BigInt.fromI32(0)
-      tb.pendingSupplyCurrency = BigInt.fromI32(0)
+      tb.supplyAmount = BigInt.fromI32(0)
       tb.save()
     }
   }
@@ -62,6 +63,8 @@ export function loadOrCreateDailyInvestorTokenBalance(
 ): RewardDailyInvestorTokenBalance {
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
+  // todo: add tb.supplyAmount
+  // tb.pending to token values
   let ditb = RewardDailyInvestorTokenBalance.load(id)
   if (ditb == null) {
     ditb = new RewardDailyInvestorTokenBalance(id)
@@ -70,18 +73,32 @@ export function loadOrCreateDailyInvestorTokenBalance(
     ditb.pool = pool.id
     ditb.seniorTokenAmount = BigInt.fromI32(0)
     ditb.seniorTokenValue = BigInt.fromI32(0)
+
+    // todo:
+    ditb.seniorSupplyAmount = BigInt.fromI32(0)
+    ditb.seniorPendingSupplyCurrency = BigInt.fromI32(0)
+
     ditb.juniorTokenAmount = BigInt.fromI32(0)
     ditb.juniorTokenValue = BigInt.fromI32(0)
+
+    ditb.juniorSupplyAmount = BigInt.fromI32(0)
+    ditb.juniorPendingSupplyCurrency = BigInt.fromI32(0)
   }
 
   // update token values
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
-    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance).div(fixed27)
+    ditb.seniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.seniorTokenValue = pool.seniorTokenPrice
+      .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
+      .div(fixed27)
   } else {
     ditb.juniorTokenAmount = tokenBalance.balance
-    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance).div(fixed27)
+    ditb.juniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.juniorTokenValue = pool.juniorTokenPrice
+      .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
+      .div(fixed27)
   }
   ditb.save()
   return <RewardDailyInvestorTokenBalance>ditb
@@ -112,9 +129,15 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      // todo: calculate disburse on the token balance
+      // and put the results into
+      // tb.pendingSupplyCurrency
+      // tb.supplyAmount
+
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
+      // todo: stop RepeatingYourself
       if (!globalAccounts.accounts.includes(ditb.account)) {
         let temp = globalAccounts.accounts
         temp.push(ditb.account)
@@ -123,6 +146,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       }
 
       // todo: move this to where i add them to token.owners..
+      // todo: stop RepeatingYourself
       if (!poolInvestors.accounts.includes(ditb.account)) {
         let temp = poolInvestors.accounts
         temp.push(ditb.account)

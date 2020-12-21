@@ -109,7 +109,7 @@ type Token @entity {
 # excludes system addresses
 type TokenBalance @entity {
   id: ID! # account address + token address
-  owner: Account! 
+  owner: Account!
   balance: BigInt!
   value: BigInt!
   token: Token!
@@ -121,8 +121,8 @@ type TokenBalance @entity {
 
   # todo: add to rewards based on calc disburse
   # todo: on disburse event, reset pending
-  pendingSupplyCurrency: BigInt! 
-  pendingSupplyAmount: BigInt! 
+  pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet
+  supplyAmount: BigInt! # converted, but not disbursed yet
   
 }
 
@@ -142,8 +142,12 @@ type RewardDailyInvestorTokenBalance @entity {
   pool: Pool!
   seniorTokenAmount: BigInt!
   seniorTokenValue: BigInt!
+  seniorSupplyAmount: BigInt!
+  seniorPendingSupplyCurrency: BigInt!
   juniorTokenAmount: BigInt!
   juniorTokenValue: BigInt!
+  juniorSupplyAmount: BigInt!
+  juniorPendingSupplyCurrency: BigInt!
 }
 
 type PoolInvestor @entity {
