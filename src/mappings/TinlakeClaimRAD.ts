@@ -1,4 +1,4 @@
-import { log, dataSource, store, BigDecimal } from '@graphprotocol/graph-ts'
+import { log, BigDecimal } from '@graphprotocol/graph-ts'
 import { Claimed } from '../../generated/templates/Claim/TinlakeClaimRAD'
 import { loadOrCreateRewardClaim } from '../domain/Claim'
 import { loadOrCreateRewardBalance } from '../domain/Reward'

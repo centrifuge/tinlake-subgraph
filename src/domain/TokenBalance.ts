@@ -1,5 +1,6 @@
-import { log, BigInt } from '@graphprotocol/graph-ts'
+import { log, BigInt, Address } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
+import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import {
   RewardDailyInvestorTokenBalance,
   Token,
@@ -9,17 +10,18 @@ import {
   PoolAddresses,
 } from '../../generated/schema'
 import { fixed27 } from '../config'
-import { isSystemAccount, loadOrCreateGlobalAccounts } from './Account'
+import { addToGlobalAccounts, isSystemAccount } from './Account'
+import { push } from '../util/array'
 
-export function loadOrCreateTokenBalance(id: string, address: string, owner: string): TokenBalance {
-  let tb = TokenBalance.load(id)
+export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
+  let tb = TokenBalance.load(owner.concat(tokenAddress))
   {
     if (tb == null) {
-      tb = new TokenBalance(id)
+      tb = new TokenBalance(tokenAddress.concat(owner))
       tb.owner = owner
       tb.balance = BigInt.fromI32(0)
       tb.value = BigInt.fromI32(0)
-      tb.token = address
+      tb.token = tokenAddress
       tb.pendingSupplyCurrency = BigInt.fromI32(0)
       tb.supplyAmount = BigInt.fromI32(0)
       tb.save()
@@ -32,10 +34,9 @@ export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: 
   let dst = event.params.dst.toHex()
 
   if (!isSystemAccount(poolId, dst)) {
-    let tokenBalanceId = dst + tokenAddress
-    let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
+    let tokenBalanceDst = TokenBalance.load(dst.concat(tokenAddress))
     if (tokenBalanceDst == null) {
-      tokenBalanceDst = loadOrCreateTokenBalance(tokenBalanceId, tokenAddress, dst)
+      tokenBalanceDst = loadOrCreateTokenBalance(dst, tokenAddress)
     }
     tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
     tokenBalanceDst.save()
@@ -46,10 +47,9 @@ export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: 
   let src = event.params.src.toHex()
 
   if (!isSystemAccount(poolId, src)) {
-    let tokenBalanceId = src + tokenAddress
-    let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
+    let tokenBalanceSrc = TokenBalance.load(src.concat(tokenAddress))
     if (tokenBalanceSrc == null) {
-      tokenBalanceSrc = loadOrCreateTokenBalance(tokenBalanceId, tokenAddress, src)
+      tokenBalanceSrc = loadOrCreateTokenBalance(src, tokenAddress)
     }
     tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
     tokenBalanceSrc.save()
@@ -73,14 +73,10 @@ export function loadOrCreateDailyInvestorTokenBalance(
     ditb.pool = pool.id
     ditb.seniorTokenAmount = BigInt.fromI32(0)
     ditb.seniorTokenValue = BigInt.fromI32(0)
-
-    // todo:
     ditb.seniorSupplyAmount = BigInt.fromI32(0)
     ditb.seniorPendingSupplyCurrency = BigInt.fromI32(0)
-
     ditb.juniorTokenAmount = BigInt.fromI32(0)
     ditb.juniorTokenValue = BigInt.fromI32(0)
-
     ditb.juniorSupplyAmount = BigInt.fromI32(0)
     ditb.juniorPendingSupplyCurrency = BigInt.fromI32(0)
   }
@@ -117,8 +113,8 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
-  let globalAccounts = loadOrCreateGlobalAccounts('1')
   let poolInvestors = loadOrCreatePoolInvestors(pool.id)
+  let addresses = PoolAddresses.load(pool.id)
 
   for (let i = 0; i < token.owners.length; i++) {
     let owners = token.owners
@@ -133,26 +129,17 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       // and put the results into
       // tb.pendingSupplyCurrency
       // tb.supplyAmount
+      let seniorTranche = Tranche.bind(<Address>Address.fromHexString(addresses.seniorTranche))
+
+      let juniorTranche = Tranche.bind(<Address>Address.fromHexString(addresses.juniorTranche))
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
-      // todo: stop RepeatingYourself
-      if (!globalAccounts.accounts.includes(ditb.account)) {
-        let temp = globalAccounts.accounts
-        temp.push(ditb.account)
-        globalAccounts.accounts = temp
-        globalAccounts.save()
-      }
+      addToGlobalAccounts(ditb.account)
 
-      // todo: move this to where i add them to token.owners..
-      // todo: stop RepeatingYourself
-      if (!poolInvestors.accounts.includes(ditb.account)) {
-        let temp = poolInvestors.accounts
-        temp.push(ditb.account)
-        poolInvestors.accounts = temp
-        poolInvestors.save()
-      }
+      poolInvestors.accounts = push(poolInvestors.accounts, ditb.account)
+      poolInvestors.save()
     }
   }
 }

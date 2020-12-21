@@ -2,6 +2,7 @@ import { BigInt } from '@graphprotocol/graph-ts'
 import { Account, GlobalAccountId, PoolAddresses } from '../../generated/schema'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { zeroAddress } from '../config'
+import { push } from '../util/array'
 
 export function createAccount(address: string): Account {
   let account = new Account(address)
@@ -45,16 +46,11 @@ export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
 
 export function addToGlobalAccounts(account: string): void {
   let globalAccounts = loadOrCreateGlobalAccounts('1')
-
-  // todo: stop RepeatingYourself
-  if (!globalAccounts.accounts.includes(account)) {
-    let temp = globalAccounts.accounts
-    temp.push(account)
-    globalAccounts.accounts = temp
-    globalAccounts.save()
-  }
+  globalAccounts.accounts = push(globalAccounts.accounts, account)
+  globalAccounts.save()
 }
 
+// todo: refactor
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
   let result = false
