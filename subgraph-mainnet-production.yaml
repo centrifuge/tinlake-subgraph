@@ -235,7 +235,7 @@ templates:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - RewardClaim
+        - RewardLink
       abis:
         - name: TinlakeClaimRAD
           file: ./abis/TinlakeClaimRAD.json

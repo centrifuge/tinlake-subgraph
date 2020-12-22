@@ -6,11 +6,11 @@ import {
   RewardBalance,
   RewardDayTotal,
   RewardByToken,
+  RewardLink,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreEligible } from './Day'
-import { secondsInDay, tierOneRewards, zeroAddress } from '../config'
-import { loadOrCreateRewardClaim } from './Claim'
+import { secondsInDay, tierOneRewards } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -41,11 +41,9 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
   let rb = RewardBalance.load(address)
   if (rb == null) {
     rb = new RewardBalance(address)
-    let rc = loadOrCreateRewardClaim(address, zeroAddress)
-    rb.claims = [rc.id]
+    rb.claims = []
     rb.eligible = false
     rb.claimableRewards = BigDecimal.fromString('0')
-    rb.previousRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')
     rb.nonZeroBalanceSince = BigInt.fromI32(0)
     rb.save()
@@ -106,13 +104,31 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
     let r = tokenValues.times(systemRewards.rewardRate)
-    // add token values x rate to user rewards
-    reward.claimableRewards = reward.claimableRewards.plus(r)
 
-    if (rewardsAreEligible(date, reward.nonZeroBalanceSince)) {
+    // if rewards are eligible, and an address is claimed
+    // add them to the most recently linked address
+    if (rewardsAreEligible(date, reward.nonZeroBalanceSince) && reward.claims.length > 0) {
       reward.eligible = true
+
+      let arr = reward.claims
+      let lastLinked = RewardLink.load(arr[arr.length - 1])
+      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+      lastLinked.save()
+
+      reward.claimableRewards = BigDecimal.fromString('0')
     }
-    reward.totalRewards = reward.previousRewards.plus(reward.claimableRewards)
+    // if no linked address is found, we track reward in claimableRewards
+    else if (rewardsAreEligible(date, reward.nonZeroBalanceSince)) {
+      reward.eligible = true
+      reward.claimableRewards = reward.claimableRewards.plus(r)
+    }
+    // if not, keep accumulating rewards on the reward balance
+    // and wait for them to make a claim
+    else {
+      // add token values x rate to user rewards
+      reward.claimableRewards = reward.claimableRewards.plus(r)
+    }
+    reward.totalRewards = reward.totalRewards.plus(r)
 
     // add user's today reward to today's rewards obj
     systemRewards.todayReward = systemRewards.todayReward.plus(r)

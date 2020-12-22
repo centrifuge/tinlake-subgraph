@@ -169,11 +169,10 @@ type RewardDayTotal @entity {
 # create new reward claim for the eth address
 type RewardBalance @entity {
   id: ID! # account address
-  claims: [RewardClaim!]!
+  claims: [RewardLink!]!
   eligible: Boolean! # rewards become eligible after investment length is greater than 60 consecutive days
   claimableRewards: BigDecimal! 
-  previousRewards: BigDecimal! # rewards on previously linked address
-  totalRewards: BigDecimal! # sum of the above 2
+  totalRewards: BigDecimal!
   nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
 
@@ -188,7 +187,7 @@ type RewardByToken @entity {
 }
 
 # initial cent address is zero address
-type RewardClaim @entity {
+type RewardLink @entity {
   id: ID! #eth address + cent address
   ethAddress: String!
   centAddress: String!
