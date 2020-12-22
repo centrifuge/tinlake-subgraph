@@ -1,5 +1,5 @@
 import { log, ethereum, BigInt } from '@graphprotocol/graph-ts'
-import { loadOrCreateRewardDayTotal } from '../domain/TokenBalance'
+import { loadOrCreateRewardDayTotal } from '../domain/Reward'
 import { createDailySnapshot } from '../domain/DailyPoolData'
 import { getToday, createDay } from '../domain/Day'
 import { updateAllPoolValues } from './Coordinator'
@@ -17,7 +17,7 @@ export function handleBlock(block: ethereum.Block): void {
     loadPoolFromIPFS(preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash)
   }
 
-  // Hnadle block every n minutes only (e.g. every 5 minutes)
+  // Handle block every n minutes only (e.g. every 5 minutes)
   if (
     block.number.mod(BigInt.fromI32((handleBlockFrequencyMinutes * 60) / blockTimeSeconds)).notEqual(BigInt.fromI32(0))
   ) {
@@ -39,6 +39,6 @@ export function handleBlock(block: ethereum.Block): void {
   // Update all pool values if the fast forward phase has passed, or if it's a new day
   let fastForwardEnabled = block.number.toI32() < fastForwardUntilBlock
   if (!fastForwardEnabled || (fastForwardEnabled && newDay)) {
-    updateAllPoolValues(today)
+    updateAllPoolValues(block, today)
   }
 }

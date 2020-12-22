@@ -15,6 +15,10 @@ type Pool @entity {
   maxReserve: BigInt!
   seniorTokenPrice: BigInt! # assessor
   juniorTokenPrice: BigInt! # assessor
+  juniorYield14Days: BigInt
+  seniorYield14Days: BigInt
+  juniorYield30Days: BigInt
+  seniorYield30Days: BigInt
   reserve: BigInt!
   assetValue: BigInt!
   shortName: String!
@@ -41,23 +45,6 @@ type PoolRegistry @entity {
   pools: [Pool!]!
 }
 
-type RewardDailyInvestorTokenBalance @entity {
-  id: ID! # investorAddress+poolId+day
-  account: Account!
-  day: Day!
-  pool: Pool!
-  seniorTokenAmount: BigInt!
-  seniorTokenValue: BigInt!
-  juniorTokenAmount: BigInt!
-  juniorTokenValue: BigInt!
-  nonZeroBalanceSince: BigInt! # investments have to be at least 60 days long for balances to accrue
-}
-
-type RewardDailyInvestorIdentifier @entity {
-  id: ID!
-  rewardIds: [String!]
-}
-
 type DailyPoolData @entity {
   id: ID! # poolId+day
   day: Day!
@@ -65,7 +52,7 @@ type DailyPoolData @entity {
   reserve: BigInt! # reserve.sol totalBalance()
   totalDebt: BigInt! # outstanding Volume (but also is already in the pool)
   assetValue: BigInt! # navfeed.sol currentNav()
-  seniorDebt: BigInt!  
+  seniorDebt: BigInt!
   seniorTokenPrice: BigInt! # assessor
   juniorTokenPrice: BigInt! # assessor
   currentJuniorRatio: BigInt!
@@ -96,9 +83,9 @@ type Proxy @entity {
 }
 
 type Account @entity {
-  id: ID! # address
+  id: ID! # account address
   dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
-  currentActiveInvestmentAmount: BigInt # not based on token balance
+  currentActiveInvestmentAmount: BigInt!
 }
 
 type ERC20Transfer @entity {
@@ -119,7 +106,7 @@ type Token @entity {
 }
 
 type TokenBalance @entity {
-  id: ID! # account address + token address 
+  id: ID! # account address + token address
   owner: Account!
   balance: BigInt!
   value: BigInt!
@@ -135,9 +122,62 @@ type Day @entity {
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
 }
 
+type RewardDailyInvestorTokenBalance @entity {
+  id: ID! # investorAddress + poolId + day
+  account: Account!
+  day: Day!
+  pool: Pool!
+  seniorTokenAmount: BigInt!
+  seniorTokenValue: BigInt!
+  juniorTokenAmount: BigInt!
+  juniorTokenValue: BigInt!
+}
+
+type PoolInvestor @entity {
+  id: ID! # poolId
+  accounts: [String!]! # account addresses in pool
+}
+
+type GlobalAccountId @entity {
+  id: ID! # systemwide '1'
+  accounts: [String!]! # account addresses in system
+}
+
+# system wide by day
 type RewardDayTotal @entity {
-  id: ID!
+  id: ID! # date
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
-  rewardRate: BigInt!
+  rewardRate: BigDecimal!
+  todayReward: BigDecimal!
+  toDateRewardAggregateValue: BigDecimal!
+}
+
+# on claim changed event from contract
+# create new reward claim for the eth address
+type RewardBalance @entity {
+  id: ID! # account address
+  claims: [RewardClaim!]!
+  pendingRewards: BigDecimal!
+  claimableRewards: BigDecimal!
+  totalRewards: BigDecimal! # sum of the above 2
+  nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
+}
+
+# this is a historical value and will not be responsible
+# for keeping track of claims made on cent chain
+# rewards earned from token investment
+type RewardByToken @entity {
+  id: ID! # investorAddress + token address
+  token: String!
+  account: String!
+  rewards: BigDecimal!
+}
+
+# initial cent address is nothing
+type RewardClaim @entity {
+  id: ID! #eth address + cent address
+  ethAddress: String!
+  centAddress: String!
+  reward: BigInt!
 }

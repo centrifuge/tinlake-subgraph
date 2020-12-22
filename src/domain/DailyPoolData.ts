@@ -1,11 +1,13 @@
 import { log, BigInt, ethereum } from '@graphprotocol/graph-ts'
-import { Day, DailyPoolData } from '../../generated/schema'
+import { Day, DailyPoolData, Account } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
 import { secondsInDay } from '../config'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { getAllPools } from './PoolRegistry'
 import { loadOrCreateToken } from './Token'
-import { createDailyTokenBalances, updateRewardDayTotal } from './TokenBalance'
+import { createDailyTokenBalances } from './TokenBalance'
+import { calculateRewards, updateRewardDayTotal, loadOrCreateRewardBalance } from './Reward'
+import { loadOrCreateGlobalAccounts } from './Account'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
@@ -26,8 +28,15 @@ export function createDailySnapshot(block: ethereum.Block): void {
 
     let seniorToken = loadOrCreateToken(addresses.seniorToken)
     createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+  }
 
+  updateSystemWideNonZeroBalances(yesterdayTimeStamp)
+
+  // another pool loop to now update rewards
+  for (let i = 0; i < pools.length; i++) {
+    let pool = Pool.load(pools[i]) as Pool
     updateRewardDayTotal(yesterdayTimeStamp, pool)
+    calculateRewards(yesterdayTimeStamp, pool)
   }
 }
 
@@ -65,4 +74,40 @@ export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): vo
   dailyPoolData.juniorTokenPrice = <BigInt>pool.juniorTokenPrice
   dailyPoolData.seniorTokenPrice = <BigInt>pool.seniorTokenPrice
   dailyPoolData.save()
+}
+
+// if an investor's system wide amount goes to 0,
+// then reset their nonZeroBalanceSince (nzbs) reward accumulation date
+function updateSystemWideNonZeroBalances(date: BigInt): void {
+  let accounts = loadOrCreateGlobalAccounts('1')
+  for (let i = 0; i < accounts.accounts.length; i++) {
+    let investors = accounts.accounts
+    let address = investors[i]
+
+    let account = Account.load(address)
+    let accountRewardBalance = loadOrCreateRewardBalance(address)
+
+    // if the account balance is 0 across all pools,
+    // then reset their nzbs.
+    if (account.currentActiveInvestmentAmount.equals(BigInt.fromI32(0))) {
+      accountRewardBalance.nonZeroBalanceSince = BigInt.fromI32(0)
+    }
+
+    // if the active investment amount is negative, it's an internal
+    // address, so it doesn't accrue rewards
+    if (account.currentActiveInvestmentAmount.lt(BigInt.fromI32(0))) {
+      // make it 0 (do nothing..)
+      accountRewardBalance.nonZeroBalanceSince = BigInt.fromI32(0)
+    }
+
+    // if the active investment amount is positive and
+    // the nzbs is not zero, keep it as it is
+    if (account.currentActiveInvestmentAmount.gt(BigInt.fromI32(0))) {
+      if (accountRewardBalance.nonZeroBalanceSince.equals(BigInt.fromI32(0))) {
+        // if the active investment account is positive and the nonzero token balance since is 0, then set the nzbS to yesterdayTimestamp
+        accountRewardBalance.nonZeroBalanceSince = date
+      }
+    }
+    accountRewardBalance.save()
+  }
 }

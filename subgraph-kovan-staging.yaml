@@ -47,7 +47,7 @@ dataSources:
     source:
       address: "0xb0cd959bbbe799ba7d18c7d28008553a7b47a04c"
       abi: ProxyRegistry
-      startBlock: 21592834
+      startBlock: 20606911
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -149,7 +149,7 @@ templates:
         - name: Pile
           file: ./abis/Pile.json
         - name: NftFeed
-          file: ./abis/NFTFeed.json
+          file: ./abis/NftFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: Assessor
@@ -177,7 +177,7 @@ templates:
         - Loan
       abis:
         - name: NftFeed
-          file: ./abis/NFTFeed.json
+          file: ./abis/NftFeed.json
         - name: Shelf
           file: ./abis/Shelf.json
         - name: Pile
