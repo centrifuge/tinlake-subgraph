@@ -23,14 +23,7 @@ export let mainnetPreloadedPools: PreloadedPool[] = [
   },
 ]
 
-export let kovanPreloadedPools: PreloadedPool[] = [
-  {
-    id: '0xc4084221fb5d0f28f817c795435c2d17eab6c389',
-    ipfsHash: 'QmejWfuhKtNr3joGWsMExBLCLwNhgfAcUf4SKeYAz43Piz',
-    assessorStartBlock: 21406450,
-    network: 'kovan',
-  },
-]
+export let kovanPreloadedPools: PreloadedPool[] = []
 
 // Lookup tables by start block
 export let preloadedPoolByStartBlockMainnet = new Map<number, PreloadedPool>()

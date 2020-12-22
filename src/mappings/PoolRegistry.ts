@@ -24,11 +24,6 @@ export function handlePoolCreated(call: PoolCreated): void {
   }
 }
 
-/**
- * TODO: removing data source templates is not possible, so what we probably should do is to check
- * which addresses changed, and if any did, then create new data source templates just for those which changed.
- * This way, you don't get any duplicates, and the old + new addresses will both be handled.
- */
 export function handlePoolUpdated(call: PoolUpdated): void {
   log.debug('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
     call.params.pool.toHexString(),
@@ -41,7 +36,9 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   let oldPoolAddresses = PoolAddresses.load(poolId)
 
   if (oldPoolAddresses == null) {
-    log.error('handlePoolUpdated: could not load old pool addresses', [])
+    // If handling the PoolCreated event failed (e.g. due to a missing hash), then we will try to create it here
+    log.error('handlePoolUpdated: could not load old pool addresses, attempting to create a new pool', [])
+    loadPoolFromIPFS(call.params.data)
     return
   }
 

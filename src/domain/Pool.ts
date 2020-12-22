@@ -77,7 +77,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   log.debug('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
 
   if (prevAddresses.coordinator != newAddresses.coordinator) {
-    log.debug('createUpdatedPoolHandlers: swapping coordinator {} => {}', [
+    log.debug('createUpdatedPoolHandlers: creating handler for changed coordinator {} => {}', [
       prevAddresses.coordinator,
       newAddresses.coordinator,
     ])
@@ -85,22 +85,31 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.assessor != newAddresses.assessor) {
-    log.debug('createUpdatedPoolHandlers: swapping assessor {} => {}', [prevAddresses.assessor, newAddresses.assessor])
+    log.debug('createUpdatedPoolHandlers: creating handler for changed assessor {} => {}', [
+      prevAddresses.assessor,
+      newAddresses.assessor,
+    ])
     AssessorTemplate.createWithContext(Address.fromString(newAddresses.assessor), context)
   }
 
   if (prevAddresses.shelf != newAddresses.shelf) {
-    log.debug('createUpdatedPoolHandlers: swapping shelf {} => {}', [prevAddresses.shelf, newAddresses.shelf])
+    log.debug('createUpdatedPoolHandlers: creating handler for changed shelf {} => {}', [
+      prevAddresses.shelf,
+      newAddresses.shelf,
+    ])
     ShelfTemplate.createWithContext(Address.fromString(newAddresses.shelf), context)
   }
 
   if (prevAddresses.feed != newAddresses.feed) {
-    log.debug('createUpdatedPoolHandlers: swapping feed {} => {}', [prevAddresses.feed, newAddresses.feed])
+    log.debug('createUpdatedPoolHandlers: creating handler for changed feed {} => {}', [
+      prevAddresses.feed,
+      newAddresses.feed,
+    ])
     NftFeedTemplate.createWithContext(Address.fromString(newAddresses.feed), context)
   }
 
   if (prevAddresses.seniorToken != newAddresses.seniorToken) {
-    log.debug('createUpdatedPoolHandlers: swapping seniorToken {} => {}', [
+    log.debug('createUpdatedPoolHandlers: creating handler for changed seniorToken {} => {}', [
       prevAddresses.seniorToken,
       newAddresses.seniorToken,
     ])
@@ -111,7 +120,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.juniorToken != newAddresses.juniorToken) {
-    log.debug('createUpdatedPoolHandlers: swapping juniorToken {} => {}', [
+    log.debug('createUpdatedPoolHandlers: creating handler for changed juniorToken {} => {}', [
       prevAddresses.juniorToken,
       newAddresses.assessor,
     ])
