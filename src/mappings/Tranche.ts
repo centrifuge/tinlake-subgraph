@@ -1,7 +1,7 @@
 import { log, dataSource } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall } from '../../generated/templates/Tranche/Tranche'
 import { Account } from '../../generated/schema'
-import { createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
+import { addToGlobalAccounts, createAccount, isSystemAccount, loadOrCreateGlobalAccounts } from '../domain/Account'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { loadOrCreateToken } from '../domain/Token'
 import { push } from '../util/array'
@@ -20,14 +20,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     if (Account.load(account) == null) {
       createAccount(account)
     }
-    let globalAccounts = loadOrCreateGlobalAccounts('1')
-    if (!globalAccounts.accounts.includes(account)) {
-      let temp = globalAccounts.accounts
-      temp.push(account)
-      globalAccounts.accounts = temp
-      globalAccounts.save()
-    }
-
+    addToGlobalAccounts(account)
     // add to token owners
     let tk = loadOrCreateToken(token)
     tk.owners = push(tk.owners, account)
