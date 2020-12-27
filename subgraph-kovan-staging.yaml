@@ -148,12 +148,12 @@ templates:
           file: ./abis/Shelf.json
         - name: Pile
           file: ./abis/Pile.json
-        - name: NftFeed
-          file: ./abis/NftFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: Assessor
           file: ./abis/Assessor.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue
