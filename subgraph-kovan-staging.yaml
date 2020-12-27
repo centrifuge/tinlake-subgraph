@@ -36,6 +36,8 @@ dataSources:
           file: ./abis/Shelf.json
         - name: PoolRegistry
           file: ./abis/PoolRegistry.json
+        - name: Tranche
+          file: ./abis/Tranche.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts

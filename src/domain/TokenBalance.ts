@@ -17,7 +17,7 @@ export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): T
   let tb = TokenBalance.load(owner.concat(tokenAddress))
   {
     if (tb == null) {
-      tb = new TokenBalance(tokenAddress.concat(owner))
+      tb = new TokenBalance(owner.concat(tokenAddress))
       tb.owner = owner
       tb.balance = BigInt.fromI32(0)
       tb.value = BigInt.fromI32(0)
@@ -129,9 +129,9 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
   let poolInvestors = loadOrCreatePoolInvestors(pool.id)
   let addresses = PoolAddresses.load(pool.id)
+  let owners = token.owners
 
-  for (let i = 0; i < token.owners.length; i++) {
-    let owners = token.owners
+  for (let i = 0; i < owners.length; i++) {
     let holderId = owners[i]
     let tbId = holderId.concat(token.id)
 

@@ -1,4 +1,4 @@
-import { BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import {
   DailyInvestorTokenBalance,
   Pool,
@@ -87,11 +87,12 @@ function updateInvestorRewardsByToken(
 export function calculateRewards(date: BigInt, pool: Pool): void {
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  let tokenAddresses = PoolAddresses.load(pool.id)
-  setRewardRate(systemRewards)
+  systemRewards = setRewardRate(systemRewards)
 
-  for (let i = 0; i < investorIds.accounts.length; i++) {
-    let accounts = investorIds.accounts
+  let tokenAddresses = PoolAddresses.load(pool.id)
+  let accounts = investorIds.accounts
+
+  for (let i = 0; i < accounts.length; i++) {
     let account = accounts[i]
     let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     let reward = loadOrCreateRewardBalance(ditb.account)
@@ -142,9 +143,12 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function setRewardRate(systemRewards: RewardDayTotal): void {
+function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
   if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(tierOneRewards))) {
+    log.debug('setting system rewards rate {}', [systemRewards.toDateRewardAggregateValue.toString()])
+
     systemRewards.rewardRate = BigDecimal.fromString('0.0042')
     systemRewards.save()
   }
+  return systemRewards
 }
