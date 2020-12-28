@@ -19,8 +19,8 @@ export const initialRewardRate = '0.0042'
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 11458684
-const fastForwardUntilBlockKovan = 22604583
+const fastForwardUntilBlockMainnet = 11535547
+const fastForwardUntilBlockKovan = 22712797
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 
