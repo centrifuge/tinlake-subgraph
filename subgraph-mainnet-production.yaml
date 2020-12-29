@@ -48,7 +48,7 @@ dataSources:
     source:
       address: "0xc9045c815bf123ad12ea75b9a7c579c1e05051f9"
       abi: ProxyRegistry
-      startBlock: 11063000
+      startBlock: 9994872
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -149,12 +149,12 @@ templates:
           file: ./abis/Shelf.json
         - name: Pile
           file: ./abis/Pile.json
-        - name: NftFeed
-          file: ./abis/NftFeed.json
         - name: SeniorTranche
           file: ./abis/SeniorTranche.json
         - name: Assessor
           file: ./abis/Assessor.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
       callHandlers:
         - function: issue(address,uint256)
           handler: handleShelfIssue

@@ -1,7 +1,7 @@
 import { log, BigInt, Address, dataSource } from '@graphprotocol/graph-ts'
 import { Pile } from '../../generated/Block/Pile'
 import { IssueCall, CloseCall, BorrowCall } from '../../generated/Block/Shelf'
-import { NftFeed } from '../../generated/Block/NftFeed'
+import { NavFeed } from '../../generated/Block/NavFeed'
 import { Pool, PoolAddresses, Loan } from '../../generated/schema'
 import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
 
@@ -54,21 +54,28 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.nftId = nftId.toString()
   loan.nftRegistry = nftRegistry
 
-  // get risk group and interest rate from nftFeed
+  // get risk group and interest rate from navFeed
   let addresses = PoolAddresses.load(poolId)
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
   let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
 
   // generate hash from nftId & registry
-  let nftHash = nftFeed.try_nftID(loanIndex)
+  let nftHash = navFeed.try_nftID(loanIndex)
   if (nftHash.reverted) {
     log.critical('handleShelfIssue: failed to find nft hash for loan idx {}', [loanIndex.toString()])
     return
   }
 
-  let riskGroup = nftFeed.try_risk(nftHash.value)
+  let riskGroup = navFeed.try_risk(nftHash.value)
   if (riskGroup.reverted) {
     log.critical('handleShelfIssue: failed to find risk group for nft hash {}', [nftHash.value.toString()])
+    return
+  }
+
+  // get maturity date
+  let maturityDate = navFeed.try_maturityDate(nftHash.value)
+  if (maturityDate.reverted) {
+    log.critical('handleShelfIssue: failed to find maturity date for nft hash {}', [nftHash.value.toString()])
     return
   }
 
@@ -80,8 +87,9 @@ export function handleShelfIssue(call: IssueCall): void {
   }
   loan.interestRatePerSecond = ratePerSecond.value.value2
   // set ceiling & threshold based on collateral value
-  loan.ceiling = nftFeed.ceiling(loanIndex)
-  loan.threshold = nftFeed.threshold(loanIndex)
+  loan.ceiling = navFeed.ceiling(loanIndex)
+  loan.threshold = navFeed.threshold(loanIndex)
+  loan.maturityDate = maturityDate.value
 
   log.debug('handleShelfIssue: will save loan {} (pool: {}, index: {}, owner: {}, opened {})', [
     loan.id,
@@ -151,8 +159,10 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.debt = loan.debt.plus(amount)
 
   let addresses = PoolAddresses.load(poolId)
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
-  loan.ceiling = nftFeed.ceiling(loanIndex)
+  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  loan.ceiling = navFeed.ceiling(loanIndex)
+  let nftID = navFeed.nftID(loanIndex)
+  loan.maturityDate = navFeed.maturityDate(nftID)
   loan.save()
 
   let pool = Pool.load(poolId)

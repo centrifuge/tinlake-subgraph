@@ -1,7 +1,7 @@
 import { TypedMap, JSONValue } from '@graphprotocol/graph-ts'
 import { PoolAddresses } from '../../generated/schema'
 
-export function createPoolAddresses(poolId: string, addresses: TypedMap<string, JSONValue>): PoolAddresses {
+export function updatePoolAddresses(poolId: string, addresses: TypedMap<string, JSONValue>): PoolAddresses {
   let poolAddresses = new PoolAddresses(poolId)
   poolAddresses.coordinator = addresses.get('COORDINATOR').toString()
   poolAddresses.assessor = addresses.get('ASSESSOR').toString()

@@ -57,7 +57,7 @@ export function createPoolHandlers(addresses: PoolAddresses): void {
   let context = new DataSourceContext()
   context.setString('id', addresses.id)
 
-  log.debug('createPool: creating pool handlers: {}', [addresses.id])
+  log.debug('createPoolHandlers: {}', [addresses.id])
 
   CoordinatorTemplate.createWithContext(Address.fromString(addresses.coordinator), context)
   AssessorTemplate.createWithContext(Address.fromString(addresses.assessor), context)
@@ -75,4 +75,65 @@ export function createPoolHandlers(addresses: PoolAddresses): void {
   juniorTokenContext.setString('id', addresses.id)
   juniorTokenContext.setString('tokenAddress', addresses.juniorToken)
   TokenTemplate.createWithContext(Address.fromString(addresses.juniorToken), juniorTokenContext)
+}
+
+export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddresses: PoolAddresses): void {
+  let context = new DataSourceContext()
+  context.setString('id', newAddresses.id)
+
+  log.debug('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
+
+  if (prevAddresses.coordinator != newAddresses.coordinator) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed coordinator {} => {}', [
+      prevAddresses.coordinator,
+      newAddresses.coordinator,
+    ])
+    CoordinatorTemplate.createWithContext(Address.fromString(newAddresses.coordinator), context)
+  }
+
+  if (prevAddresses.assessor != newAddresses.assessor) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed assessor {} => {}', [
+      prevAddresses.assessor,
+      newAddresses.assessor,
+    ])
+    AssessorTemplate.createWithContext(Address.fromString(newAddresses.assessor), context)
+  }
+
+  if (prevAddresses.shelf != newAddresses.shelf) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed shelf {} => {}', [
+      prevAddresses.shelf,
+      newAddresses.shelf,
+    ])
+    ShelfTemplate.createWithContext(Address.fromString(newAddresses.shelf), context)
+  }
+
+  if (prevAddresses.feed != newAddresses.feed) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed feed {} => {}', [
+      prevAddresses.feed,
+      newAddresses.feed,
+    ])
+    NftFeedTemplate.createWithContext(Address.fromString(newAddresses.feed), context)
+  }
+
+  if (prevAddresses.seniorToken != newAddresses.seniorToken) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed seniorToken {} => {}', [
+      prevAddresses.seniorToken,
+      newAddresses.seniorToken,
+    ])
+    let seniorTokenContext = new DataSourceContext()
+    seniorTokenContext.setString('id', newAddresses.id)
+    seniorTokenContext.setString('tokenAddress', newAddresses.seniorToken)
+    TokenTemplate.createWithContext(Address.fromString(newAddresses.seniorToken), seniorTokenContext)
+  }
+
+  if (prevAddresses.juniorToken != newAddresses.juniorToken) {
+    log.debug('createUpdatedPoolHandlers: creating handler for changed juniorToken {} => {}', [
+      prevAddresses.juniorToken,
+      newAddresses.assessor,
+    ])
+    let juniorTokenContext = new DataSourceContext()
+    juniorTokenContext.setString('id', newAddresses.id)
+    juniorTokenContext.setString('tokenAddress', newAddresses.juniorToken)
+    TokenTemplate.createWithContext(Address.fromString(newAddresses.juniorToken), juniorTokenContext)
+  }
 }
