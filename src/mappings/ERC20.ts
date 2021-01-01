@@ -4,8 +4,8 @@ import { ERC20Transfer } from '../../generated/schema'
 import { createERC20Transfer } from '../domain/ERC20Transfer'
 import { loadOrCreateToken } from '../domain/Token'
 import { loadOrCreateTokenBalanceSrc, loadOrCreateTokenBalanceDst } from '../domain/TokenBalance'
-import { isSystemAccount, updateAccounts } from '../domain/Account'
-import { push } from '../util/array'
+import { isSystemAccount, updateAccountsAfterTransfer } from '../domain/Account'
+import { pushUnique } from '../util/array'
 
 export function handleERC20Transfer(event: TransferEvent): void {
   let tokenAddress = dataSource.context().getString('tokenAddress')
@@ -21,13 +21,13 @@ export function handleERC20Transfer(event: TransferEvent): void {
   if (!isSystemAccount(poolId, event.params.dst.toHex())) {
     log.debug('handleERC20Transfer: adding owner {}', [event.params.dst.toHex()])
     // only push dst as owners
-    token.owners = push(token.owners, event.params.dst.toHex())
+    token.owners = pushUnique(token.owners, event.params.dst.toHex())
     token.save()
   }
 
   loadOrCreateTokenBalanceDst(event, tokenAddress, poolId)
   loadOrCreateTokenBalanceSrc(event, tokenAddress, poolId)
-  updateAccounts(event, poolId)
+  updateAccountsAfterTransfer(event, poolId)
 
   let id = event.block.number
     .toString()

@@ -1,4 +1,4 @@
-export function push(arr: string[], item: string): string[] {
+export function pushUnique(arr: string[], item: string): string[] {
   if (!arr.includes(item)) {
     let temp = arr
     temp.push(item)

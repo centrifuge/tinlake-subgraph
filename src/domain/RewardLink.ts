@@ -1,12 +1,12 @@
 import { BigDecimal } from '@graphprotocol/graph-ts'
 import { RewardLink } from '../../generated/schema'
 
-export function loadOrCreateRewardLink(address: string, substrate: string): RewardLink {
-  let claim = RewardLink.load(address.concat(substrate))
+export function loadOrCreateRewardLink(address: string, centAddress: string): RewardLink {
+  let claim = RewardLink.load(address.concat(centAddress))
   if (claim == null) {
-    new RewardLink(address.concat(substrate))
+    claim = new RewardLink(address.concat(centAddress))
     claim.ethAddress = address
-    claim.centAddress = substrate
+    claim.centAddress = centAddress
     claim.rewardsAccumulated = BigDecimal.fromString('0')
     claim.save()
   }

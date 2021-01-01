@@ -1,10 +1,10 @@
 import { log, dataSource } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall } from '../../generated/templates/Tranche/Tranche'
 import { Account, PoolAddresses } from '../../generated/schema'
-import { addToGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
+import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { loadOrCreateToken } from '../domain/Token'
-import { push } from '../util/array'
+import { pushUnique } from '../util/array'
 
 // the supply order is the first contact an investor has with tinlake
 export function handleSupplyOrder(call: SupplyOrderCall): void {
@@ -21,18 +21,19 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   let amount = call.inputs.newSupplyAmount
 
   // protection from adding system account to internal tracking
-  if (!isSystemAccount(poolId, account)) {
-    if (Account.load(account) == null) {
-      createAccount(account)
-    }
-    addToGlobalAccounts(account)
-    // add to token owners
-    let tk = loadOrCreateToken(token)
-    tk.owners = push(tk.owners, account)
-    tk.save()
-
-    let tokenBalance = loadOrCreateTokenBalance(account, token)
-    tokenBalance.pendingSupplyCurrency = amount
-    tokenBalance.save()
+  if (isSystemAccount(poolId, account)) {
+    return
   }
+  if (Account.load(account) == null) {
+    createAccount(account)
+  }
+  ensureSavedInGlobalAccounts(account)
+  // ensure user is in token owners
+  let tk = loadOrCreateToken(token)
+  tk.owners = pushUnique(tk.owners, account)
+  tk.save()
+
+  let tokenBalance = loadOrCreateTokenBalance(account, token)
+  tokenBalance.pendingSupplyCurrency = amount
+  tokenBalance.save()
 }

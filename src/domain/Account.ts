@@ -2,7 +2,7 @@ import { BigInt } from '@graphprotocol/graph-ts'
 import { Account, GlobalAccountId, PoolAddresses } from '../../generated/schema'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { zeroAddress } from '../config'
-import { push } from '../util/array'
+import { pushUnique } from '../util/array'
 
 export function createAccount(address: string): Account {
   let account = new Account(address)
@@ -12,7 +12,7 @@ export function createAccount(address: string): Account {
 }
 
 // used for determining nonZeroBalanceSince across system for user
-export function updateAccounts(event: TransferEvent, poolId: string): void {
+export function updateAccountsAfterTransfer(event: TransferEvent, poolId: string): void {
   if (!isSystemAccount(poolId, event.params.dst.toHex())) {
     // increase accountTo balance
     let accountTo = Account.load(event.params.dst.toHex())
@@ -44,9 +44,9 @@ export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   return <GlobalAccountId>ids
 }
 
-export function addToGlobalAccounts(account: string): void {
+export function ensureSavedInGlobalAccounts(account: string): void {
   let globalAccounts = loadOrCreateGlobalAccounts('1')
-  globalAccounts.accounts = push(globalAccounts.accounts, account)
+  globalAccounts.accounts = pushUnique(globalAccounts.accounts, account)
   globalAccounts.save()
 }
 

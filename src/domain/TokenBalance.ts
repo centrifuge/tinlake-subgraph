@@ -10,8 +10,8 @@ import {
   PoolAddresses,
 } from '../../generated/schema'
 import { fixed27 } from '../config'
-import { addToGlobalAccounts, isSystemAccount } from './Account'
-import { push } from '../util/array'
+import { ensureSavedInGlobalAccounts, isSystemAccount } from './Account'
+import { pushUnique } from '../util/array'
 
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
   let tb = TokenBalance.load(owner.concat(tokenAddress))
@@ -144,8 +144,8 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
-      addToGlobalAccounts(ditb.account)
-      poolInvestors.accounts = push(poolInvestors.accounts, ditb.account)
+      ensureSavedInGlobalAccounts(ditb.account)
+      poolInvestors.accounts = pushUnique(poolInvestors.accounts, ditb.account)
       poolInvestors.save()
     }
   }
