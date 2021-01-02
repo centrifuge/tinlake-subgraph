@@ -15,7 +15,7 @@ import { secondsInDay, tierOneRewards } from '../config'
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   let rdt = loadOrCreateRewardDayTotal(date)
-  rdt.todayValue = rdt.todayValue.plus(pool.assetValue)
+  rdt.todayValue = rdt.todayValue.plus(pool.assetValue).plus(pool.reserve)
   let prevDayId = date.minus(BigInt.fromI32(secondsInDay))
   let prevDayRewardTotal = loadOrCreateRewardDayTotal(prevDayId)
   rdt.toDateAggregateValue = rdt.todayValue.plus(prevDayRewardTotal.toDateAggregateValue)
