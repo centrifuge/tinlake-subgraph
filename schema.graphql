@@ -164,13 +164,13 @@ type RewardDayTotal @entity {
 }
 
 # on claim changed event from contract
-# create new reward claim for the eth address
+# create new reward link for the eth address
 type RewardBalance @entity {
   id: ID! # account address
-  claims: [RewardLink!]!
-  eligible: Boolean! # rewards become eligible after investment length is greater than 60 consecutive days
-  claimableRewards: BigDecimal! 
-  totalRewards: BigDecimal!
+  links: [RewardLink!]!
+  claimable: Boolean! # rewards become claimable to cent chain after investment length is greater than 60 consecutive days
+  linkableRewards: BigDecimal! 
+  totalRewards: BigDecimal! # cumulative across links
   nonZeroBalanceSince: BigInt # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
 

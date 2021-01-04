@@ -12,13 +12,13 @@ export function handleClaimed(claimed: Claimed): void {
 
   let balance = loadOrCreateRewardBalance(sender)
   let link = loadOrCreateRewardLink(sender, centAddress)
-  balance.claims = pushUnique(balance.claims, link.id)
+  balance.links = pushUnique(balance.links, link.id)
 
   // add this link to their reward balance and put any
-  // eligible rewards claimable into this claim, reset claimable to 0
-  if (balance.eligible) {
-    link.rewardsAccumulated = balance.claimableRewards
-    balance.claimableRewards = BigDecimal.fromString('0')
+  // claimable rewards into this link, reset linkableRewards to 0
+  if (balance.claimable) {
+    link.rewardsAccumulated = balance.linkableRewards
+    balance.linkableRewards = BigDecimal.fromString('0')
   }
   balance.save()
   link.save()
