@@ -45,7 +45,7 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
     rb.eligible = false
     rb.claimableRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')
-    rb.nonZeroBalanceSince = BigInt.fromI32(0)
+    rb.nonZeroBalanceSince = null
     rb.save()
   }
   return <RewardBalance>rb

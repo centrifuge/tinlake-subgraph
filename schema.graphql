@@ -171,7 +171,7 @@ type RewardBalance @entity {
   eligible: Boolean! # rewards become eligible after investment length is greater than 60 consecutive days
   claimableRewards: BigDecimal! 
   totalRewards: BigDecimal!
-  nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
+  nonZeroBalanceSince: BigInt # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
 
 # this is a historical value and will not be responsible

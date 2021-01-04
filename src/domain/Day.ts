@@ -31,8 +31,8 @@ export function getToday(block: ethereum.Block): Day {
 // if the difference between days since nonzerobalance
 // and today's timestamp are greater than or equal to sixty days in seconds
 // if kovan, we want to make rewards eligible after 1 day
-export function rewardsAreEligible(today: BigInt, nonZeroSince: BigInt): boolean {
-  return dataSource.network() == 'mainnet'
-    ? today.minus(nonZeroSince).ge(BigInt.fromI32(secondsInSixtyDays))
-    : today.minus(nonZeroSince).ge(BigInt.fromI32(secondsInDay))
+export function rewardsAreEligible(today: BigInt, nonZeroSince: BigInt | null): boolean {
+  return nonZeroSince != null && dataSource.network() == 'mainnet'
+    ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInSixtyDays))
+    : today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInDay))
 }
