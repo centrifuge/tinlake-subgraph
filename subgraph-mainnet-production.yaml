@@ -91,6 +91,27 @@ dataSources:
           handler: handlePoolUpdated
       file: ./src/mappings/PoolRegistry.ts
 
+  - kind: ethereum/contract
+    name: Claim
+    network: mainnet
+    source: 
+      address: "0xD10A3e31ff5475c779052864484998540feFC1E9"
+      abi: TinlakeClaimRAD
+      startBlock: 11556333
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - RewardLink
+      abis:
+        - name: TinlakeClaimRAD
+          file: ./abis/TinlakeClaimRAD.json
+      eventHandlers:
+        - event: Claimed(address,bytes32)
+          handler: handleClaimed
+      file: ./src/mappings/TinlakeClaimRAD.ts
+
 templates:
   - kind: ethereum/contract
     name: Coordinator
@@ -227,21 +248,3 @@ templates:
         - function: supplyOrder(address,uint256)
           handler: handleSupplyOrder
       file: ./src/mappings/Tranche.ts
-  - kind: ethereum/contract
-    name: Claim
-    network: mainnet
-    source: 
-      abi: TinlakeClaimRAD
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      language: wasm/assemblyscript
-      entities:
-        - RewardLink
-      abis:
-        - name: TinlakeClaimRAD
-          file: ./abis/TinlakeClaimRAD.json
-      eventHandlers:
-        - event: Claimed(address,bytes32)
-          handler: handleClaimed
-      file: ./src/mappings/TinlakeClaimRAD.ts

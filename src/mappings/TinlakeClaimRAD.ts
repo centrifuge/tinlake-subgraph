@@ -1,5 +1,5 @@
 import { log, BigDecimal } from '@graphprotocol/graph-ts'
-import { Claimed } from '../../generated/templates/Claim/TinlakeClaimRAD'
+import { Claimed } from '../../generated/Claim/TinlakeClaimRAD'
 import { loadOrCreateRewardLink } from '../domain/RewardLink'
 import { loadOrCreateRewardBalance } from '../domain/Reward'
 import { pushUnique } from '../util/array'
