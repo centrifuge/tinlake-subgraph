@@ -163,6 +163,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.ceiling = navFeed.ceiling(loanIndex)
   let nftID = navFeed.nftID(loanIndex)
   loan.maturityDate = navFeed.maturityDate(nftID)
+  loan.financingDate = call.block.timestamp
   loan.save()
 
   let pool = Pool.load(poolId)
