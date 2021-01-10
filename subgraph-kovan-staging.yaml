@@ -47,9 +47,9 @@ dataSources:
     name: ProxyRegistry
     network: kovan
     source:
-      address: "0x432054Ad9D79f769B6F6F9CC35f46E0BFEa6A826"
+      address: "0xb0cd959bbbe799ba7d18c7d28008553a7b47a04c"
       abi: ProxyRegistry
-      startBlock: 22895811
+      startBlock: 20606911
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
