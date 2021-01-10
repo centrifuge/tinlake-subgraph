@@ -139,6 +139,12 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      // update tokenBalance value
+      if (tb.token == addresses.seniorToken) {
+        tb.value = tb.balance.times(pool.seniorTokenPrice)
+      } else {
+        tb.value = tb.balance.times(pool.juniorTokenPrice)
+      }
       calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
