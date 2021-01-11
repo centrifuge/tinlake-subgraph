@@ -91,12 +91,14 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     // then reset their nzbs.
     if (account.currentActiveInvestmentAmount.equals(BigInt.fromI32(0))) {
       accountRewardBalance.nonZeroBalanceSince = null
+      accountRewardBalance.claimable = false
     }
 
     // if the active investment amount is negative, it's an internal
     // address, so it doesn't accrue rewards
     if (account.currentActiveInvestmentAmount.lt(BigInt.fromI32(0))) {
       accountRewardBalance.nonZeroBalanceSince = null
+      accountRewardBalance.claimable = false
     }
 
     // if the active investment amount is positive and
