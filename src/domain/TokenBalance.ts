@@ -1,82 +1,120 @@
-import { log, BigInt } from '@graphprotocol/graph-ts'
+import { log, BigInt, Address } from '@graphprotocol/graph-ts'
 import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
+import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import {
-  RewardDailyInvestorTokenBalance,
+  DailyInvestorTokenBalance,
   Token,
   TokenBalance,
   Pool,
   PoolInvestor,
   PoolAddresses,
 } from '../../generated/schema'
-import { loadOrCreateGlobalAccounts } from './Account'
+import { fixed27 } from '../config'
+import { ensureSavedInGlobalAccounts, isSystemAccount } from './Account'
+import { pushUnique } from '../util/array'
 
-export function createTokenBalance(id: string, event: TransferEvent, owner: string): TokenBalance {
-  let tb = new TokenBalance(id)
-  tb.owner = owner
-  tb.balance = BigInt.fromI32(0)
-  tb.value = BigInt.fromI32(0)
-  tb.token = event.address.toHex()
-  tb.save()
-  return tb
+export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
+  let tb = TokenBalance.load(owner.concat(tokenAddress))
+  {
+    if (tb == null) {
+      tb = new TokenBalance(owner.concat(tokenAddress))
+      tb.owner = owner
+      tb.balance = BigInt.fromI32(0)
+      tb.value = BigInt.fromI32(0)
+      tb.token = tokenAddress
+      tb.pendingSupplyCurrency = BigInt.fromI32(0)
+      tb.supplyAmount = BigInt.fromI32(0)
+      tb.save()
+    }
+  }
+  return <TokenBalance>tb
 }
 
-export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string): TokenBalance {
+export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string, poolId: string): void {
   let dst = event.params.dst.toHex()
-  let tokenBalanceId = dst + tokenAddress
-  let tokenBalanceDst = TokenBalance.load(tokenBalanceId)
-  if (tokenBalanceDst == null) {
-    tokenBalanceDst = createTokenBalance(tokenBalanceId, event, dst)
+
+  if (!isSystemAccount(poolId, dst)) {
+    let tokenBalanceDst = TokenBalance.load(dst.concat(tokenAddress))
+    if (tokenBalanceDst == null) {
+      tokenBalanceDst = loadOrCreateTokenBalance(dst, tokenAddress)
+    }
+    tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
+    tokenBalanceDst.save()
   }
-  tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
-  tokenBalanceDst.save()
-  return tokenBalanceDst as TokenBalance
 }
 
-export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string): TokenBalance {
+export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string, poolId: string): void {
   let src = event.params.src.toHex()
-  let tokenBalanceId = src + tokenAddress
-  let tokenBalanceSrc = TokenBalance.load(tokenBalanceId)
-  if (tokenBalanceSrc == null) {
-    tokenBalanceSrc = createTokenBalance(tokenBalanceId, event, src)
+
+  if (!isSystemAccount(poolId, src)) {
+    let tokenBalanceSrc = TokenBalance.load(src.concat(tokenAddress))
+    if (tokenBalanceSrc == null) {
+      tokenBalanceSrc = loadOrCreateTokenBalance(src, tokenAddress)
+    }
+    tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
+    tokenBalanceSrc.save()
   }
-  tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
-  tokenBalanceSrc.save()
-  return tokenBalanceSrc as TokenBalance
 }
 
-// TODO: if the owner/account address is part of the pool, don't add it to rewards calcs
 export function loadOrCreateDailyInvestorTokenBalance(
   tokenBalance: TokenBalance,
   pool: Pool,
   timestamp: BigInt
-): RewardDailyInvestorTokenBalance {
+): DailyInvestorTokenBalance {
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
-  let ditb = RewardDailyInvestorTokenBalance.load(id)
+  let ditb = DailyInvestorTokenBalance.load(id)
   if (ditb == null) {
-    ditb = new RewardDailyInvestorTokenBalance(id)
+    ditb = new DailyInvestorTokenBalance(id)
     ditb.account = tokenBalance.owner
     ditb.day = timestamp.toString()
     ditb.pool = pool.id
     ditb.seniorTokenAmount = BigInt.fromI32(0)
     ditb.seniorTokenValue = BigInt.fromI32(0)
+    ditb.seniorSupplyAmount = BigInt.fromI32(0)
+    ditb.seniorPendingSupplyCurrency = BigInt.fromI32(0)
     ditb.juniorTokenAmount = BigInt.fromI32(0)
     ditb.juniorTokenValue = BigInt.fromI32(0)
+    ditb.juniorSupplyAmount = BigInt.fromI32(0)
+    ditb.juniorPendingSupplyCurrency = BigInt.fromI32(0)
   }
 
   // update token values
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
     ditb.seniorTokenAmount = tokenBalance.balance
-    ditb.seniorTokenValue = pool.seniorTokenPrice.times(tokenBalance.balance)
+    ditb.seniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+    ditb.seniorTokenValue = pool.seniorTokenPrice
+      .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
+      .div(fixed27)
   } else {
     ditb.juniorTokenAmount = tokenBalance.balance
-    ditb.juniorTokenValue = pool.juniorTokenPrice.times(tokenBalance.balance)
+    ditb.juniorSupplyAmount = tokenBalance.supplyAmount
+    ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+    ditb.juniorTokenValue = pool.juniorTokenPrice
+      .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
+      .div(fixed27)
   }
   ditb.save()
-  return <RewardDailyInvestorTokenBalance>ditb
+  return <DailyInvestorTokenBalance>ditb
 }
 
+// calcDisburse returns (payoutCurrencyAmount, payoutTokenAmount, remainingSupplyCurrency, remainingRedeemToken)
+function calculateDisburse(tokenBalance: TokenBalance, poolAddresses: PoolAddresses): void {
+  let tranche: Tranche
+  if (tokenBalance.token == poolAddresses.seniorToken) {
+    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.seniorTranche))
+  } else {
+    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
+  }
+  let result = tranche.calcDisburse(<Address>Address.fromHexString(tokenBalance.owner))
+  tokenBalance.pendingSupplyCurrency = result.value2
+  tokenBalance.supplyAmount = result.value1
+  tokenBalance.save()
+}
+
+// made up currently junior and senior token.owners
 export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   let ids = PoolInvestor.load(poolId)
   if (ids == null) {
@@ -89,11 +127,11 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
-  let globalAccounts = loadOrCreateGlobalAccounts('1')
   let poolInvestors = loadOrCreatePoolInvestors(pool.id)
+  let addresses = PoolAddresses.load(pool.id)
+  let owners = token.owners
 
-  for (let i = 0; i < token.owners.length; i++) {
-    let owners = token.owners
+  for (let i = 0; i < owners.length; i++) {
     let holderId = owners[i]
     let tbId = holderId.concat(token.id)
 
@@ -101,21 +139,20 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      // update tokenBalance value
+      if (tb.token == addresses.seniorToken) {
+        tb.value = tb.balance.times(pool.seniorTokenPrice).div(fixed27)
+      } else {
+        tb.value = tb.balance.times(pool.juniorTokenPrice).div(fixed27)
+      }
+      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
+
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
       // bit of a hack to get around lack of array support in assembly script
-      if (!globalAccounts.accounts.includes(ditb.account)) {
-        let temp = globalAccounts.accounts
-        temp.push(ditb.account)
-        globalAccounts.accounts = temp
-        globalAccounts.save()
-      }
-      if (!poolInvestors.accounts.includes(ditb.account)) {
-        let temp = poolInvestors.accounts
-        temp.push(ditb.account)
-        poolInvestors.accounts = temp
-        poolInvestors.save()
-      }
+      ensureSavedInGlobalAccounts(ditb.account)
+      poolInvestors.accounts = pushUnique(poolInvestors.accounts, ditb.account)
+      poolInvestors.save()
     }
   }
 }

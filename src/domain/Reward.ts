@@ -1,20 +1,21 @@
-import { log, BigInt, BigDecimal } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import {
-  RewardDailyInvestorTokenBalance,
+  DailyInvestorTokenBalance,
   Pool,
   PoolAddresses,
   RewardBalance,
   RewardDayTotal,
   RewardByToken,
+  RewardLink,
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
-import { haveSixtyDaysPassed } from './Day'
-import { initialRewardRate, secondsInDay, tierOneRewards } from '../config'
+import { rewardsAreClaimable } from './Day'
+import { secondsInDay, tierOneRewards } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
   let rdt = loadOrCreateRewardDayTotal(date)
-  rdt.todayValue = rdt.todayValue.plus(pool.assetValue)
+  rdt.todayValue = rdt.todayValue.plus(pool.assetValue).plus(pool.reserve)
   let prevDayId = date.minus(BigInt.fromI32(secondsInDay))
   let prevDayRewardTotal = loadOrCreateRewardDayTotal(prevDayId)
   rdt.toDateAggregateValue = rdt.todayValue.plus(prevDayRewardTotal.toDateAggregateValue)
@@ -28,8 +29,7 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
-    // 0.0042 RAD/DAI up to 1M RAD
-    rewardDayTotal.rewardRate = BigDecimal.fromString(initialRewardRate)
+    rewardDayTotal.rewardRate = BigDecimal.fromString('0')
     rewardDayTotal.todayReward = BigDecimal.fromString('0')
     rewardDayTotal.toDateRewardAggregateValue = BigDecimal.fromString('0')
   }
@@ -41,11 +41,11 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
   let rb = RewardBalance.load(address)
   if (rb == null) {
     rb = new RewardBalance(address)
-    rb.claims = []
-    rb.pendingRewards = BigDecimal.fromString('0')
-    rb.claimableRewards = BigDecimal.fromString('0')
+    rb.links = []
+    rb.claimable = false
+    rb.linkableRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')
-    rb.nonZeroBalanceSince = BigInt.fromI32(0)
+    rb.nonZeroBalanceSince = null
     rb.save()
   }
   return <RewardBalance>rb
@@ -64,21 +64,22 @@ export function loadOrCreateRewardByToken(account: string, token: string): Rewar
   return <RewardByToken>rbt
 }
 
-// query RewardByToken where account = current account
 function updateInvestorRewardsByToken(
   addresses: PoolAddresses,
-  ditb: RewardDailyInvestorTokenBalance,
+  ditb: DailyInvestorTokenBalance,
   rate: BigDecimal
 ): void {
-  // and an entity per token that they have invested in
+  // add an entity per token that they have invested in
   if (ditb.seniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.seniorToken)
-    rbt.rewards = rbt.rewards.plus(ditb.seniorTokenValue.toBigDecimal().times(rate))
+    let val = ditb.seniorTokenValue.toBigDecimal().times(rate)
+    rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
   if (ditb.juniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.juniorToken)
-    rbt.rewards = rbt.rewards.plus(ditb.juniorTokenValue.toBigDecimal().times(rate))
+    let val = ditb.juniorTokenValue.toBigDecimal().times(rate)
+    rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
 }
@@ -86,35 +87,50 @@ function updateInvestorRewardsByToken(
 export function calculateRewards(date: BigInt, pool: Pool): void {
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  checkRewardRate(systemRewards)
-  let tokenAddresses = PoolAddresses.load(pool.id)
+  systemRewards = setRewardRate(systemRewards)
 
-  for (let i = 0; i < investorIds.accounts.length; i++) {
-    let accounts = investorIds.accounts
+  let tokenAddresses = PoolAddresses.load(pool.id)
+  let accounts = investorIds.accounts
+
+  for (let i = 0; i < accounts.length; i++) {
     let account = accounts[i]
-    let ditb = RewardDailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
+    let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     let reward = loadOrCreateRewardBalance(ditb.account)
 
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
-      <RewardDailyInvestorTokenBalance>ditb,
+      <DailyInvestorTokenBalance>ditb,
       systemRewards.rewardRate
     )
 
     let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-    let balance = tokenValues.times(systemRewards.rewardRate)
-    reward.pendingRewards = reward.pendingRewards.plus(balance)
+    let r = tokenValues.times(systemRewards.rewardRate)
 
-    if (haveSixtyDaysPassed(date, reward.nonZeroBalanceSince)) {
-      log.debug('transfer pending rewards to claimable:  {}', [date.toString()])
-      reward.claimableRewards = reward.pendingRewards
-      // reset pending rewards
-      reward.pendingRewards = BigDecimal.fromString('0')
+    // if rewards are claimable, and an address is linked
+    // add them to the most recently linked address
+    if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
+      reward.claimable = true
+
+      let arr = reward.links
+      let lastLinked = RewardLink.load(arr[arr.length - 1])
+      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+      lastLinked.save()
+
+      // reset linkableRewards to 0 as we have just
+      // written the rewards to the linked address
+      reward.linkableRewards = BigDecimal.fromString('0')
     }
-    reward.totalRewards = reward.pendingRewards.plus(reward.claimableRewards)
-
-    // add this user's pending rewards to today's rewards obj
-    systemRewards.todayReward = systemRewards.todayReward.plus(reward.pendingRewards)
+    // if no linked address is found, we track reward in linkableRewards
+    else if (rewardsAreClaimable(date, reward.nonZeroBalanceSince)) {
+      reward.claimable = true
+      reward.linkableRewards = reward.linkableRewards.plus(r)
+    } else {
+      reward.linkableRewards = reward.linkableRewards.plus(r)
+    }
+    // totalRewards are cumulative across linked addresses
+    reward.totalRewards = reward.totalRewards.plus(r)
+    // add user's today reward to today's rewards obj
+    systemRewards.todayReward = systemRewards.todayReward.plus(r)
     systemRewards.save()
     reward.save()
   }
@@ -125,12 +141,12 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function checkRewardRate(checker: RewardDayTotal): void {
-  if (checker.toDateRewardAggregateValue.gt(BigDecimal.fromString(tierOneRewards))) {
-    log.debug('pending rewards > 1 MILL:  {}', [checker.toDateRewardAggregateValue.toString()])
+function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
+  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(tierOneRewards))) {
+    log.debug('setting system rewards rate {}', [systemRewards.toDateRewardAggregateValue.toString()])
 
-    // TODO: update this with correct value
-    checker.rewardRate = BigDecimal.fromString('0')
-    checker.save()
+    systemRewards.rewardRate = BigDecimal.fromString('0.0042')
+    systemRewards.save()
   }
+  return systemRewards
 }

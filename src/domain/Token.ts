@@ -1,6 +1,6 @@
 import { Address } from '@graphprotocol/graph-ts'
 import { Token } from '../../generated/schema'
-import { ERC20 } from '../../generated/templates/token/ERC20'
+import { ERC20 } from '../../generated/templates/Token/ERC20'
 
 export function createToken(address: string): Token {
   let token = new Token(address)

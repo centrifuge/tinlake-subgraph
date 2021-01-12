@@ -86,7 +86,7 @@ type Proxy @entity {
 
 type Account @entity {
   id: ID! # account address
-  dailyTokenBalances: [RewardDailyInvestorTokenBalance!] @derivedFrom (field: "account")
+  dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom (field: "account")
   currentActiveInvestmentAmount: BigInt!
 }
 
@@ -100,6 +100,7 @@ type ERC20Transfer @entity {
   pool: Pool!
 }
 
+# used in reward calc
 type Token @entity {
   id: ID! # token address
   symbol: String
@@ -107,12 +108,16 @@ type Token @entity {
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
 }
 
+# excludes system addresses
 type TokenBalance @entity {
   id: ID! # account address + token address
   owner: Account!
   balance: BigInt!
   value: BigInt!
   token: Token!
+  pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet (remainingSupplyCurrency)
+  supplyAmount: BigInt! # converted, but not disbursed yet (payoutTokenAmount)
+  
 }
 
 type Day @entity {
@@ -124,15 +129,19 @@ type Day @entity {
   dailyPoolData: [DailyPoolData!] @derivedFrom(field: "day")
 }
 
-type RewardDailyInvestorTokenBalance @entity {
+type DailyInvestorTokenBalance @entity {
   id: ID! # investorAddress + poolId + day
   account: Account!
   day: Day!
   pool: Pool!
   seniorTokenAmount: BigInt!
   seniorTokenValue: BigInt!
+  seniorSupplyAmount: BigInt!
+  seniorPendingSupplyCurrency: BigInt!
   juniorTokenAmount: BigInt!
   juniorTokenValue: BigInt!
+  juniorSupplyAmount: BigInt!
+  juniorPendingSupplyCurrency: BigInt!
 }
 
 type PoolInvestor @entity {
@@ -156,14 +165,14 @@ type RewardDayTotal @entity {
 }
 
 # on claim changed event from contract
-# create new reward claim for the eth address
+# create new reward link for the eth address
 type RewardBalance @entity {
   id: ID! # account address
-  claims: [RewardClaim!]!
-  pendingRewards: BigDecimal!
-  claimableRewards: BigDecimal!
-  totalRewards: BigDecimal! # sum of the above 2
-  nonZeroBalanceSince: BigInt! # system wide, has to have a non zero balance for at least the past 60 consecutive days
+  links: [RewardLink!]!
+  claimable: Boolean! # rewards become claimable to cent chain after investment length is greater than 60 consecutive days
+  linkableRewards: BigDecimal! 
+  totalRewards: BigDecimal! # cumulative across links
+  nonZeroBalanceSince: BigInt # system wide, has to have a non zero balance for at least the past 60 consecutive days
 }
 
 # this is a historical value and will not be responsible
@@ -176,10 +185,9 @@ type RewardByToken @entity {
   rewards: BigDecimal!
 }
 
-# initial cent address is nothing
-type RewardClaim @entity {
+type RewardLink @entity {
   id: ID! #eth address + cent address
   ethAddress: String!
   centAddress: String!
-  reward: BigInt!
+  rewardsAccumulated: BigDecimal!
 }

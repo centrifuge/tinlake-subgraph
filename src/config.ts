@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts'
+import { dataSource, BigInt } from '@graphprotocol/graph-ts'
 
 export const secondsInDay = 86400
 
@@ -8,9 +8,11 @@ export const handleBlockFrequencyMinutes = 5
 
 export const blockTimeSeconds = 15
 
-export const tierOneRewards = '1000000000000000000000000000000000000000000000000000'
+export let fixed27 = BigInt.fromI32(10).pow(27)
 
-export const initialRewardRate = '0.0042'
+export const tierOneRewards = '1000000000000000000000000000000000'
+
+export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
 /**
  * The pool values will only be updated in daily until fastForwardUntilBlock.
@@ -19,8 +21,8 @@ export const initialRewardRate = '0.0042'
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 11535547
-const fastForwardUntilBlockKovan = 22712797
+const fastForwardUntilBlockMainnet = 11596693
+const fastForwardUntilBlockKovan = 22897387
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 

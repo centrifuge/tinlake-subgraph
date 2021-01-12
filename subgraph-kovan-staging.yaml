@@ -36,6 +36,8 @@ dataSources:
           file: ./abis/Shelf.json
         - name: PoolRegistry
           file: ./abis/PoolRegistry.json
+        - name: Tranche
+          file: ./abis/Tranche.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
@@ -89,6 +91,27 @@ dataSources:
         - event: PoolUpdated(address,bool,string,string)
           handler: handlePoolUpdated
       file: ./src/mappings/PoolRegistry.ts
+
+  - kind: ethereum/contract
+    name: Claim
+    network: kovan
+    source: 
+      address: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
+      abi: TinlakeClaimRAD
+      startBlock: 22686539
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - RewardLink
+      abis:
+        - name: TinlakeClaimRAD
+          file: ./abis/TinlakeClaimRAD.json
+      eventHandlers:
+        - event: Claimed(address,bytes32)
+          handler: handleClaimed
+      file: ./src/mappings/TinlakeClaimRAD.ts
 
 templates:
   - kind: ethereum/contract
@@ -206,3 +229,23 @@ templates:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleERC20Transfer
       file: ./src/mappings/ERC20.ts
+  - kind: ethereum/contract
+    name: Tranche
+    network: kovan
+    source:
+      abi: Tranche
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - TokenBalance
+      abis:
+        - name: Tranche
+          file: ./abis/Tranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: supplyOrder(address,uint256)
+          handler: handleSupplyOrder
+      file: ./src/mappings/Tranche.ts

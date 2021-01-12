@@ -1,7 +1,7 @@
-import { BigInt, ethereum } from '@graphprotocol/graph-ts'
+import { BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts'
 import { Day } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
-import { secondsInSixtyDays } from '../config'
+import { secondsInDay, secondsInSixtyDays } from '../config'
 
 export function createDay(dateString: string): Day {
   let day = new Day(dateString)
@@ -30,6 +30,10 @@ export function getToday(block: ethereum.Block): Day {
 
 // if the difference between days since nonzerobalance
 // and today's timestamp are greater than or equal to sixty days in seconds
-export function haveSixtyDaysPassed(today: BigInt, nonZeroSince: BigInt): boolean {
-  return nonZeroSince.minus(BigInt.fromI32(secondsInSixtyDays)) >= today
+// if kovan, we want to make rewards claimable after 1 day
+export function rewardsAreClaimable(today: BigInt, nonZeroSince: BigInt | null): boolean {
+  if (nonZeroSince == null) return false
+  return dataSource.network() == 'mainnet'
+    ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInSixtyDays))
+    : today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInDay))
 }
