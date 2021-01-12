@@ -32,7 +32,8 @@ export function getToday(block: ethereum.Block): Day {
 // and today's timestamp are greater than or equal to sixty days in seconds
 // if kovan, we want to make rewards claimable after 1 day
 export function rewardsAreClaimable(today: BigInt, nonZeroSince: BigInt | null): boolean {
-  return nonZeroSince != null && dataSource.network() == 'mainnet'
+  if (nonZeroSince == null) return false
+  return dataSource.network() == 'mainnet'
     ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInSixtyDays))
     : today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInDay))
 }
