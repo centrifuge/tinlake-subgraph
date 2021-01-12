@@ -75,7 +75,8 @@ type Loan @entity {
   borrowsAggregatedAmount: BigInt!
   repaysCount: Int!
   repaysAggregatedAmount: BigInt!
-  maturityDate: BigInt!
+  maturityDate: BigInt
+  financingDate: BigInt
 }
 
 type Proxy @entity {
