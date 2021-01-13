@@ -30,32 +30,6 @@ export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): T
   return <TokenBalance>tb
 }
 
-export function loadOrCreateTokenBalanceDst(event: TransferEvent, tokenAddress: string, poolId: string): void {
-  let dst = event.params.dst.toHex()
-
-  if (!isSystemAccount(poolId, dst)) {
-    let tokenBalanceDst = TokenBalance.load(dst.concat(tokenAddress))
-    if (tokenBalanceDst == null) {
-      tokenBalanceDst = loadOrCreateTokenBalance(dst, tokenAddress)
-    }
-    tokenBalanceDst.balance = tokenBalanceDst.balance.plus(event.params.wad)
-    tokenBalanceDst.save()
-  }
-}
-
-export function loadOrCreateTokenBalanceSrc(event: TransferEvent, tokenAddress: string, poolId: string): void {
-  let src = event.params.src.toHex()
-
-  if (!isSystemAccount(poolId, src)) {
-    let tokenBalanceSrc = TokenBalance.load(src.concat(tokenAddress))
-    if (tokenBalanceSrc == null) {
-      tokenBalanceSrc = loadOrCreateTokenBalance(src, tokenAddress)
-    }
-    tokenBalanceSrc.balance = tokenBalanceSrc.balance.minus(event.params.wad)
-    tokenBalanceSrc.save()
-  }
-}
-
 export function loadOrCreateDailyInvestorTokenBalance(
   tokenBalance: TokenBalance,
   pool: Pool,
@@ -111,6 +85,13 @@ function calculateDisburse(tokenBalance: TokenBalance, poolAddresses: PoolAddres
   let result = tranche.calcDisburse(<Address>Address.fromHexString(tokenBalance.owner))
   tokenBalance.pendingSupplyCurrency = result.value2
   tokenBalance.supplyAmount = result.value1
+  log.debug('calculateDisburse{} token {}, pendingSupply {}, supplyAmount {}', [
+    tokenBalance.owner.toString(),
+    tokenBalance.token.toString(),
+    tokenBalance.pendingSupplyCurrency.toString(),
+    tokenBalance.supplyAmount.toString(),
+  ])
+
   tokenBalance.save()
 }
 

@@ -8,7 +8,7 @@ import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
 import { getAllPools } from '../domain/PoolRegistry'
 import { timestampToDate } from '../util/date'
-import { secondsInDay } from '../config'
+import { secondsInDay, zeroAddress } from '../config'
 import { addToDailyAggregate } from '../domain/DailyPoolData'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
@@ -68,7 +68,7 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool = addYields(pool as Pool, block)
 
   // Check if senior tranche exists
-  if (addresses.seniorTranche != '0x0000000000000000000000000000000000000000') {
+  if (addresses.seniorTranche != zeroAddress) {
     let seniorDebtResult = new ethereum.CallResult<BigInt>()
     let assessor = Assessor.bind(<Address>Address.fromHexString(addresses.assessor))
     seniorDebtResult = assessor.try_seniorDebt_()
