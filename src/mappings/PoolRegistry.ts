@@ -4,7 +4,7 @@ import { createPool, createPoolHandlers, createUpdatedPoolHandlers } from '../do
 import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
 import { updatePoolAddresses } from '../domain/PoolAddresses'
 import { preloadedPoolByIPFSHash } from '../preloadedPools'
-import { Pool, PoolAddresses, PoolRegistry } from '../../generated/schema'
+import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 
 export function handlePoolCreated(call: PoolCreated): void {
