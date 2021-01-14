@@ -34,6 +34,6 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   tk.save()
 
   let tokenBalance = loadOrCreateTokenBalance(account, token)
-  tokenBalance.pendingSupplyCurrency = tokenBalance.pendingSupplyCurrency.plus(amount)
+  tokenBalance.pendingSupplyCurrency = amount
   tokenBalance.save()
 }
