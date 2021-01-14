@@ -2,7 +2,7 @@ import { log, BigDecimal } from '@graphprotocol/graph-ts'
 import { Claimed } from '../../generated/Claim/TinlakeClaimRAD'
 import { loadOrCreateRewardLink } from '../domain/RewardLink'
 import { loadOrCreateRewardBalance } from '../domain/Reward'
-import { pushUnique } from '../util/array'
+import { pushOrMoveLast, pushUnique } from '../util/array'
 
 export function handleClaimed(claimed: Claimed): void {
   let sender = claimed.params.claimer.toHex()
@@ -12,7 +12,7 @@ export function handleClaimed(claimed: Claimed): void {
 
   let balance = loadOrCreateRewardBalance(sender)
   let link = loadOrCreateRewardLink(sender, centAddress)
-  balance.links = pushUnique(balance.links, link.id)
+  balance.links = pushOrMoveLast(balance.links, link.id)
 
   // add this link to their reward balance and put any
   // claimable rewards into this link, reset linkableRewards to 0
