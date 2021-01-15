@@ -1,7 +1,9 @@
 import { TypedMap, JSONValue, Address } from '@graphprotocol/graph-ts'
 import { PoolAddresses } from '../../generated/schema'
+import { zeroAddress } from '../config'
 
-function toLowerCaseAddress(addr: JSONValue): string {
+function toLowerCaseAddress(addr: JSONValue | null): string {
+  if (addr == null) return zeroAddress
   return Address.fromHexString(addr.toString()).toHexString()
 }
 
