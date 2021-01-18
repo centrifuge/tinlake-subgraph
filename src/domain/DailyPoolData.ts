@@ -104,7 +104,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     // if the active investment amount is positive and
     // the nzbs exists, keep it as it is
     if (account.currentActiveInvestmentAmount.gt(BigInt.fromI32(0))) {
-      if (accountRewardBalance.nonZeroBalanceSince != null) {
+      if (accountRewardBalance.nonZeroBalanceSince == null) {
         // if the active investment account is positive and the nzbs is null,
         // then set the nzbS to yesterdayTimestamp
         accountRewardBalance.nonZeroBalanceSince = date
