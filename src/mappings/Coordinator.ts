@@ -52,18 +52,18 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
     : BigInt.fromI32(0)
 
   let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
-  let currentNav = navFeedContract.currentNAV()
-  pool.assetValue = currentNav
+  let currentNav = navFeedContract.try_currentNAV()
+  pool.assetValue = !currentNav.reverted ? currentNav.value : BigInt.fromI32(0)
 
   let reserveContract = Reserve.bind(<Address>Address.fromHexString(addresses.reserve))
-  let reserve = reserveContract.totalBalance()
-  pool.reserve = reserve
+  let reserve = reserveContract.try_totalBalance()
+  pool.reserve = !reserve.reverted ? reserve.value : BigInt.fromI32(0)
 
-  let juniorPrice = assessor.try_calcJuniorTokenPrice(currentNav, reserve)
-  let seniorPrice = assessor.try_calcSeniorTokenPrice(currentNav, reserve)
+  let juniorPrice = assessor.try_calcJuniorTokenPrice(pool.assetValue, pool.reserve)
+  let seniorPrice = assessor.try_calcSeniorTokenPrice(pool.assetValue, pool.reserve)
 
-  pool.seniorTokenPrice = seniorPrice.value
-  pool.juniorTokenPrice = juniorPrice.value
+  pool.seniorTokenPrice = !seniorPrice.reverted ? seniorPrice.value : BigInt.fromI32(0)
+  pool.juniorTokenPrice = !juniorPrice.reverted ? juniorPrice.value : BigInt.fromI32(0)
 
   pool = addYields(pool as Pool, block)
 
