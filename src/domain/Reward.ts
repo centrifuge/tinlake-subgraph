@@ -85,6 +85,8 @@ function updateInvestorRewardsByToken(
 }
 
 export function calculateRewards(date: BigInt, pool: Pool): void {
+  log.debug('calculateRewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
+
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
   systemRewards = setRewardRate(systemRewards)
@@ -128,7 +130,9 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
     // totalRewards are cumulative across linked addresses
+    log.debug('calculateRewards: {} earned {} today', [account, r.toString()])
     reward.totalRewards = reward.totalRewards.plus(r)
+
     // add user's today reward to today's rewards obj
     systemRewards.todayReward = systemRewards.todayReward.plus(r)
     systemRewards.save()

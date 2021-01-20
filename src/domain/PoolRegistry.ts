@@ -1,6 +1,7 @@
 import { log } from '@graphprotocol/graph-ts'
 import { PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
+import { pushUnique } from '../util/array'
 
 export function createPoolRegistry(): void {
   log.debug('createPoolRegistry: {}', [registryAddress])
@@ -14,7 +15,7 @@ export function addPoolToRegistry(poolId: string): void {
   if (registry != null) {
     log.debug('addPoolToRegistry: adding pool {} to registry {}', [poolId, registryAddress])
     let pools = registry.pools
-    pools.push(poolId)
+    pools = pushUnique(pools, poolId)
     registry.pools = pools // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
     registry.save()
   }
@@ -25,6 +26,8 @@ export function getAllPools(): string[] {
   if (registry == null) {
     return []
   }
+
+  log.debug('getAllPools: returning {} pools', [registry.pools.length.toString()])
 
   return registry.pools
 }

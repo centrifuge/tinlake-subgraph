@@ -11,6 +11,8 @@ import { loadOrCreateGlobalAccounts } from './Account'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
+  log.debug('createDailySnapshot: {}', [date.toString()])
+
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
