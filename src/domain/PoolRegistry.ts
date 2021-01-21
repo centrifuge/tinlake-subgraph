@@ -1,4 +1,4 @@
-import { log } from '@graphprotocol/graph-ts'
+import { log, BigInt } from '@graphprotocol/graph-ts'
 import { PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { pushUnique } from '../util/array'
@@ -26,8 +26,6 @@ export function getAllPools(): string[] {
   if (registry == null) {
     return []
   }
-
-  log.debug('getAllPools: returning {} pools', [registry.pools.length.toString()])
-
+  log.debug('getAllPools: returning {} pools', [BigInt.fromI32(registry.pools.length).toString()])
   return registry.pools
 }
