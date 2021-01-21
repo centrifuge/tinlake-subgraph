@@ -117,5 +117,6 @@ function resetActiveInvestments(): void {
 
     let account = Account.load(address)
     account.hasActiveInvestment = false
+    account.save()
   }
 }
