@@ -28,7 +28,7 @@ export function ensureSavedInGlobalAccounts(account: string): void {
 }
 
 // todo: refactor
-// do i need to add the operators to this?
+// todo: add operators (they are in json but not in PoolAddresses)
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
 
