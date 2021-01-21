@@ -11,29 +11,6 @@ export function createAccount(address: string): Account {
   return account
 }
 
-// // used for determining nonZeroBalanceSince across system for user
-// export function updateAccountsAfterTransfer(event: TransferEvent, poolId: string): void {
-//   if (!isSystemAccount(poolId, event.params.dst.toHex())) {
-//     // increase accountTo balance
-//     let accountTo = Account.load(event.params.dst.toHex())
-//     if (accountTo == null) {
-//       accountTo = createAccount(event.params.dst.toHex())
-//     }
-//     accountTo.currentActiveInvestmentAmount = accountTo.currentActiveInvestmentAmount.plus(event.params.wad)
-//     accountTo.save()
-//   }
-
-//   if (!isSystemAccount(poolId, event.params.src.toHex())) {
-//     // decrease accountFrom balance
-//     let accountFrom = Account.load(event.params.src.toHex())
-//     if (accountFrom == null) {
-//       accountFrom = createAccount(event.params.src.toHex())
-//     }
-//     accountFrom.currentActiveInvestmentAmount = accountFrom.currentActiveInvestmentAmount.minus(event.params.wad)
-//     accountFrom.save()
-//   }
-// }
-
 export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   let ids = GlobalAccountId.load(id)
   if (ids == null) {
