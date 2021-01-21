@@ -1,5 +1,4 @@
 import { log, BigInt, Address } from '@graphprotocol/graph-ts'
-import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import {
   DailyInvestorTokenBalance,
@@ -8,9 +7,10 @@ import {
   Pool,
   PoolInvestor,
   PoolAddresses,
+  Account,
 } from '../../generated/schema'
 import { fixed27 } from '../config'
-import { ensureSavedInGlobalAccounts, isSystemAccount } from './Account'
+import { ensureSavedInGlobalAccounts } from './Account'
 import { pushUnique } from '../util/array'
 
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
@@ -106,6 +106,10 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   return <PoolInvestor>ids
 }
 
+function investmentGreaterThanZero(tb: TokenBalance): boolean {
+  return tb.value.plus(tb.pendingSupplyCurrency).gt(BigInt.fromI32(0))
+}
+
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
   let poolInvestors = loadOrCreatePoolInvestors(pool.id)
@@ -130,6 +134,13 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
+
+      // if token balance values are greater than 0, they have an active investment
+      if (investmentGreaterThanZero(<TokenBalance>tb)) {
+        let account = Account.load(ditb.account)
+        account.hasActiveInvestment = true
+        account.save()
+      }
       // bit of a hack to get around lack of array support in assembly script
       ensureSavedInGlobalAccounts(ditb.account)
       poolInvestors.accounts = pushUnique(poolInvestors.accounts, ditb.account)

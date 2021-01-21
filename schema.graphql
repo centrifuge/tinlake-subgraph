@@ -87,7 +87,7 @@ type Proxy @entity {
 type Account @entity {
   id: ID! # account address
   dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom (field: "account")
-  currentActiveInvestmentAmount: BigInt!
+  hasActiveInvestment: Boolean!
 }
 
 type ERC20Transfer @entity {

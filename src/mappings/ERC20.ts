@@ -4,7 +4,7 @@ import { ERC20Transfer } from '../../generated/schema'
 import { createERC20Transfer } from '../domain/ERC20Transfer'
 import { loadOrCreateToken } from '../domain/Token'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
-import { isSystemAccount, updateAccountsAfterTransfer } from '../domain/Account'
+import { isSystemAccount } from '../domain/Account'
 import { pushUnique } from '../util/array'
 
 export function handleERC20Transfer(event: TransferEvent): void {
@@ -35,7 +35,7 @@ export function handleERC20Transfer(event: TransferEvent): void {
     tb.balance = tb.balance.minus(event.params.wad)
     tb.save()
   }
-  updateAccountsAfterTransfer(event, poolId)
+
   let id = event.block.number
     .toString()
     .concat('-')
