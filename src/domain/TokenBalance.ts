@@ -10,7 +10,7 @@ import {
   Account,
 } from '../../generated/schema'
 import { fixed27 } from '../config'
-import { ensureSavedInGlobalAccounts } from './Account'
+import { createAccount, ensureSavedInGlobalAccounts } from './Account'
 import { pushUnique } from '../util/array'
 
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
@@ -138,6 +138,9 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       // if token balance values are greater than 0, they have an active investment
       if (investmentGreaterThanZero(<TokenBalance>tb)) {
         let account = Account.load(ditb.account)
+        if (account == null) {
+          account = createAccount(ditb.account)
+        }
         account.hasActiveInvestment = true
         account.save()
       }

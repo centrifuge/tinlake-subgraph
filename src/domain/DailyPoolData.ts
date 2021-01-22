@@ -7,7 +7,7 @@ import { getAllPools } from './PoolRegistry'
 import { loadOrCreateToken } from './Token'
 import { createDailyTokenBalances } from './TokenBalance'
 import { calculateRewards, updateRewardDayTotal, loadOrCreateRewardBalance } from './Reward'
-import { loadOrCreateGlobalAccounts } from './Account'
+import { createAccount, loadOrCreateGlobalAccounts } from './Account'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
@@ -88,6 +88,9 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     let address = investors[i]
 
     let account = Account.load(address)
+    if (account == null) {
+      account = createAccount(address)
+    }
     let accountRewardBalance = loadOrCreateRewardBalance(address)
 
     // if the account does not have an active investment
@@ -116,6 +119,9 @@ function resetActiveInvestments(): void {
     let address = investors[i]
 
     let account = Account.load(address)
+    if (account == null) {
+      account = createAccount(address)
+    }
     account.hasActiveInvestment = false
     account.save()
   }
