@@ -107,7 +107,7 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
 }
 
 function investmentGreaterThanZero(tb: TokenBalance): boolean {
-  return tb.value.plus(tb.pendingSupplyCurrency).gt(BigInt.fromI32(0))
+  return tb.value.plus(tb.supplyAmount).gt(BigInt.fromI32(0))
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {

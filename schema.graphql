@@ -115,9 +115,23 @@ type TokenBalance @entity {
   balance: BigInt!
   value: BigInt!
   token: Token!
+
+  # Order Management
+  # Users can submit supplyOrder or redeemOrder to change their investment in the pool:
+  # 1) A user can supply DAI which goes into the `pendingSupplyCurrency`
+  # 2) After each epoch some or all of the pendingSupplyCurrency can be converted to pool shares (DROP/TIN) or some or all of the pendingRedeemToken can be converted to DAI. After each epoch the fulfillment percentage can increase.
+  # 3) Calling calcDisburse() gives you 4 values: 
+  #    - pendingSupplyCurrency: the amount of DAI not converted to tokens yet
+  #    - supplyAmount: the amount of DROP/TIN you will get the next time you call `disburse`
+  #    - pendingRedeemToken: the amount of tokens not redeemed to DAI yet
+  #    - redeemAmount: the amount of DAI you will get next time you call `disburse`
+  # 4) Calling `disburse` will send all of the above balances to the user (token & currency)
   pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet (remainingSupplyCurrency)
   supplyAmount: BigInt! # converted, but not disbursed yet (payoutTokenAmount)
-  
+
+  # below two fields are not implemented yet
+  pendingRedeemToken: BigInt! # amount of tokens the user has pending for redemption
+  redeemAmount: BigInt! # amount of DAI user gets for a redemption
 }
 
 type Day @entity {
