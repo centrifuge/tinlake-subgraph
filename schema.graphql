@@ -130,8 +130,8 @@ type TokenBalance @entity {
   supplyAmount: BigInt! # converted, but not disbursed yet (payoutTokenAmount)
 
   # below two fields are not implemented yet
-  pendingRedeemToken: BigInt! # amount of tokens the user has pending for redemption
-  redeemAmount: BigInt! # amount of DAI user gets for a redemption
+  # pendingRedeemToken: BigInt! # amount of tokens the user has pending for redemption
+  # redeemAmount: BigInt! # amount of DAI user gets for a redemption
 }
 
 type Day @entity {
