@@ -87,7 +87,8 @@ type Proxy @entity {
 type Account @entity {
   id: ID! # account address
   dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom (field: "account")
-  hasActiveInvestment: Boolean!
+  # used for reward calculations to determine if an investor has an active investment 
+  rewardCalcBitFlip: Boolean!
 }
 
 type ERC20Transfer @entity {

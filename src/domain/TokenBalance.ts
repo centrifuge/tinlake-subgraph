@@ -148,7 +148,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
         if (account == null) {
           account = createAccount(ditb.account)
         }
-        account.hasActiveInvestment = true
+        account.rewardCalcBitFlip = true
         account.save()
       }
       // bit of a hack to get around lack of array support in assembly script

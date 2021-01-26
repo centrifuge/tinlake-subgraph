@@ -6,7 +6,7 @@ import { pushUnique } from '../util/array'
 
 export function createAccount(address: string): Account {
   let account = new Account(address)
-  account.hasActiveInvestment = false
+  account.rewardCalcBitFlip = false
   account.save()
   return account
 }

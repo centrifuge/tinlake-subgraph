@@ -95,7 +95,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
 
     // if the account does not have an active investment
     // then reset their nzbs.
-    if (!account.hasActiveInvestment) {
+    if (!account.rewardCalcBitFlip) {
       accountRewardBalance.nonZeroBalanceSince = null
       accountRewardBalance.claimable = false
     }
@@ -122,7 +122,7 @@ function resetActiveInvestments(): void {
     if (account == null) {
       account = createAccount(address)
     }
-    account.hasActiveInvestment = false
+    account.rewardCalcBitFlip = false
     account.save()
   }
 }
