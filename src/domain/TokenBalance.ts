@@ -107,7 +107,7 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
 }
 
 function investmentGreaterThanZero(tb: TokenBalance): boolean {
-  return tb.value.plus(tb.supplyAmount).gt(BigInt.fromI32(0))
+  return tb.value.gt(BigInt.fromI32(0))
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
@@ -124,18 +124,25 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
       // update tokenBalance value
       if (tb.token == addresses.seniorToken) {
-        tb.value = tb.balance.times(pool.seniorTokenPrice).div(fixed27)
+        tb.value = tb.balance
+          .plus(tb.supplyAmount)
+          .times(pool.seniorTokenPrice)
+          .div(fixed27)
       } else {
-        tb.value = tb.balance.times(pool.juniorTokenPrice).div(fixed27)
+        tb.balance
+          .plus(tb.supplyAmount)
+          .times(pool.juniorTokenPrice)
+          .div(fixed27)
       }
-      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
+      tb.save()
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
 
-      // if token balance values are greater than 0, they have an active investment
+      // if token balance value is greater than 0, they have an active investment
       if (investmentGreaterThanZero(<TokenBalance>tb)) {
         let account = Account.load(ditb.account)
         if (account == null) {
