@@ -132,7 +132,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
           .times(pool.seniorTokenPrice)
           .div(fixed27)
       } else {
-        tb.balance
+        tb.value = tb.balance
           .plus(tb.supplyAmount)
           .times(pool.juniorTokenPrice)
           .div(fixed27)
