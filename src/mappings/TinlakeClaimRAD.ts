@@ -16,8 +16,10 @@ export function handleClaimed(claimed: Claimed): void {
 
   // add this link to their reward balance and put any
   // claimable rewards into this link, reset linkableRewards to 0
-  link.rewardsAccumulated = link.rewardsAccumulated.plus(reward.linkableRewards)
-  reward.linkableRewards = BigDecimal.fromString('0')
+  if (reward.claimable) {
+    link.rewardsAccumulated = link.rewardsAccumulated.plus(reward.linkableRewards)
+    reward.linkableRewards = BigDecimal.fromString('0')
+  }
   reward.save()
   link.save()
 }
