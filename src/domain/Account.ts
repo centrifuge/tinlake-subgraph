@@ -6,32 +6,9 @@ import { pushUnique } from '../util/array'
 
 export function createAccount(address: string): Account {
   let account = new Account(address)
-  account.currentActiveInvestmentAmount = BigInt.fromI32(0)
+  account.rewardCalcBitFlip = false
   account.save()
   return account
-}
-
-// used for determining nonZeroBalanceSince across system for user
-export function updateAccountsAfterTransfer(event: TransferEvent, poolId: string): void {
-  if (!isSystemAccount(poolId, event.params.dst.toHex())) {
-    // increase accountTo balance
-    let accountTo = Account.load(event.params.dst.toHex())
-    if (accountTo == null) {
-      accountTo = createAccount(event.params.dst.toHex())
-    }
-    accountTo.currentActiveInvestmentAmount = accountTo.currentActiveInvestmentAmount.plus(event.params.wad)
-    accountTo.save()
-  }
-
-  if (!isSystemAccount(poolId, event.params.src.toHex())) {
-    // decrease accountFrom balance
-    let accountFrom = Account.load(event.params.src.toHex())
-    if (accountFrom == null) {
-      accountFrom = createAccount(event.params.src.toHex())
-    }
-    accountFrom.currentActiveInvestmentAmount = accountFrom.currentActiveInvestmentAmount.minus(event.params.wad)
-    accountFrom.save()
-  }
 }
 
 export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
@@ -51,6 +28,7 @@ export function ensureSavedInGlobalAccounts(account: string): void {
 }
 
 // todo: refactor
+// todo: add operators (they are in json but not in PoolAddresses)
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
 

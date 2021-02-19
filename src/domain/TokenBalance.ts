@@ -1,5 +1,4 @@
 import { log, BigInt, Address } from '@graphprotocol/graph-ts'
-import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import {
   DailyInvestorTokenBalance,
@@ -8,9 +7,10 @@ import {
   Pool,
   PoolInvestor,
   PoolAddresses,
+  Account,
 } from '../../generated/schema'
 import { fixed27 } from '../config'
-import { ensureSavedInGlobalAccounts, isSystemAccount } from './Account'
+import { createAccount, ensureSavedInGlobalAccounts } from './Account'
 import { pushUnique } from '../util/array'
 
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
@@ -106,6 +106,10 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   return <PoolInvestor>ids
 }
 
+function investmentGreaterThanZero(tb: TokenBalance): boolean {
+  return tb.value.gt(BigInt.fromI32(0))
+}
+
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
   log.debug('createDailyTokenBalances: token {}, pool {}', [token.id, pool.id])
   let poolInvestors = loadOrCreatePoolInvestors(pool.id)
@@ -120,16 +124,33 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
 
     let tb = TokenBalance.load(tbId)
     if (tb != null) {
+      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
       // update tokenBalance value
       if (tb.token == addresses.seniorToken) {
-        tb.value = tb.balance.times(pool.seniorTokenPrice).div(fixed27)
+        tb.value = tb.balance
+          .plus(tb.supplyAmount)
+          .times(pool.seniorTokenPrice)
+          .div(fixed27)
       } else {
-        tb.value = tb.balance.times(pool.juniorTokenPrice).div(fixed27)
+        tb.value = tb.balance
+          .plus(tb.supplyAmount)
+          .times(pool.juniorTokenPrice)
+          .div(fixed27)
       }
-      calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
+      tb.save()
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
       let ditb = loadOrCreateDailyInvestorTokenBalance(<TokenBalance>tb, pool, timestamp)
+
+      // if token balance value is greater than 0, they have an active investment
+      if (investmentGreaterThanZero(<TokenBalance>tb)) {
+        let account = Account.load(ditb.account)
+        if (account == null) {
+          account = createAccount(ditb.account)
+        }
+        account.rewardCalcBitFlip = true
+        account.save()
+      }
       // bit of a hack to get around lack of array support in assembly script
       ensureSavedInGlobalAccounts(ditb.account)
       poolInvestors.accounts = pushUnique(poolInvestors.accounts, ditb.account)

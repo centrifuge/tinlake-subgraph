@@ -116,17 +116,20 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       let arr = reward.links
       let lastLinked = RewardLink.load(arr[arr.length - 1])
       lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+      // write the linkable rewards
+      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
       lastLinked.save()
 
-      // reset linkableRewards to 0 as we have just
-      // written the rewards to the linked address
+      // reset linkableRewards to 0
       reward.linkableRewards = BigDecimal.fromString('0')
     }
     // if no linked address is found, we track reward in linkableRewards
     else if (rewardsAreClaimable(date, reward.nonZeroBalanceSince)) {
       reward.claimable = true
       reward.linkableRewards = reward.linkableRewards.plus(r)
-    } else {
+    }
+    // rewards not claimable
+    else {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
     // totalRewards are cumulative across linked addresses

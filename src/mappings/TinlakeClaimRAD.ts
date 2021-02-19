@@ -10,16 +10,16 @@ export function handleClaimed(claimed: Claimed): void {
 
   log.debug('handle update claim address {} to substrate address {}', [sender.toString(), centAddress.toString()])
 
-  let balance = loadOrCreateRewardBalance(sender)
+  let reward = loadOrCreateRewardBalance(sender)
   let link = loadOrCreateRewardLink(sender, centAddress)
-  balance.links = pushOrMoveLast(balance.links, link.id)
+  reward.links = pushOrMoveLast(reward.links, link.id)
 
   // add this link to their reward balance and put any
   // claimable rewards into this link, reset linkableRewards to 0
-  if (balance.claimable) {
-    link.rewardsAccumulated = link.rewardsAccumulated.plus(balance.linkableRewards)
-    balance.linkableRewards = BigDecimal.fromString('0')
+  if (reward.claimable) {
+    link.rewardsAccumulated = link.rewardsAccumulated.plus(reward.linkableRewards)
+    reward.linkableRewards = BigDecimal.fromString('0')
   }
-  balance.save()
+  reward.save()
   link.save()
 }

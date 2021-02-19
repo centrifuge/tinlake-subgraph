@@ -1,4 +1,4 @@
-import { log } from '@graphprotocol/graph-ts'
+import { log, BigInt } from '@graphprotocol/graph-ts'
 import { PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { pushUnique } from '../util/array'

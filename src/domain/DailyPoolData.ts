@@ -7,7 +7,7 @@ import { getAllPools } from './PoolRegistry'
 import { loadOrCreateToken } from './Token'
 import { createDailyTokenBalances } from './TokenBalance'
 import { calculateRewards, updateRewardDayTotal, loadOrCreateRewardBalance } from './Reward'
-import { loadOrCreateGlobalAccounts } from './Account'
+import { createAccount, loadOrCreateGlobalAccounts } from './Account'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
@@ -40,6 +40,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
     updateRewardDayTotal(yesterdayTimeStamp, pool)
     calculateRewards(yesterdayTimeStamp, pool)
   }
+  resetActiveInvestments()
 }
 
 export function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
@@ -78,7 +79,7 @@ export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): vo
   dailyPoolData.save()
 }
 
-// if an investor's system wide amount goes to 0,
+// if an investor does not have an active investment
 // then reset their nonZeroBalanceSince (nzbs) reward accumulation date
 function updateSystemWideNonZeroBalances(date: BigInt): void {
   let accounts = loadOrCreateGlobalAccounts('1')
@@ -87,31 +88,41 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     let address = investors[i]
 
     let account = Account.load(address)
+    if (account == null) {
+      account = createAccount(address)
+    }
     let accountRewardBalance = loadOrCreateRewardBalance(address)
 
-    // if the account balance is 0 across all pools,
+    // if the account does not have an active investment
     // then reset their nzbs.
-    if (account.currentActiveInvestmentAmount.equals(BigInt.fromI32(0))) {
+    if (!account.rewardCalcBitFlip) {
       accountRewardBalance.nonZeroBalanceSince = null
       accountRewardBalance.claimable = false
     }
 
-    // if the active investment amount is negative, it's an internal
-    // address, so it doesn't accrue rewards
-    if (account.currentActiveInvestmentAmount.lt(BigInt.fromI32(0))) {
-      accountRewardBalance.nonZeroBalanceSince = null
-      accountRewardBalance.claimable = false
-    }
-
-    // if the active investment amount is positive and
-    // the nzbs exists, keep it as it is
-    if (account.currentActiveInvestmentAmount.gt(BigInt.fromI32(0))) {
+    // if they an active investment and the nzbs exists, keep it as it is
+    else {
       if (accountRewardBalance.nonZeroBalanceSince == null) {
-        // if the active investment account is positive and the nzbs is null,
+        // if they have an active investment and the nzbs is null
         // then set the nzbS to yesterdayTimestamp
         accountRewardBalance.nonZeroBalanceSince = date
       }
     }
     accountRewardBalance.save()
+  }
+}
+
+function resetActiveInvestments(): void {
+  let accounts = loadOrCreateGlobalAccounts('1')
+  for (let i = 0; i < accounts.accounts.length; i++) {
+    let investors = accounts.accounts
+    let address = investors[i]
+
+    let account = Account.load(address)
+    if (account == null) {
+      account = createAccount(address)
+    }
+    account.rewardCalcBitFlip = false
+    account.save()
   }
 }
