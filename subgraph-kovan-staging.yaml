@@ -97,7 +97,7 @@ dataSources:
     network: kovan
     source: 
       address: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
-      abi: TinlakeClaimRAD
+      abi: TinlakeClaimRad
       startBlock: 22686539
     mapping:
       kind: ethereum/events
@@ -106,8 +106,8 @@ dataSources:
       entities:
         - RewardLink
       abis:
-        - name: TinlakeClaimRAD
-          file: ./abis/TinlakeClaimRAD.json
+        - name: TinlakeClaimRad
+          file: ./abis/TinlakeClaimRad.json
       eventHandlers:
         - event: Claimed(address,bytes32)
           handler: handleClaimed

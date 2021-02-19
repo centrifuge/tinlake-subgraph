@@ -26,6 +26,9 @@ export function getAllPools(): string[] {
   if (registry == null) {
     return []
   }
-  log.debug('getAllPools: returning {} pools', [BigInt.fromI32(registry.pools.length).toString()])
+
+  let l = registry.pools.length;
+  log.debug('getAllPools: returning {} pools', [l.toString()])
+
   return registry.pools
 }
