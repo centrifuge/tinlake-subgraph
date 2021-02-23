@@ -86,8 +86,8 @@ type Proxy @entity {
 
 type Account @entity {
   id: ID! # account address
-  dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom (field: "account")
-  # used for reward calculations to determine if an investor has an active investment 
+  dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom(field: "account")
+  # used for reward calculations to determine if an investor has an active investment
   rewardCalcBitFlip: Boolean!
 }
 
@@ -121,7 +121,7 @@ type TokenBalance @entity {
   # Users can submit supplyOrder or redeemOrder to change their investment in the pool:
   # 1) A user can supply DAI which goes into the `pendingSupplyCurrency`
   # 2) After each epoch some or all of the pendingSupplyCurrency can be converted to pool shares (DROP/TIN) or some or all of the pendingRedeemToken can be converted to DAI. After each epoch the fulfillment percentage can increase.
-  # 3) Calling calcDisburse() gives you 4 values: 
+  # 3) Calling calcDisburse() gives you 4 values:
   #    - pendingSupplyCurrency: the amount of DAI not converted to tokens yet
   #    - supplyAmount: the amount of DROP/TIN you will get the next time you call `disburse`
   #    - pendingRedeemToken: the amount of tokens not redeemed to DAI yet
@@ -179,15 +179,35 @@ type RewardDayTotal @entity {
   toDateRewardAggregateValue: BigDecimal!
 }
 
-# on claim changed event from contract
-# create new reward link for the eth address
+"""
+Rewards accumulated by an account on Ethereum and links Centrifuge Chain accounts that can claim those rewards
+"""
 type RewardBalance @entity {
-  id: ID! # account address
+  """
+  Etherum account that earned rewards
+  """
+  id: ID!
+  """
+  Links to Centrifuge Chain accounts with rewards that are currently claimable
+  """
   links: [RewardLink!]!
-  claimable: Boolean! # rewards become claimable to cent chain after investment length is greater than 60 consecutive days
-  linkableRewards: BigDecimal! 
-  totalRewards: BigDecimal! # cumulative across links
-  nonZeroBalanceSince: BigInt # system wide, has to have a non zero balance for at least the past 60 consecutive days
+  """
+  Rewards that can be linked or claimed in the future. Rewards only become claimable after an Ethereum account has any
+  investment for at least 60 consecutive days. Until that is the case, rewards will accumulate in linkableRewards. After
+  the 60 days are over, rewards will automatically go to the last RewardLink in links. If there is no RewardLink in
+  links, rewards will stay in linkableRewards until a RewardLink is created.
+  """
+  linkableRewards: BigDecimal!
+  """
+  Sum of all rewards across links and linkableRewards
+  """
+  totalRewards: BigDecimal!
+  """
+  Timestamp (in seconds) since which the Ethereum account had a non-zero investment. Will be set to null when the
+  investment balance becomes zero on a day. If null and an investment is in the system, will be set to the timestamp of
+  that day.
+  """
+  nonZeroBalanceSince: BigInt
 }
 
 # this is a historical value and will not be responsible
@@ -200,9 +220,22 @@ type RewardByToken @entity {
   rewards: BigDecimal!
 }
 
+"""
+A link between an Ethereum account and an account on Centrifuge Chain. Any balance that are accumulated on that account
+are claimable on Centrifuge Chain
+"""
 type RewardLink @entity {
   id: ID! #eth address + cent address
+  """
+  Ethereum address that has earned the rewards
+  """
   ethAddress: String!
+  """
+  Hex encoded public key of an account on Centrifuge Chain that will receive rewards
+  """
   centAddress: String!
+  """
+  Rewards that are claimable by the Centrifuge Chain account
+  """
   rewardsAccumulated: BigDecimal!
 }

@@ -27,7 +27,7 @@ export function getAllPools(): string[] {
     return []
   }
 
-  let l = registry.pools.length;
+  let l = registry.pools.length
   log.debug('getAllPools: returning {} pools', [l.toString()])
 
   return registry.pools
