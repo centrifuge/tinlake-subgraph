@@ -121,10 +121,6 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       reward.linkableRewards = BigDecimal.fromString('0')
     }
     // if no linked address is found, we track reward in linkableRewards
-    else if (rewardsAreClaimable(date, reward.nonZeroBalanceSince)) {
-      reward.linkableRewards = reward.linkableRewards.plus(r)
-    }
-    // rewards not claimable
     else {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
