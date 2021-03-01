@@ -1,7 +1,7 @@
 import { BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts'
 import { Day } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
-import { secondsInDay, secondsInSixtyDays } from '../config'
+import { secondsInDay, secondsInThirtyDays } from '../config'
 
 export function createDay(dateString: string): Day {
   let day = new Day(dateString)
@@ -34,6 +34,6 @@ export function getToday(block: ethereum.Block): Day {
 export function rewardsAreClaimable(today: BigInt, nonZeroSince: BigInt | null): boolean {
   if (nonZeroSince == null) return false
   return dataSource.network() == 'mainnet'
-    ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInSixtyDays))
+    ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInThirtyDays))
     : today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInDay))
 }
