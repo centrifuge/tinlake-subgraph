@@ -25,22 +25,17 @@ export function handleShelfIssue(call: IssueCall): void {
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
   let pool = Pool.load(poolId)
-  let poolChanged = false
 
-  if (!pool.loans.includes(poolId)) {
-    // TODO: maybe optimize by using a binary search on a sorted array instead
+  if (!pool.loans.includes(loanId)) {
     log.debug('handleShelfIssue: will add loan {} to pool {}', [loanId, poolId])
     let loans = pool.loans
     loans.push(loanId)
     pool.loans = loans // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
-    poolChanged = true
-  }
-  if (poolChanged) {
+
     log.debug('handleShelfIssue: will save pool {}', [pool.id])
     pool.save()
   }
 
-  // TODO: move to createLoan() in ../domain/Loan.ts
   let loan = new Loan(loanId)
   loan.pool = poolId
   loan.index = loanIndex.toI32()
