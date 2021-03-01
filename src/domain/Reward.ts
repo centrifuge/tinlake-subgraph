@@ -42,7 +42,6 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
   if (rb == null) {
     rb = new RewardBalance(address)
     rb.links = []
-    rb.claimable = false
     rb.linkableRewards = BigDecimal.fromString('0')
     rb.totalRewards = BigDecimal.fromString('0')
     rb.nonZeroBalanceSince = null
@@ -111,8 +110,6 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     // if rewards are claimable, and an address is linked
     // add them to the most recently linked address
     if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
-      reward.claimable = true
-
       let arr = reward.links
       let lastLinked = RewardLink.load(arr[arr.length - 1])
       lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
@@ -124,11 +121,6 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       reward.linkableRewards = BigDecimal.fromString('0')
     }
     // if no linked address is found, we track reward in linkableRewards
-    else if (rewardsAreClaimable(date, reward.nonZeroBalanceSince)) {
-      reward.claimable = true
-      reward.linkableRewards = reward.linkableRewards.plus(r)
-    }
-    // rewards not claimable
     else {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
