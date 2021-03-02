@@ -2,7 +2,7 @@ import { dataSource, BigInt } from '@graphprotocol/graph-ts'
 
 export const secondsInDay = 86400
 
-export const secondsInThirtyDays = 259200
+export const secondsInThirtyDays = 30 * secondsInDay
 
 export const handleBlockFrequencyMinutes = 5
 
