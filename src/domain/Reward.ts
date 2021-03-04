@@ -10,7 +10,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreClaimable } from './Day'
-import { secondsInDay, tierOneRewards } from '../config'
+import { rewardsCeiling, secondsInDay } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -141,7 +141,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(tierOneRewards))) {
+  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))) {
     log.debug('setting system rewards rate {}', [systemRewards.toDateRewardAggregateValue.toString()])
 
     systemRewards.rewardRate = BigDecimal.fromString('0.0042')

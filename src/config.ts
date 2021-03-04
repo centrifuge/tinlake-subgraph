@@ -2,7 +2,7 @@ import { dataSource, BigInt } from '@graphprotocol/graph-ts'
 
 export const secondsInDay = 86400
 
-export const secondsInSixtyDays = 5184000
+export const secondsInThirtyDays = 30 * secondsInDay
 
 export const handleBlockFrequencyMinutes = 5
 
@@ -10,7 +10,7 @@ export const blockTimeSeconds = 15
 
 export let fixed27 = BigInt.fromI32(10).pow(27)
 
-export const tierOneRewards = '1000000000000000000000000000000000'
+export const rewardsCeiling = '2000000000000000000000000000000000'
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
