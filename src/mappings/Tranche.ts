@@ -33,7 +33,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   tk.owners = pushUnique(tk.owners, account)
   tk.save()
 
-  let tokenBalance = loadOrCreateTokenBalance(account, token)
-  tokenBalance.pendingSupplyCurrency = amount
-  tokenBalance.save()
+  let tb = loadOrCreateTokenBalance(account, token)
+  tb.pendingSupplyCurrency = amount
+  tb.save()
 }

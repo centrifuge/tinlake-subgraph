@@ -19,11 +19,14 @@ export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): T
     if (tb == null) {
       tb = new TokenBalance(owner.concat(tokenAddress))
       tb.owner = owner
-      tb.balance = BigInt.fromI32(0)
-      tb.value = BigInt.fromI32(0)
+      tb.balanceAmount = BigInt.fromI32(0)
+      tb.balanceValue = BigInt.fromI32(0)
+      tb.totalValue = BigInt.fromI32(0)
+      tb.tokenPrice = BigInt.fromI32(0)
       tb.token = tokenAddress
       tb.pendingSupplyCurrency = BigInt.fromI32(0)
       tb.supplyAmount = BigInt.fromI32(0)
+      tb.supplyValue = BigInt.fromI32(0)
       tb.save()
     }
   }
@@ -56,14 +59,14 @@ export function loadOrCreateDailyInvestorTokenBalance(
   // update token values
   let addresses = PoolAddresses.load(pool.id)
   if (tokenBalance.token == addresses.seniorToken) {
-    ditb.seniorTokenAmount = tokenBalance.balance
+    ditb.seniorTokenAmount = tokenBalance.balanceAmount
     ditb.seniorSupplyAmount = tokenBalance.supplyAmount
     ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
     ditb.seniorTokenValue = pool.seniorTokenPrice
       .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
       .div(fixed27)
   } else {
-    ditb.juniorTokenAmount = tokenBalance.balance
+    ditb.juniorTokenAmount = tokenBalance.balanceAmount
     ditb.juniorSupplyAmount = tokenBalance.supplyAmount
     ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
     ditb.juniorTokenValue = pool.juniorTokenPrice
@@ -75,24 +78,24 @@ export function loadOrCreateDailyInvestorTokenBalance(
 }
 
 // calcDisburse returns (payoutCurrencyAmount, payoutTokenAmount, remainingSupplyCurrency, remainingRedeemToken)
-function calculateDisburse(tokenBalance: TokenBalance, poolAddresses: PoolAddresses): void {
+function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses): void {
   let tranche: Tranche
-  if (tokenBalance.token == poolAddresses.seniorToken) {
+  if (tb.token == poolAddresses.seniorToken) {
     tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.seniorTranche))
   } else {
     tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
   }
-  let result = tranche.calcDisburse(<Address>Address.fromHexString(tokenBalance.owner))
-  tokenBalance.pendingSupplyCurrency = result.value2
-  tokenBalance.supplyAmount = result.value1
+  let result = tranche.calcDisburse(<Address>Address.fromHexString(tb.owner))
+  tb.pendingSupplyCurrency = result.value2
+  tb.supplyAmount = result.value1
   log.debug('calculateDisburse{} token {}, pendingSupply {}, supplyAmount {}', [
-    tokenBalance.owner.toString(),
-    tokenBalance.token.toString(),
-    tokenBalance.pendingSupplyCurrency.toString(),
-    tokenBalance.supplyAmount.toString(),
+    tb.owner.toString(),
+    tb.token.toString(),
+    tb.pendingSupplyCurrency.toString(),
+    tb.supplyAmount.toString(),
   ])
 
-  tokenBalance.save()
+  tb.save()
 }
 
 // made up currently junior and senior token.owners
@@ -107,7 +110,18 @@ export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
 }
 
 function investmentGreaterThanZero(tb: TokenBalance): boolean {
-  return tb.value.gt(BigInt.fromI32(0))
+  return tb.totalValue.gt(BigInt.fromI32(0))
+}
+
+function updateTokenBalanceValues(tb: TokenBalance, pool: Pool, poolAddresses: PoolAddresses): void {
+  if (tb.token == poolAddresses.seniorToken) {
+    tb.tokenPrice = pool.seniorTokenPrice
+  } else {
+    tb.tokenPrice = pool.juniorTokenPrice
+  }
+  tb.balanceValue = tb.balanceAmount.times(tb.tokenPrice).div(fixed27)
+  tb.supplyValue = tb.supplyAmount.times(tb.tokenPrice).div(fixed27)
+  tb.totalValue = tb.supplyValue.plus(tb.balanceValue).div(fixed27)
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
@@ -126,17 +140,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
     if (tb != null) {
       calculateDisburse(<TokenBalance>tb, <PoolAddresses>addresses)
       // update tokenBalance value
-      if (tb.token == addresses.seniorToken) {
-        tb.value = tb.balance
-          .plus(tb.supplyAmount)
-          .times(pool.seniorTokenPrice)
-          .div(fixed27)
-      } else {
-        tb.value = tb.balance
-          .plus(tb.supplyAmount)
-          .times(pool.juniorTokenPrice)
-          .div(fixed27)
-      }
+      updateTokenBalanceValues(<TokenBalance>tb, <Pool>pool, <PoolAddresses>addresses)
       tb.save()
 
       log.debug('createDailyTokenBalances: load or create token balance {}', [tbId])
