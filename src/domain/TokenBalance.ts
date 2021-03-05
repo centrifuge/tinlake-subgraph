@@ -121,7 +121,7 @@ function updateTokenBalanceValues(tb: TokenBalance, pool: Pool, poolAddresses: P
   }
   tb.balanceValue = tb.balanceAmount.times(tb.tokenPrice).div(fixed27)
   tb.supplyValue = tb.supplyAmount.times(tb.tokenPrice).div(fixed27)
-  tb.totalValue = tb.supplyValue.plus(tb.balanceValue).div(fixed27)
+  tb.totalValue = tb.supplyValue.plus(tb.balanceValue)
 }
 
 export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: BigInt): void {
