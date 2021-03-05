@@ -28,11 +28,13 @@ export function handleERC20Transfer(event: TransferEvent): void {
     token.save()
     let tb = loadOrCreateTokenBalance(dst, tokenAddress)
     tb.balanceAmount = tb.balanceAmount.plus(event.params.wad)
+    tb.totalAmount = tb.balanceAmount.plus(tb.supplyAmount)
     tb.save()
   }
   if (!isSystemAccount(poolId, src)) {
     let tb = loadOrCreateTokenBalance(src, tokenAddress)
     tb.balanceAmount = tb.balanceAmount.minus(event.params.wad)
+    tb.totalAmount = tb.balanceAmount.plus(tb.supplyAmount)
     tb.save()
   }
 

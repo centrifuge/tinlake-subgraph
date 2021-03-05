@@ -107,6 +107,7 @@ type Token @entity {
   symbol: String
   owners: [Account!]!
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
+  price: BigInt!
 }
 
 # excludes system addresses
@@ -115,8 +116,8 @@ type TokenBalance @entity {
   owner: Account!
   balanceAmount: BigInt!
   balanceValue: BigInt!
+  totalAmount: BigInt!
   totalValue: BigInt!
-  tokenPrice: BigInt!
   token: Token!
 
   # Order Management
