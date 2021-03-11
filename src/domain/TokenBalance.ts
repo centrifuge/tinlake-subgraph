@@ -88,7 +88,7 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
   let result = tranche.calcDisburse(<Address>Address.fromHexString(tb.owner))
   tb.pendingSupplyCurrency = result.value2
   tb.supplyAmount = result.value1
-  log.debug('calculateDisburse{} token {}, pendingSupply {}, supplyAmount {}', [
+  log.debug('calculateDisburse {} token {}, pendingSupply {}, supplyAmount {}', [
     tb.owner.toString(),
     tb.token.toString(),
     tb.pendingSupplyCurrency.toString(),
