@@ -107,14 +107,17 @@ type Token @entity {
   symbol: String
   owners: [Account!]!
   tokenBalances: [TokenBalance!]! @derivedFrom(field: "token")
+  price: BigInt!
 }
 
 # excludes system addresses
 type TokenBalance @entity {
   id: ID! # account address + token address
   owner: Account!
-  balance: BigInt!
-  value: BigInt!
+  balanceAmount: BigInt!
+  balanceValue: BigInt!
+  totalAmount: BigInt!
+  totalValue: BigInt!
   token: Token!
 
   # Order Management
@@ -129,7 +132,7 @@ type TokenBalance @entity {
   # 4) Calling `disburse` will send all of the above balances to the user (token & currency)
   pendingSupplyCurrency: BigInt! # dai not converted into drop/tin yet (remainingSupplyCurrency)
   supplyAmount: BigInt! # converted, but not disbursed yet (payoutTokenAmount)
-
+  supplyValue: BigInt!
   # below two fields are not implemented yet
   # pendingRedeemToken: BigInt! # amount of tokens the user has pending for redemption
   # redeemAmount: BigInt! # amount of DAI user gets for a redemption
