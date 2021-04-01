@@ -86,7 +86,7 @@ export function loadPoolFromIPFS(hash: string): void {
     return
   }
 
-  let poolId = toLowerCaseAddress(addresses.get('ROOT_CONTRACT'))
+  let poolId = toLowerCaseAddress(addresses.get('ROOT_CONTRACT').toString())
   let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
 
   let poolAddresses = updatePoolAddresses(poolId, addresses)
