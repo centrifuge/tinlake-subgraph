@@ -26,7 +26,7 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let pool = Pool.load(poolId)
 
-  if (!pool.loans.includes(poolId)) {
+  if (!pool.loans.includes(loanId)) {
     // TODO: maybe optimize by using a binary search on a sorted array instead
     let loans = pool.loans
     loans.push(loanId)
