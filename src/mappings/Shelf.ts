@@ -13,7 +13,7 @@ export function handleShelfIssue(call: IssueCall): void {
   let nftRegistry = call.inputs.registry_
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.debug('handleShelfIssue - shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}', [
+  log.debug('handleShelfIssue: shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}', [
     shelf.toHex(),
     loanOwner.toHex(),
     loanIndex.toString(),
@@ -28,15 +28,9 @@ export function handleShelfIssue(call: IssueCall): void {
 
   if (!pool.loans.includes(poolId)) {
     // TODO: maybe optimize by using a binary search on a sorted array instead
-    log.debug('handleShelfIssue: will add loan {} to pool {}', [loanId, poolId])
-    let l1 = pool.loans.length
-    log.debug('handleShelfIssue: loans list length before {}', [l1.toString()])
     let loans = pool.loans
     loans.push(loanId)
     pool.loans = loans // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
-    let l2 = pool.loans.length
-    log.debug('handleShelfIssue: loans list length after {}', [l2.toString()])
-    log.debug('handleShelfIssue: will save pool {}', [pool.id])
     pool.save()
   }
 
