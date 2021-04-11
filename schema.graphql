@@ -19,6 +19,8 @@ type Pool @entity {
   seniorYield14Days: BigInt
   juniorYield30Days: BigInt
   seniorYield30Days: BigInt
+  juniorYieldSinceInception: BigInt
+  seniorYieldSinceInception: BigInt
   reserve: BigInt!
   assetValue: BigInt!
   shortName: String!
