@@ -27,12 +27,10 @@ export function handleShelfIssue(call: IssueCall): void {
   let pool = Pool.load(poolId)
 
   if (!pool.loans.includes(loanId)) {
-    log.debug('handleShelfIssue: will add loan {} to pool {}', [loanId, poolId])
+    // TODO: maybe optimize by using a binary search on a sorted array instead
     let loans = pool.loans
     loans.push(loanId)
     pool.loans = loans // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
-
-    log.debug('handleShelfIssue: will save pool {}', [pool.id])
     pool.save()
   }
 

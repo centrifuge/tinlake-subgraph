@@ -6,6 +6,7 @@ import { updatePoolAddresses } from '../domain/PoolAddresses'
 import { preloadedPoolByIPFSHash } from '../preloadedPools'
 import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
+import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -85,7 +86,7 @@ export function loadPoolFromIPFS(hash: string): void {
     return
   }
 
-  let poolId = addresses.get('ROOT_CONTRACT').toString()
+  let poolId = toLowerCaseAddress(addresses.get('ROOT_CONTRACT').toString())
   let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
 
   let poolAddresses = updatePoolAddresses(poolId, addresses)

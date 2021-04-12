@@ -97,7 +97,6 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     // then reset their nzbs.
     if (!account.rewardCalcBitFlip) {
       accountRewardBalance.nonZeroBalanceSince = null
-      accountRewardBalance.claimable = false
     }
 
     // if they an active investment and the nzbs exists, keep it as it is

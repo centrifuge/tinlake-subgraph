@@ -7,8 +7,7 @@ Subgraph for the Tinlake applications.
 
 ```
 graph auth https://api.thegraph.com/deploy/ ACCESS_TOKEN
-yarn run codegen ./subgraph-mainnet-production.yaml
-yarn run deploy centrifuge/tinlake ./subgraph-mainnet-production.yaml
+yarn run codegen ./subgraph-mainnet-production.yaml && yarn run deploy centrifuge/tinlake-v3 ./subgraph-mainnet-production.yaml
 ```
 
 ### Kovan staging
