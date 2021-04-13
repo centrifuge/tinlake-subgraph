@@ -10,7 +10,7 @@ export const blockTimeSeconds = 15
 
 export let fixed27 = BigInt.fromI32(10).pow(27)
 
-export const rewardsCeiling = '2000000000000000000000000000000000'
+export const rewardsCeiling = '5600000000000000000000000000000000'
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
