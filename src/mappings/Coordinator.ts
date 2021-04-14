@@ -142,7 +142,7 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
   pool.juniorYield30Days = yields30.junior
   pool.seniorYield30Days = yields30.senior
 
-  // The inception is defined by the origination of the first loan
+  // The inception is defined by minimum of the origination of the first loan and 30 days since pool creation
   let firstLoan = Loan.load(loanIdFromPoolIdAndIndex(pool.id, BigInt.fromI32(1)))
   if (firstLoan == null) {
     // There is no loan yet
