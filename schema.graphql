@@ -38,6 +38,7 @@ type PoolAddresses @entity {
   juniorToken: ID!
   seniorTranche: ID!
   juniorTranche: ID!
+  makerMgr: ID
 }
 
 type PoolRegistry @entity {

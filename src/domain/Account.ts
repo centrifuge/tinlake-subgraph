@@ -36,6 +36,7 @@ export function isSystemAccount(poolId: string, account: string): boolean {
   if (addresses.juniorToken == account) return true
   if (addresses.seniorTranche == account) return true
   if (addresses.juniorTranche == account) return true
+  if (addresses.makerMgr && addresses.makerMgr == account) return true
   if (account == zeroAddress) return true
   return false
 }
