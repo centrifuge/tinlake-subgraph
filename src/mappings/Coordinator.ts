@@ -163,8 +163,8 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
     poolInception.seniorTokenPrice,
     daysSinceInception.toI32()
   )
-  pool.juniorYield30Days = yieldsInception.junior
-  pool.seniorYield30Days = yieldsInception.senior
+  pool.juniorYieldSinceInception = yieldsInception.junior
+  pool.seniorYieldSinceInception = yieldsInception.senior
 
   return pool
 }
