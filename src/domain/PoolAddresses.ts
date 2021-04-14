@@ -15,7 +15,7 @@ export function updatePoolAddresses(poolId: string, addresses: TypedMap<string, 
   poolAddresses.juniorToken = toLowerCaseAddress(addresses.get('JUNIOR_TOKEN').toString())
   poolAddresses.seniorTranche = toLowerCaseAddress(addresses.get('SENIOR_TRANCHE').toString())
   poolAddresses.juniorTranche = toLowerCaseAddress(addresses.get('JUNIOR_TRANCHE').toString())
-  const makerMgr = addresses.get('MAKER_MGR')
+  let makerMgr = addresses.get('MAKER_MGR')
   if (!makerMgr.isNull() && makerMgr.toString() != '') {
     poolAddresses.makerMgr = toLowerCaseAddress(makerMgr.toString())
   }
