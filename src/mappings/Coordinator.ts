@@ -156,6 +156,8 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
     .div(BigInt.fromI32(secondsInDay))
   log.debug('pool {} inception was {} days ago', [pool.id.toString(), daysSinceInception.toString()])
 
+  // TODO: poolInception token prices should just be 1.0
+  // TODO: dayInception should probably be the actual deployment data rather than the first loan
   let yieldsInception = calculateYields(
     pool.juniorTokenPrice,
     poolInception.juniorTokenPrice,
