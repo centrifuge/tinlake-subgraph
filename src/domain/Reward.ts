@@ -145,8 +145,7 @@ function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
   if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))) {
     systemRewards.rewardRate = BigDecimal.fromString('0.0042')
     systemRewards.save()
-  }
-  else {
+  } else {
     systemRewards.rewardRate = BigDecimal.fromString('0')
     systemRewards.save()
   }
