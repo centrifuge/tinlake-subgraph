@@ -141,11 +141,16 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
+  log.debug('setting system rewards rate, toDateRewardAggregateValue {}', [
+    systemRewards.toDateRewardAggregateValue.toString(),
+  ])
   if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))) {
-    log.debug('setting system rewards rate {}', [systemRewards.toDateRewardAggregateValue.toString()])
-
     systemRewards.rewardRate = BigDecimal.fromString('0.0042')
     systemRewards.save()
+  } else {
+    systemRewards.rewardRate = BigDecimal.fromString('0')
+    systemRewards.save()
   }
+  log.debug('set system rewards rate to {}', [systemRewards.rewardRate.toString()])
   return systemRewards
 }
