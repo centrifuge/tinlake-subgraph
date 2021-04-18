@@ -2,7 +2,7 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData, Loan } from '../../generated/schema'
 import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
@@ -10,6 +10,7 @@ import { getAllPools } from '../domain/PoolRegistry'
 import { timestampToDate } from '../util/date'
 import { secondsInDay, zeroAddress } from '../config'
 import { addToDailyAggregate } from '../domain/DailyPoolData'
+import { loanIdFromPoolIdAndIndex } from '../util/typecasts'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
@@ -140,6 +141,32 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
   )
   pool.juniorYield30Days = yields30.junior
   pool.seniorYield30Days = yields30.senior
+
+  // The inception is defined by minimum of the origination of the first loan and 30 days since pool creation
+  let firstLoan = Loan.load(loanIdFromPoolIdAndIndex(pool.id, BigInt.fromI32(1)))
+  if (firstLoan == null) {
+    // There is no loan yet
+    return pool
+  }
+
+  let dayInception = Day.load(timestampToDate(BigInt.fromI32(firstLoan.opened)).toString())
+  let poolInception = DailyPoolData.load(pool.id.concat(dayInception.id))
+  let daysSinceInception = dateNow
+    .minus(timestampToDate(BigInt.fromI32(firstLoan.opened)))
+    .div(BigInt.fromI32(secondsInDay))
+  log.debug('pool {} inception was {} days ago', [pool.id.toString(), daysSinceInception.toString()])
+
+  // TODO: poolInception token prices should just be 1.0
+  // TODO: dayInception should probably be the actual deployment data rather than the first loan
+  let yieldsInception = calculateYields(
+    pool.juniorTokenPrice,
+    poolInception.juniorTokenPrice,
+    pool.seniorTokenPrice,
+    poolInception.seniorTokenPrice,
+    daysSinceInception.toI32()
+  )
+  pool.juniorYieldSinceInception = yieldsInception.junior
+  pool.seniorYieldSinceInception = yieldsInception.senior
 
   return pool
 }
