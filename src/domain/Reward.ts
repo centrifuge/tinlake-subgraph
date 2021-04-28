@@ -30,8 +30,11 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
     rewardDayTotal.rewardRate = BigDecimal.fromString('0')
+    rewardDayTotal.aoRewardRate = BigDecimal.fromString('0')
     rewardDayTotal.todayReward = BigDecimal.fromString('0')
+    rewardDayTotal.todayAOReward = BigDecimal.fromString('0')
     rewardDayTotal.toDateRewardAggregateValue = BigDecimal.fromString('0')
+    rewardDayTotal.toDateAORewardAggregateValue = BigDecimal.fromString('0')
   }
   rewardDayTotal.save()
   return <RewardDayTotal>rewardDayTotal

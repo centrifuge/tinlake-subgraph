@@ -7,6 +7,7 @@ import { preloadedPoolByIPFSHash } from '../preloadedPools'
 import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
+import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../domain/PoolsByAORewardRecipient'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -61,6 +62,8 @@ export function handlePoolUpdated(call: PoolUpdated): void {
 
   // Create new pool handlers for the addresses that changed
   createUpdatedPoolHandlers(oldPoolAddresses as PoolAddresses, newPoolAddresses)
+
+  updatePoolsByAORewardRecipient(oldPoolAddresses as PoolAddresses, newPoolAddresses)
 }
 
 export function loadPoolFromIPFS(hash: string): void {
@@ -93,4 +96,6 @@ export function loadPoolFromIPFS(hash: string): void {
   createPool(poolId, shortName, poolAddresses)
   createPoolHandlers(poolAddresses)
   addPoolToRegistry(poolId)
+
+  addPoolsByAORewardRecipient(poolAddresses)
 }
