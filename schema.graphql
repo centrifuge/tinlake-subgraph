@@ -223,7 +223,8 @@ type RewardBalance @entity {
 }
 
 """
-Rewards accumulated by an Asset Originator's account on Ethereum and links Centrifuge Chain accounts that can claim those rewards
+Rewards accumulated by an Asset Originator's (AO's) account on Ethereum and links Centrifuge Chain accounts that can
+claim those rewards
 """
 type AORewardBalance @entity {
   """
