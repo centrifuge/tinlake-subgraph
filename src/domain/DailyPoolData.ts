@@ -8,6 +8,7 @@ import { loadOrCreateToken } from './Token'
 import { createDailyTokenBalances } from './TokenBalance'
 import { calculateRewards, updateRewardDayTotal, loadOrCreateRewardBalance } from './Reward'
 import { createAccount, loadOrCreateGlobalAccounts } from './Account'
+import { calculateAORewards } from './AOReward'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
@@ -39,6 +40,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
     let pool = Pool.load(pools[i]) as Pool
     updateRewardDayTotal(yesterdayTimeStamp, pool)
     calculateRewards(yesterdayTimeStamp, pool)
+    calculateAORewards(yesterdayTimeStamp, pool)
   }
   resetActiveInvestments()
 }

@@ -38,6 +38,7 @@ type PoolAddresses @entity {
   juniorToken: ID!
   seniorTranche: ID!
   juniorTranche: ID!
+  aoRewardRecipient: ID
   makerMgr: ID
 }
 
@@ -179,8 +180,11 @@ type RewardDayTotal @entity {
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
   rewardRate: BigDecimal!
+  aoRewardRate: BigDecimal!
   todayReward: BigDecimal!
+  todayAOReward: BigDecimal!
   toDateRewardAggregateValue: BigDecimal!
+  toDateAORewardAggregateValue: BigDecimal!
 }
 
 """
@@ -191,10 +195,12 @@ type RewardBalance @entity {
   Etherum account that earned rewards
   """
   id: ID!
+
   """
   Links to Centrifuge Chain accounts with rewards that are currently claimable
   """
   links: [RewardLink!]!
+
   """
   Rewards that can be linked or claimed in the future. Rewards only become claimable after an Ethereum account has any
   investment for at least 60 consecutive days. Until that is the case, rewards will accumulate in linkableRewards. After
@@ -202,16 +208,59 @@ type RewardBalance @entity {
   links, rewards will stay in linkableRewards until a RewardLink is created.
   """
   linkableRewards: BigDecimal!
+
   """
   Sum of all rewards across links and linkableRewards
   """
   totalRewards: BigDecimal!
+
   """
   Timestamp (in seconds) since which the Ethereum account had a non-zero investment. Will be set to null when the
   investment balance becomes zero on a day. If null and an investment is in the system, will be set to the timestamp of
   that day.
   """
   nonZeroBalanceSince: BigInt
+}
+
+"""
+Rewards accumulated by an Asset Originator's (AO's) account on Ethereum and links Centrifuge Chain accounts that can
+claim those rewards
+"""
+type AORewardBalance @entity {
+  """
+  Pool root address (lowercase), note that this is different from investor rewards
+  """
+  id: ID!
+
+  """
+  Links to Centrifuge Chain accounts with rewards that are currently claimable
+  """
+  links: [RewardLink!]!
+
+  """
+  Rewards that can be linked or claimed in the future. If the links list is not empty, rewards will automatically go
+  to the last RewardLink in links. If there is no RewardLink in links, rewards will stay in linkableRewards until a
+  RewardLink is created.
+  """
+  linkableRewards: BigDecimal!
+
+  """
+  Sum of all rewards across links and linkableRewards
+  """
+  totalRewards: BigDecimal!
+}
+
+"""
+Find pools by AO reward recipient Ethereum address
+"""
+type PoolsByAORewardRecipient @entity {
+  """
+  Lowercased Ethereum address of the recipient of the rewards, which is a dedicated address set in the pool config
+  retrieved from IPFS.
+  """
+  id: ID!
+
+  pools: [Pool!]!
 }
 
 # this is a historical value and will not be responsible
@@ -234,10 +283,12 @@ type RewardLink @entity {
   Ethereum address that has earned the rewards
   """
   ethAddress: String!
+
   """
   Hex encoded public key of an account on Centrifuge Chain that will receive rewards
   """
   centAddress: String!
+
   """
   Rewards that are claimable by the Centrifuge Chain account
   """
