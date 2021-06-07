@@ -85,9 +85,17 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
   } else {
     tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
   }
-  let result = tranche.calcDisburse(<Address>Address.fromHexString(tb.owner))
-  tb.pendingSupplyCurrency = result.value2
-  tb.supplyAmount = result.value1
+  let calcDisburse = tranche.try_calcDisburse(<Address>Address.fromHexString(tb.owner))
+  if (calcDisburse.reverted) {
+    log.warning('calculateDisburse failed - owner {}, token {}, tranche {}', [
+      tb.owner.toString(),
+      tb.token.toString(),
+      tranche._address.toString(),
+    ])
+    return
+  }
+  tb.pendingSupplyCurrency = calcDisburse.value.value2
+  tb.supplyAmount = calcDisburse.value.value1
   log.debug('calculateDisburse {} token {}, pendingSupply {}, supplyAmount {}', [
     tb.owner.toString(),
     tb.token.toString(),
