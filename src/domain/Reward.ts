@@ -145,12 +145,12 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 }
 
 function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
-  const cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+  let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
 
-  const investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
+  let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
 
   if (!investorRewardRateOption.reverted) {
-    const investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
+    let investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
       fixed27.toBigDecimal()
     )
 
@@ -160,7 +160,7 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
 
     return investorRewardRate
   } else {
-    const investorRewardRate = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
+    let investorRewardRate = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
       ? BigDecimal.fromString('0.0042')
       : BigDecimal.fromString('0')
 
@@ -171,7 +171,7 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  const investorRewardRate = getInvestorRewardRate(systemRewards)
+  let investorRewardRate = getInvestorRewardRate(systemRewards)
 
   systemRewards.rewardRate = investorRewardRate
   systemRewards.save()
