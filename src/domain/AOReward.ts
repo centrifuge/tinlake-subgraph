@@ -63,7 +63,7 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function getAORewardRate(systemRewards: RewardDayTotal) {
+function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
   const cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
 
   const aoRewardRateOption = cfgRewardRate.try_aoRewardRate()

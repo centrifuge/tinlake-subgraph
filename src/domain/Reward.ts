@@ -144,7 +144,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function getInvestorRewardRate(systemRewards: RewardDayTotal) {
+function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   const cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
 
   const investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
