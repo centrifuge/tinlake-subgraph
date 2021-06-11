@@ -64,24 +64,30 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
 }
 
 function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
+  let defaultRewardRate = BigDecimal.fromString('0.0017')
+
+  let hasReachedLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
+
+  if (hasReachedLimit) {
+    return defaultRewardRate
+  }
+
   let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
 
   let aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
 
   if (aoRewardRateOption.reverted) {
-    let limit = systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
+    log.debug('setting AO system rewards rate default, aoRewardRate {}', [defaultRewardRate.toString()])
 
-    let aoRewardRate = limit ? BigDecimal.fromString('0.0017') : BigDecimal.fromString('0')
-
-    log.debug('setting AO system rewards rate default, aoRewardRate {}', [aoRewardRate.toString()])
-
-    return aoRewardRate
+    return defaultRewardRate
   } else {
-    let aoRewardRate = BigDecimal.fromString(aoRewardRateOption.value.toString()).div(fixed27.toBigDecimal())
+    let contractRewardRate = BigDecimal.fromString(aoRewardRateOption.value.toString()).div(fixed27.toBigDecimal())
 
-    log.debug('setting AO system rewards rate from cfgRewardRate contract, aoRewardRate {}', [aoRewardRate.toString()])
+    log.debug('setting AO system rewards rate from cfgRewardRate contract, aoRewardRate {}', [
+      contractRewardRate.toString(),
+    ])
 
-    return aoRewardRate
+    return contractRewardRate
   }
 }
 
