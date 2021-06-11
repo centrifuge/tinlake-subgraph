@@ -147,9 +147,9 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let defaultRewardRate = BigDecimal.fromString('0.0042')
 
-  let hasReachedLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
+  let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
 
-  if (hasReachedLimit) {
+  if (isBelowLimit) {
     return defaultRewardRate
   }
 

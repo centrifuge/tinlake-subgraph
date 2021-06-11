@@ -66,9 +66,9 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
 function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let defaultRewardRate = BigDecimal.fromString('0.0017')
 
-  let hasReachedLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
+  let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
 
-  if (hasReachedLimit) {
+  if (isBelowLimit) {
     return defaultRewardRate
   }
 
