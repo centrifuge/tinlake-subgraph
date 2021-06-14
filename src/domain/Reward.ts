@@ -157,7 +157,7 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
 
   let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
 
-  if (investorRewardRateOption.reverted) {
+  if (investorRewardRateOption.reverted || investorRewardRateOption.value.isZero()) {
     log.debug('setting system rewards rate default, investorRewardRate {}', [defaultRewardRate.toString()])
 
     return defaultRewardRate

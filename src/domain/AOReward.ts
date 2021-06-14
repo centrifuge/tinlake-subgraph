@@ -76,7 +76,7 @@ function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
 
   let aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
 
-  if (aoRewardRateOption.reverted) {
+  if (aoRewardRateOption.reverted || aoRewardRateOption.value.isZero()) {
     log.debug('setting AO system rewards rate default, aoRewardRate {}', [defaultRewardRate.toString()])
 
     return defaultRewardRate
