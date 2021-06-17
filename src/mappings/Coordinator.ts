@@ -13,7 +13,7 @@ import { addToDailyAggregate } from '../domain/DailyPoolData'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
-  log.debug('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
+  log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
 
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
@@ -28,7 +28,7 @@ export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
 
   let pools = getAllPools()
   for (let i = 0; i < pools.length; i++) {
-    log.debug('handleBlock: update pool values - pool {}', [pools[i]])
+    log.info('handleBlock: update pool values - pool {}', [pools[i]])
     updatePoolValues(pools[i], block, today)
   }
 }
@@ -74,12 +74,12 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
     seniorDebtResult = assessor.try_seniorDebt_()
 
     pool.seniorDebt = !seniorDebtResult.reverted ? seniorDebtResult.value : BigInt.fromI32(0)
-    log.debug('updatePoolValues: will update seniorDebt {}', [pool.seniorDebt.toString()])
+    log.info('updatePoolValues: will update seniorDebt {}', [pool.seniorDebt.toString()])
   }
 
   addToDailyAggregate(<Day>today, <Pool>pool)
 
-  log.debug(
+  log.info(
     'updatePoolValues: will update pool {}: totalDebt {} minJuniorRatio {} juniorRatio {} weightedInterestRate {}',
     [
       poolId,
@@ -160,7 +160,7 @@ function calculateYields(
 
   let seniorYield = seniorCurrent.minus(seniorFormer).times(BigInt.fromI32(365).div(BigInt.fromI32(days)))
 
-  log.debug(
+  log.info(
     'addYields {}: junior token price: {} days ago {}, today {}, yield {}; senior token price: {} days ago {}, today {}, yield {}; ',
     [
       days.toString(),

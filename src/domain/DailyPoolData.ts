@@ -12,7 +12,7 @@ import { calculateAORewards } from './AOReward'
 
 export function createDailySnapshot(block: ethereum.Block): void {
   let date = timestampToDate(block.timestamp)
-  log.debug('createDailySnapshot: {}', [date.toString()])
+  log.info('createDailySnapshot: {}', [date.toString()])
 
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
@@ -21,7 +21,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
   for (let i = 0; i < pools.length; i++) {
     let pool = Pool.load(pools[i]) as Pool
     let addresses = PoolAddresses.load(pool.id)
-    log.debug('createDailySnapshot: loaded pool {}', [pool.shortName])
+    log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
 
     let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
     setDailyPoolValues(pool, dailyPoolData)

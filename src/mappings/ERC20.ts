@@ -11,7 +11,7 @@ export function handleERC20Transfer(event: TransferEvent): void {
   let tokenAddress = dataSource.context().getString('tokenAddress')
   let poolId = dataSource.context().getString('id')
 
-  log.debug('handleERC20Transfer: token {}, from {}, to {}, amount {}', [
+  log.info('handleERC20Transfer: token {}, from {}, to {}, amount {}', [
     tokenAddress,
     event.params.src.toHex(),
     event.params.dst.toHex(),
@@ -22,7 +22,7 @@ export function handleERC20Transfer(event: TransferEvent): void {
   let src = event.params.src.toHex()
   let dst = event.params.dst.toHex()
   if (!isSystemAccount(poolId, dst)) {
-    log.debug('handleERC20Transfer: adding owner {}', [dst])
+    log.info('handleERC20Transfer: adding owner {}', [dst])
     // only push dst as owners
     token.owners = pushUnique(token.owners, dst)
     token.save()

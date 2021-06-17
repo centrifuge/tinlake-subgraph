@@ -17,7 +17,7 @@ export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
 }
 
 export function calculateAORewards(date: BigInt, pool: Pool): void {
-  log.debug('calculateAORewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
+  log.info('calculateAORewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
 
   let systemRewards = loadOrCreateRewardDayTotal(date)
   systemRewards = setAORewardRate(systemRewards)
@@ -46,7 +46,7 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   }
 
   // totalRewards are cumulative across linked addresses
-  log.debug('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
+  log.info('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
   reward.totalRewards = reward.totalRewards.plus(r)
   reward.save()
 
@@ -70,11 +70,11 @@ function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
 
   if (isBelowLimit) {
-    log.debug('isBelowLimit is true for AO rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
+    log.info('isBelowLimit is true for AO rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
     return defaultRewardRateBelowLimit
   }
 
-  log.debug('setting AO system rewards rate default, aoRewardRate {}', [defaultRewardRateAboveLimit.toString()])
+  log.info('setting AO system rewards rate default, aoRewardRate {}', [defaultRewardRateAboveLimit.toString()])
   return defaultRewardRateAboveLimit
 }
 

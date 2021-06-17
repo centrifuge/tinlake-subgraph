@@ -13,7 +13,7 @@ export function handleShelfIssue(call: IssueCall): void {
   let nftRegistry = call.inputs.registry_
   let loanIndex = call.outputs.value0 // incremental value, not unique across all tinlake pools
 
-  log.debug('handleShelfIssue: shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}', [
+  log.info('handleShelfIssue: shelf: {}, loanOwner: {}, loanIndex: {},  nftId: {}, nftRegistry: {}', [
     shelf.toHex(),
     loanOwner.toHex(),
     loanIndex.toString(),
@@ -85,7 +85,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.threshold = navFeed.threshold(loanIndex)
   loan.maturityDate = maturityDate.value
 
-  log.debug('handleShelfIssue: will save loan {} (pool: {}, index: {}, owner: {}, opened {})', [
+  log.info('handleShelfIssue: will save loan {} (pool: {}, index: {}, owner: {}, opened {})', [
     loan.id,
     loan.pool,
     loanIndex.toString(),
@@ -101,7 +101,7 @@ export function handleShelfClose(call: CloseCall): void {
   let shelf = call.to
   let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
 
-  log.debug('handleShelfClose: shelf: {}, loanOwner: {}, loanIndex: {}', [
+  log.info('handleShelfClose: shelf: {}, loanOwner: {}, loanIndex: {}', [
     shelf.toHex(),
     loanOwner.toHex(),
     loanIndex.toString(),
@@ -127,7 +127,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
   let amount = call.inputs.currencyAmount
 
-  log.debug('handleShelfBorrow: shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}', [
+  log.info('handleShelfBorrow: shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}', [
     shelf.toHex(),
     loanOwner.toHex(),
     loanIndex.toString(),
@@ -137,7 +137,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   let poolId = dataSource.context().getString('id')
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
 
-  log.debug('handleShelfBorrow: generated poolId {}, loanId {}', [poolId, loanId])
+  log.info('handleShelfBorrow: generated poolId {}, loanId {}', [poolId, loanId])
 
   // update loan
   let loan = Loan.load(loanId)
@@ -179,7 +179,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   let loanIndex = call.inputs.loan // incremental value, not unique across all tinlake pools
   let amount = call.inputs.currencyAmount
 
-  log.debug('handleShelfRepay: shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}', [
+  log.info('handleShelfRepay: shelf: {}, loanOwner: {}, loanIndex: {}, amount: {}', [
     shelf.toHex(),
     loanOwner.toHex(),
     loanIndex.toString(),

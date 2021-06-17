@@ -16,7 +16,7 @@ export function handleClaimed(claimed: Claimed): void {
   let sender = claimed.params.claimer.toHex()
   let centAddress = claimed.params.account.toHex()
 
-  log.debug('handle update claim address {} to substrate address {}', [sender.toString(), centAddress.toString()])
+  log.info('handle update claim address {} to substrate address {}', [sender.toString(), centAddress.toString()])
 
   let link = loadOrCreateRewardLink(sender, centAddress)
 

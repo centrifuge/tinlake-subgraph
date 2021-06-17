@@ -16,20 +16,20 @@ export function handleAssessorFile(call: AssessorFileCall): void {
 
   if (name == 'seniorInterestRate') {
     pool.seniorInterestRate = value
-    log.debug(`handleAssessorFile: update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
+    log.info(`handleAssessorFile: update pool {} - set seniorInterestRate to {}`, [poolId, value.toString()])
   } else if (name == 'maxReserve') {
     pool.maxReserve = value
-    log.debug(`handleAssessorFile: update pool {} - set maxReserve to {}`, [poolId, value.toString()])
+    log.info(`handleAssessorFile: update pool {} - set maxReserve to {}`, [poolId, value.toString()])
   } else if (name == 'maxSeniorRatio') {
     // Internally we use senior ratio, while externally we use the junior ratio
     pool.minJuniorRatio = seniorToJuniorRatio(value)
-    log.debug(`handleAssessorFile: update pool {} - set minJuniorRatio {}`, [
+    log.info(`handleAssessorFile: update pool {} - set minJuniorRatio {}`, [
       poolId,
       seniorToJuniorRatio(value).toString(),
     ])
   } else if (name == 'minSeniorRatio') {
     pool.maxJuniorRatio = seniorToJuniorRatio(value)
-    log.debug(`handleAssessorFile: update pool {} - set maxJuniorRatio {}`, [
+    log.info(`handleAssessorFile: update pool {} - set maxJuniorRatio {}`, [
       poolId,
       seniorToJuniorRatio(value).toString(),
     ])

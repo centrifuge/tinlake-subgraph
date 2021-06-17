@@ -88,7 +88,7 @@ function updateInvestorRewardsByToken(
 }
 
 export function calculateRewards(date: BigInt, pool: Pool): void {
-  log.debug('calculateRewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
+  log.info('calculateRewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
 
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
@@ -129,7 +129,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
     // totalRewards are cumulative across linked addresses
-    log.debug('calculateRewards: {} earned {} today', [account, r.toString()])
+    log.info('calculateRewards: {} earned {} today', [account, r.toString()])
     reward.totalRewards = reward.totalRewards.plus(r)
 
     // add user's today reward to today's rewards obj
@@ -151,11 +151,11 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
 
   if (isBelowLimit) {
-    log.debug('isBelowLimit is true for investor rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
+    log.info('isBelowLimit is true for investor rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
     return defaultRewardRateBelowLimit
   }
 
-  log.debug('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
+  log.info('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
   return defaultRewardRateAboveLimit
 }
 

@@ -26,7 +26,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   // get ratePerSecond for riskGroup
   let ratePerSecond = pile.rates(riskGroup).value2
 
-  log.debug('handleNFTFeedUpdated: nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}, interestRate {}', [
+  log.info('handleNFTFeedUpdated: nftFeedContract: {}, loanIndex: {}, ceiling: {}, threshold: {}, interestRate {}', [
     nftFeedAddress.toHex(),
     loanIndex.toString(),
     ceiling.toString(),

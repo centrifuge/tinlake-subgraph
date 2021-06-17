@@ -11,9 +11,7 @@ import { timestampToDate } from '../util/date'
 export function handleBlock(block: ethereum.Block): void {
   // Check if there's a preloaded pool for this block
   if (preloadedPoolByStartBlock.has(block.number.toI32())) {
-    log.debug('handleBlock: preload pool - IPFS hash {}', [
-      preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash,
-    ])
+    log.info('handleBlock: preload pool - IPFS hash {}', [preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash])
     loadPoolFromIPFS(preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash)
   }
 
@@ -21,7 +19,7 @@ export function handleBlock(block: ethereum.Block): void {
   if (
     block.number.mod(BigInt.fromI32((handleBlockFrequencyMinutes * 60) / blockTimeSeconds)).notEqual(BigInt.fromI32(0))
   ) {
-    log.debug('handleBlock: skip block {}', [block.number.toString()])
+    log.info('handleBlock: skip block {}', [block.number.toString()])
     return
   }
 
