@@ -67,7 +67,7 @@ function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let defaultRewardRateBelowLimit = BigDecimal.fromString('0.0017')
   let defaultRewardRateAboveLimit = BigDecimal.fromString('0.0003')
 
-  let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
+  let isBelowLimit = systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
 
   if (isBelowLimit) {
     log.info('isBelowLimit is true for AO rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
