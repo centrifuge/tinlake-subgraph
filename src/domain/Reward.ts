@@ -155,25 +155,8 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
     return defaultRewardRateBelowLimit
   }
 
-  let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
-
-  let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
-
-  if (investorRewardRateOption.reverted || investorRewardRateOption.value.isZero()) {
-    log.debug('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
-
-    return defaultRewardRateAboveLimit
-  } else {
-    let contractRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
-      fixed27.toBigDecimal()
-    )
-
-    log.debug('setting system rewards rate from cfgRewardRate contract, investorRewardRate {}', [
-      contractRewardRate.toString(),
-    ])
-
-    return contractRewardRate
-  }
+  log.debug('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
+  return defaultRewardRateAboveLimit
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
