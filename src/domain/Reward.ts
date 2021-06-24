@@ -146,7 +146,6 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 
 function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let defaultRewardRateBelowLimit = BigDecimal.fromString('0.0042')
-  let defaultRewardRateAboveLimit = BigDecimal.fromString('0.0020')
 
   let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
 
@@ -155,8 +154,27 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
     return defaultRewardRateBelowLimit
   }
 
-  log.info('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
-  return defaultRewardRateAboveLimit
+  let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+
+  let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
+
+  if (investorRewardRateOption.reverted) {
+    let investorRewardRate = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
+      ? defaultRewardRateBelowLimit
+      : BigDecimal.fromString('0')
+
+    log.debug('setting system rewards rate default, investorRewardRate {}', [investorRewardRate.toString()])
+
+    return investorRewardRate
+  }
+
+  let investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(fixed27.toBigDecimal())
+
+  log.debug('setting system rewards rate from cfgRewardRate contract, investorRewardRate {}', [
+    investorRewardRate.toString(),
+  ])
+
+  return investorRewardRate
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
