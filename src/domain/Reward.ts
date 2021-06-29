@@ -10,8 +10,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreClaimable } from './Day'
-import { cfgRewardRateAddress, fixed27, rewardsCeiling, secondsInDay } from '../config'
-import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
+import { cfgRewardRateAddress, fixed27, rewardsCeilingOne, rewardsCeilingTwo, secondsInDay } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -145,18 +144,24 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 }
 
 function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
-  let defaultRewardRateBelowLimit = BigDecimal.fromString('0.0042')
-  let defaultRewardRateAboveLimit = BigDecimal.fromString('0.0020')
+  let firstRate = BigDecimal.fromString('0.0042')
+  let secondRate = BigDecimal.fromString('0.0020')
+  let thirdRate = BigDecimal.fromString('0.0010')
 
-  let isBelowLimit = systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))
-
-  if (isBelowLimit) {
-    log.info('isBelowLimit is true for investor rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
-    return defaultRewardRateBelowLimit
+  if(systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingOne)))
+  {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), firstRate.toString()])
+    return firstRate
   }
 
-  log.info('setting system rewards rate default, investorRewardRate {}', [defaultRewardRateAboveLimit.toString()])
-  return defaultRewardRateAboveLimit
+  if(systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingTwo)))
+  {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), secondRate.toString()])
+    return secondRate
+  }
+
+  log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), thirdRate.toString()])
+  return thirdRate
 }
 
 function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {

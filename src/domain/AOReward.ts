@@ -1,7 +1,6 @@
 import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
-import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
-import { aoRewardsCeiling, cfgRewardRateAddress, fixed27, secondsInDay } from '../config'
+import { aoRewardsCeilingOne, aoRewardsCeilingTwo, cfgRewardRateAddress, fixed27, secondsInDay } from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
@@ -64,18 +63,22 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
 }
 
 function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
-  let defaultRewardRateBelowLimit = BigDecimal.fromString('0.0017')
-  let defaultRewardRateAboveLimit = BigDecimal.fromString('0.0003')
+  let firstRate = BigDecimal.fromString('0.0017')
+  let secondRate = BigDecimal.fromString('0.0003')
+  let thirdRate = BigDecimal.fromString('0.0002')
 
-  let isBelowLimit = systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))
-
-  if (isBelowLimit) {
-    log.info('isBelowLimit is true for AO rewards, defaulting to {}', [defaultRewardRateBelowLimit.toString()])
-    return defaultRewardRateBelowLimit
+  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingOne))){
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), firstRate.toString()])
+      return firstRate
   }
 
-  log.info('setting AO system rewards rate default, aoRewardRate {}', [defaultRewardRateAboveLimit.toString()])
-  return defaultRewardRateAboveLimit
+  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingTwo))){
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), secondRate.toString()])
+      return secondRate
+  }
+
+  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), thirdRate.toString()])
+  return thirdRate
 }
 
 function setAORewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
