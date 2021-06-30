@@ -13,8 +13,8 @@ export let fixed27 = BigInt.fromI32(10).pow(27)
 export const rewardsCeilingOne = '5890000000000000000000000' // systemRewards.toDateRewardAggregateValue value on 15/06/16
 export const aoRewardsCeilingOne = '1960000000000000000000000' // systemRewards.toDateAORewardAggregateValue value on 15/06/16
 
-export const rewardsCeilingTwo = '6457353807169183324815722' // systemRewards.toDateRewardAggregateValue value on 29/06
-export const aoRewardsCeilingTwo = '2062227991521831037673220' // systemRewards.toDateAORewardAggregateValue value on 29/06
+export const rewardsCeilingTwo = '6468983687657053920694644' // systemRewards.toDateRewardAggregateValue value on 30/06
+export const aoRewardsCeilingTwo = '2063801834545137699567975' // systemRewards.toDateAORewardAggregateValue value on 30/06
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
