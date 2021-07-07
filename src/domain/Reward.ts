@@ -148,19 +148,26 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let secondRate = BigDecimal.fromString('0.0020')
   let thirdRate = BigDecimal.fromString('0.0010')
 
-  if(systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingOne)))
-  {
-    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), firstRate.toString()])
+  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingOne))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
     return firstRate
   }
 
-  if(systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingTwo)))
-  {
-    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), secondRate.toString()])
+  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingTwo))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
     return secondRate
   }
 
-  log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [systemRewards.toDateRewardAggregateValue.toString(), thirdRate.toString()])
+  log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+    systemRewards.toDateRewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
   return thirdRate
 }
 

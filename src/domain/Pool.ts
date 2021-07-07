@@ -129,11 +129,27 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   if (prevAddresses.juniorToken != newAddresses.juniorToken) {
     log.info('createUpdatedPoolHandlers: creating handler for changed juniorToken {} => {}', [
       prevAddresses.juniorToken,
-      newAddresses.assessor,
+      newAddresses.juniorToken,
     ])
     let juniorTokenContext = new DataSourceContext()
     juniorTokenContext.setString('id', newAddresses.id)
     juniorTokenContext.setString('tokenAddress', newAddresses.juniorToken)
     TokenTemplate.createWithContext(Address.fromString(newAddresses.juniorToken), juniorTokenContext)
+  }
+
+  if (prevAddresses.seniorTranche != newAddresses.seniorTranche) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed seniorTranche {} => {}', [
+      prevAddresses.seniorTranche,
+      newAddresses.seniorTranche,
+    ])
+    TrancheTemplate.createWithContext(Address.fromString(newAddresses.seniorTranche), context)
+  }
+
+  if (prevAddresses.juniorTranche != newAddresses.juniorTranche) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed juniorTranche {} => {}', [
+      prevAddresses.juniorTranche,
+      newAddresses.juniorTranche,
+    ])
+    TrancheTemplate.createWithContext(Address.fromString(newAddresses.juniorTranche), context)
   }
 }

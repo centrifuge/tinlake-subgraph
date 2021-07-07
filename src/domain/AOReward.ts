@@ -67,17 +67,26 @@ function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
   let secondRate = BigDecimal.fromString('0.0003')
   let thirdRate = BigDecimal.fromString('0.0002')
 
-  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingOne))){
-    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), firstRate.toString()])
-      return firstRate
+  if (systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingOne))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
+    return firstRate
   }
 
-  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingTwo))){
-    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), secondRate.toString()])
-      return secondRate
+  if (systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingTwo))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
+    return secondRate
   }
 
-  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), thirdRate.toString()])
+  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+    systemRewards.toDateAORewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
   return thirdRate
 }
 

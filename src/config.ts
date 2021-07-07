@@ -25,8 +25,8 @@ export const zeroAddress = '0x0000000000000000000000000000000000000000'
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 12730114
-const fastForwardUntilBlockKovan = 25264786
+const fastForwardUntilBlockMainnet = 12779810
+const fastForwardUntilBlockKovan = 25967180
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 

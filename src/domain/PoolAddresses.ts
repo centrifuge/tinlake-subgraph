@@ -1,9 +1,11 @@
-import { TypedMap, JSONValue } from '@graphprotocol/graph-ts'
+import { TypedMap, JSONValue, log } from '@graphprotocol/graph-ts'
 import { PoolAddresses } from '../../generated/schema'
 import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 
 export function updatePoolAddresses(poolId: string, addresses: TypedMap<string, JSONValue>): PoolAddresses {
   let poolAddresses = new PoolAddresses(toLowerCaseAddress(poolId))
+
+  log.info('update poolAddresses {}', [poolId])
 
   poolAddresses.coordinator = toLowerCaseAddress(addresses.get('COORDINATOR').toString())
   poolAddresses.assessor = toLowerCaseAddress(addresses.get('ASSESSOR').toString())
