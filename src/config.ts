@@ -10,12 +10,6 @@ export const blockTimeSeconds = 15
 
 export let fixed27 = BigInt.fromI32(10).pow(27)
 
-export const rewardsCeilingOne = '5890000000000000000000000' // systemRewards.toDateRewardAggregateValue value on 15/06/16
-export const aoRewardsCeilingOne = '1960000000000000000000000' // systemRewards.toDateAORewardAggregateValue value on 15/06/16
-
-export const rewardsCeilingTwo = '6468983687657053920694644' // systemRewards.toDateRewardAggregateValue value on 30/06
-export const aoRewardsCeilingTwo = '2063801834545137699567975' // systemRewards.toDateAORewardAggregateValue value on 30/06
-
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
 /**
@@ -33,8 +27,3 @@ export let fastForwardUntilBlock =
 const registryAddressMainnet = '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
 const registryAddressKovan = '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
 export let registryAddress = dataSource.network() == 'mainnet' ? registryAddressMainnet : registryAddressKovan
-
-const cfgRewardRateAddressMainnet = '0xfBFE4779056b8C8493EECA7FfeA78f295a48635E'
-const cfgRewardRateAddressKovan = '0x2C821E34F737406D27D25C7F28f6b59b42547EfD'
-export let cfgRewardRateAddress =
-  dataSource.network() == 'mainnet' ? cfgRewardRateAddressMainnet : cfgRewardRateAddressKovan

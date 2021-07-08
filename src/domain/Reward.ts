@@ -10,7 +10,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreClaimable } from './Day'
-import { cfgRewardRateAddress, fixed27, rewardsCeilingOne, rewardsCeilingTwo, secondsInDay } from '../config'
+import { secondsInDay } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -91,7 +91,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
 
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  systemRewards = setRewardRate(systemRewards)
+  systemRewards = setRewardRate(date, systemRewards)
 
   let tokenAddresses = PoolAddresses.load(pool.id)
   let accounts = investorIds.accounts
@@ -143,12 +143,12 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
+function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
   let firstRate = BigDecimal.fromString('0.0042')
   let secondRate = BigDecimal.fromString('0.0020')
   let thirdRate = BigDecimal.fromString('0.0010')
 
-  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingOne))) {
+  if (date.le(BigInt.fromI32(1623715200))) {
     log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
       systemRewards.toDateRewardAggregateValue.toString(),
       firstRate.toString(),
@@ -156,7 +156,7 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
     return firstRate
   }
 
-  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeilingTwo))) {
+  if (date.le(BigInt.fromI32(1624838400))) {
     log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
       systemRewards.toDateRewardAggregateValue.toString(),
       secondRate.toString(),
@@ -171,11 +171,34 @@ function getInvestorRewardRate(systemRewards: RewardDayTotal): BigDecimal {
   return thirdRate
 }
 
-function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  let investorRewardRate = getInvestorRewardRate(systemRewards)
+function setRewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTotal {
+  let investorRewardRate = getInvestorRewardRate(date, systemRewards)
 
   systemRewards.rewardRate = investorRewardRate
   systemRewards.save()
 
   return systemRewards
 }
+
+// previous subgraph investor rewards using ceilings
+// {
+//   "id": "1623715200",
+//   "rewardRate": "0.0042",
+//   "todayValue": "22152256370852680838791266"
+// },
+// {
+//   "id": "1623801600",
+//   "rewardRate": "0.002",
+//   "todayValue": "22156466449092702866895657"
+// },
+
+// {
+//   "id": "1624838400",
+//   "rewardRate": "0.002",
+//   "todayValue": "24484391367013016788277753"
+// },
+// {
+//   "id": "1624924800",
+//   "rewardRate": "0.001",
+//   "todayValue": "25285837439893519526041268"
+// },
