@@ -1,6 +1,6 @@
-import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
-import { aoRewardsCeilingOne, aoRewardsCeilingTwo, cfgRewardRateAddress, fixed27, secondsInDay } from '../config'
+import { secondsInDay } from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
@@ -19,7 +19,7 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   log.info('calculateAORewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
 
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  systemRewards = setAORewardRate(systemRewards)
+  systemRewards = setAORewardRate(date, systemRewards)
 
   let tokenAddresses = PoolAddresses.load(pool.id)
 
@@ -62,30 +62,57 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function getAORewardRate(systemRewards: RewardDayTotal): BigDecimal {
+function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
   let firstRate = BigDecimal.fromString('0.0017')
   let secondRate = BigDecimal.fromString('0.0003')
   let thirdRate = BigDecimal.fromString('0.0002')
 
-  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingOne))){
-    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), firstRate.toString()])
-      return firstRate
+  if (date.le(BigInt.fromI32(1623628800))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
+    return firstRate
   }
 
-  if(systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeilingTwo))){
-    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), secondRate.toString()])
-      return secondRate
+  if (date.le(BigInt.fromI32(1624838400))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
+    return secondRate
   }
 
-  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [systemRewards.toDateAORewardAggregateValue.toString(), thirdRate.toString()])
+  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+    systemRewards.toDateAORewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
   return thirdRate
 }
 
-function setAORewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  let aoRewardRate = getAORewardRate(systemRewards)
+function setAORewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTotal {
+  let aoRewardRate = getAORewardRate(date, systemRewards)
 
   systemRewards.aoRewardRate = aoRewardRate
   systemRewards.save()
 
   return systemRewards
 }
+
+// previous subgraph ao rewards using ceilings
+// {
+//   "aoRewardRate": "0.0017",
+//   "id": "1623628800",
+// },
+// {
+//   "aoRewardRate": "0.0003",
+//   "id": "1623715200",
+// },
+
+// "aoRewardRate": "0.0003",
+// "id": "1624838400",
+// },
+// {
+// "aoRewardRate": "0.0002",
+// "id": "1624924800",
+// },
