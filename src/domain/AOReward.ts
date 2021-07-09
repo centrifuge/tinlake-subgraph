@@ -67,7 +67,7 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
   let secondRate = BigDecimal.fromString('0.0003')
   let thirdRate = BigDecimal.fromString('0.0002')
 
-  if (date.le(BigInt.fromI32(1623628800))) {
+  if (date.lt(BigInt.fromI32(1623715200))) {
     log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
       systemRewards.toDateAORewardAggregateValue.toString(),
       firstRate.toString(),
@@ -75,7 +75,7 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
     return firstRate
   }
 
-  if (date.le(BigInt.fromI32(1624838400))) {
+  if (date.lt(BigInt.fromI32(1624924800))) {
     log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
       systemRewards.toDateAORewardAggregateValue.toString(),
       secondRate.toString(),
