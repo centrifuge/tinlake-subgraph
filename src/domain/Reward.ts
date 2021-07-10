@@ -148,7 +148,7 @@ function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): Big
   let secondRate = BigDecimal.fromString('0.0020')
   let thirdRate = BigDecimal.fromString('0.0010')
 
-  if (date.lt(BigInt.fromI32(1623801600))) {
+  if (date.le(BigInt.fromI32(1623801600))) {
     log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
       systemRewards.toDateRewardAggregateValue.toString(),
       firstRate.toString(),
@@ -156,7 +156,7 @@ function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): Big
     return firstRate
   }
 
-  if (date.lt(BigInt.fromI32(1624924800))) {
+  if (date.le(BigInt.fromI32(1624924800))) {
     log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
       systemRewards.toDateRewardAggregateValue.toString(),
       secondRate.toString(),
