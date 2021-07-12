@@ -98,21 +98,3 @@ function setAORewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDay
 
   return systemRewards
 }
-
-// previous subgraph ao rewards using ceilings
-// {
-//   "aoRewardRate": "0.0017",
-//   "id": "1623628800",
-// },
-// {
-//   "aoRewardRate": "0.0003",
-//   "id": "1623715200",
-// },
-
-// "aoRewardRate": "0.0003",
-// "id": "1624838400",
-// },
-// {
-// "aoRewardRate": "0.0002",
-// "id": "1624924800",
-// },

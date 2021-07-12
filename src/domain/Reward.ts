@@ -179,26 +179,3 @@ function setRewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTo
 
   return systemRewards
 }
-
-// previous subgraph investor rewards using ceilings
-// {
-//   "id": "1623715200",
-//   "rewardRate": "0.0042",
-//   "todayValue": "22152256370852680838791266"
-// },
-// {
-//   "id": "1623801600",
-//   "rewardRate": "0.002",
-//   "todayValue": "22156466449092702866895657"
-// },
-
-// {
-//   "id": "1624838400",
-//   "rewardRate": "0.002",
-//   "todayValue": "24484391367013016788277753"
-// },
-// {
-//   "id": "1624924800",
-//   "rewardRate": "0.001",
-//   "todayValue": "25285837439893519526041268"
-// },
