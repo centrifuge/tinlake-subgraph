@@ -22,7 +22,7 @@ export function removePoolFromPoolsByAORewardRecipient(
 }
 
 export function addPoolsByAORewardRecipient(addr: PoolAddresses): void {
-  log.debug('addPoolsByAORewardRecipient: pool: {}, recipient: {}', [addr.id.toString(), addr.aoRewardRecipient])
+  log.info('addPoolsByAORewardRecipient: pool: {}, recipient: {}', [addr.id.toString(), addr.aoRewardRecipient])
 
   // add pool to new recipient
   if (addr.aoRewardRecipient != null) {
@@ -33,7 +33,7 @@ export function addPoolsByAORewardRecipient(addr: PoolAddresses): void {
 }
 
 export function updatePoolsByAORewardRecipient(oldAddr: PoolAddresses, addr: PoolAddresses): void {
-  log.debug('updatePoolsByAORewardRecipient: pool: {}, old recipient: {}, new recipient: {}', [
+  log.info('updatePoolsByAORewardRecipient: pool: {}, old recipient: {}, new recipient: {}', [
     oldAddr.id.toString(),
     oldAddr.aoRewardRecipient,
     addr.aoRewardRecipient,

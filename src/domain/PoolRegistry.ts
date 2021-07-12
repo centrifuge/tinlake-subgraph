@@ -4,7 +4,7 @@ import { registryAddress } from '../config'
 import { pushUnique } from '../util/array'
 
 export function createPoolRegistry(): void {
-  log.debug('createPoolRegistry: {}', [registryAddress])
+  log.info('createPoolRegistry: {}', [registryAddress])
   let registry = new PoolRegistry(registryAddress)
   registry.pools = []
   registry.save()
@@ -13,7 +13,7 @@ export function createPoolRegistry(): void {
 export function addPoolToRegistry(poolId: string): void {
   let registry = PoolRegistry.load(registryAddress)
   if (registry != null) {
-    log.debug('addPoolToRegistry: adding pool {} to registry {}', [poolId, registryAddress])
+    log.info('addPoolToRegistry: adding pool {} to registry {}', [poolId, registryAddress])
     let pools = registry.pools
     pools = pushUnique(pools, poolId)
     registry.pools = pools // NOTE: this needs to be done, see https://thegraph.com/docs/assemblyscript-api#store-api
@@ -28,7 +28,7 @@ export function getAllPools(): string[] {
   }
 
   let l = registry.pools.length
-  log.debug('getAllPools: returning {} pools', [l.toString()])
+  log.info('getAllPools: returning {} pools', [l.toString()])
 
   return registry.pools
 }

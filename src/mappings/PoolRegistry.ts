@@ -10,7 +10,7 @@ import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../domain/PoolsByAORewardRecipient'
 
 export function handlePoolCreated(call: PoolCreated): void {
-  log.debug('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
+  log.info('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
@@ -18,21 +18,21 @@ export function handlePoolCreated(call: PoolCreated): void {
   ])
 
   if (!call.params.live || call.params.name == 'registry') {
-    log.debug('handlePoolCreated: pool not live or registry {}', [call.params.data])
+    log.info('handlePoolCreated: pool not live or registry {}', [call.params.data])
     return
   }
 
   // Only add if the pool isn't preloaded
   if (!preloadedPoolByIPFSHash.has(call.params.data)) {
-    log.debug('handlePoolCreated: pool not preloaded {}', [call.params.data])
+    log.info('handlePoolCreated: pool not preloaded {}', [call.params.data])
     loadPoolFromIPFS(call.params.data)
   } else {
-    log.debug('handlePoolCreated: pool is preloaded, skipping {}', [call.params.data])
+    log.info('handlePoolCreated: pool is preloaded, skipping {}', [call.params.data])
   }
 }
 
 export function handlePoolUpdated(call: PoolUpdated): void {
-  log.debug('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
+  log.info('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
     call.params.name,
@@ -67,10 +67,10 @@ export function handlePoolUpdated(call: PoolUpdated): void {
 }
 
 export function loadPoolFromIPFS(hash: string): void {
-  log.debug('loadPoolFromIPFS: {}', [hash])
+  log.info('loadPoolFromIPFS: {}', [hash])
 
   if (PoolRegistry.load(registryAddress) == null) {
-    log.debug('loadPoolFromIPFS: create pool registry {}', [registryAddress])
+    log.info('loadPoolFromIPFS: create pool registry {}', [registryAddress])
     createPoolRegistry()
   }
 

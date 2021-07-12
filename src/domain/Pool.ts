@@ -24,7 +24,7 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   let maxSeniorRatioResult = assessor.try_maxSeniorRatio()
   let maxReserveResult = assessor.try_maxReserve()
 
-  log.debug('createPool: will create new pool poolId {}', [poolId])
+  log.info('createPool: will create new pool poolId {}', [poolId])
   let pool = new Pool(poolId)
   pool.seniorInterestRate = interestRateResult.value
   pool.loans = []
@@ -57,7 +57,7 @@ export function createPoolHandlers(addresses: PoolAddresses): void {
   let context = new DataSourceContext()
   context.setString('id', addresses.id)
 
-  log.debug('createPoolHandlers: {}', [addresses.id])
+  log.info('createPoolHandlers: {}', [addresses.id])
 
   CoordinatorTemplate.createWithContext(Address.fromString(addresses.coordinator), context)
   AssessorTemplate.createWithContext(Address.fromString(addresses.assessor), context)
@@ -81,10 +81,10 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   let context = new DataSourceContext()
   context.setString('id', newAddresses.id)
 
-  log.debug('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
+  log.info('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
 
   if (prevAddresses.coordinator != newAddresses.coordinator) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed coordinator {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed coordinator {} => {}', [
       prevAddresses.coordinator,
       newAddresses.coordinator,
     ])
@@ -92,7 +92,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.assessor != newAddresses.assessor) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed assessor {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed assessor {} => {}', [
       prevAddresses.assessor,
       newAddresses.assessor,
     ])
@@ -100,7 +100,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.shelf != newAddresses.shelf) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed shelf {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed shelf {} => {}', [
       prevAddresses.shelf,
       newAddresses.shelf,
     ])
@@ -108,7 +108,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.feed != newAddresses.feed) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed feed {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed feed {} => {}', [
       prevAddresses.feed,
       newAddresses.feed,
     ])
@@ -116,7 +116,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.seniorToken != newAddresses.seniorToken) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed seniorToken {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed seniorToken {} => {}', [
       prevAddresses.seniorToken,
       newAddresses.seniorToken,
     ])
@@ -127,13 +127,29 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
   }
 
   if (prevAddresses.juniorToken != newAddresses.juniorToken) {
-    log.debug('createUpdatedPoolHandlers: creating handler for changed juniorToken {} => {}', [
+    log.info('createUpdatedPoolHandlers: creating handler for changed juniorToken {} => {}', [
       prevAddresses.juniorToken,
-      newAddresses.assessor,
+      newAddresses.juniorToken,
     ])
     let juniorTokenContext = new DataSourceContext()
     juniorTokenContext.setString('id', newAddresses.id)
     juniorTokenContext.setString('tokenAddress', newAddresses.juniorToken)
     TokenTemplate.createWithContext(Address.fromString(newAddresses.juniorToken), juniorTokenContext)
+  }
+
+  if (prevAddresses.seniorTranche != newAddresses.seniorTranche) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed seniorTranche {} => {}', [
+      prevAddresses.seniorTranche,
+      newAddresses.seniorTranche,
+    ])
+    TrancheTemplate.createWithContext(Address.fromString(newAddresses.seniorTranche), context)
+  }
+
+  if (prevAddresses.juniorTranche != newAddresses.juniorTranche) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed juniorTranche {} => {}', [
+      prevAddresses.juniorTranche,
+      newAddresses.juniorTranche,
+    ])
+    TrancheTemplate.createWithContext(Address.fromString(newAddresses.juniorTranche), context)
   }
 }

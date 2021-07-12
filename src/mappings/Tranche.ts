@@ -10,7 +10,11 @@ import { pushUnique } from '../util/array'
 export function handleSupplyOrder(call: SupplyOrderCall): void {
   let tranche = call.to.toHex()
   let poolId = dataSource.context().getString('id')
-  log.debug('handle supply order for pool {}, tranche {}', [poolId.toString(), tranche.toString()])
+  log.debug('handle supply order for pool {}, tranche {}, from account {}', [
+    poolId.toString(),
+    tranche.toString(),
+    call.inputs.usr.toHex(),
+  ])
   let poolAddresses = PoolAddresses.load(poolId)
   let token = poolAddresses.juniorToken
   if (poolAddresses.seniorTranche == tranche) {

@@ -1,4 +1,4 @@
-import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import {
   DailyInvestorTokenBalance,
   Pool,
@@ -10,7 +10,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreClaimable } from './Day'
-import { rewardsCeiling, secondsInDay } from '../config'
+import { secondsInDay } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -87,11 +87,11 @@ function updateInvestorRewardsByToken(
 }
 
 export function calculateRewards(date: BigInt, pool: Pool): void {
-  log.debug('calculateRewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
+  log.info('calculateRewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
 
   let investorIds = loadOrCreatePoolInvestors(pool.id)
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  systemRewards = setRewardRate(systemRewards)
+  systemRewards = setRewardRate(date, systemRewards)
 
   let tokenAddresses = PoolAddresses.load(pool.id)
   let accounts = investorIds.accounts
@@ -128,7 +128,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       reward.linkableRewards = reward.linkableRewards.plus(r)
     }
     // totalRewards are cumulative across linked addresses
-    log.debug('calculateRewards: {} earned {} today', [account, r.toString()])
+    log.info('calculateRewards: {} earned {} today', [account, r.toString()])
     reward.totalRewards = reward.totalRewards.plus(r)
 
     // add user's today reward to today's rewards obj
@@ -143,17 +143,39 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function setRewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  log.debug('setting system rewards rate, toDateRewardAggregateValue {}', [
-    systemRewards.toDateRewardAggregateValue.toString(),
-  ])
-  if (systemRewards.toDateRewardAggregateValue.lt(BigDecimal.fromString(rewardsCeiling))) {
-    systemRewards.rewardRate = BigDecimal.fromString('0.0042')
-    systemRewards.save()
-  } else {
-    systemRewards.rewardRate = BigDecimal.fromString('0')
-    systemRewards.save()
+function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
+  let firstRate = BigDecimal.fromString('0.0042')
+  let secondRate = BigDecimal.fromString('0.0020')
+  let thirdRate = BigDecimal.fromString('0.0010')
+
+  if (date.le(BigInt.fromI32(1623801600))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
+    return firstRate
   }
-  log.debug('set system rewards rate to {}', [systemRewards.rewardRate.toString()])
+
+  if (date.le(BigInt.fromI32(1624924800))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
+    return secondRate
+  }
+
+  log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+    systemRewards.toDateRewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
+  return thirdRate
+}
+
+function setRewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTotal {
+  let investorRewardRate = getInvestorRewardRate(date, systemRewards)
+
+  systemRewards.rewardRate = investorRewardRate
+  systemRewards.save()
+
   return systemRewards
 }

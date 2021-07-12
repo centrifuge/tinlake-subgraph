@@ -4,7 +4,7 @@ import { Loan, Pool } from '../../generated/schema'
 import { loanIndexFromLoanId } from '../util/typecasts'
 
 export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
-  log.debug('updateLoans: {}', [pool.id])
+  log.info('updateLoans: {}', [pool.id])
 
   let pile = Pile.bind(<Address>Address.fromHexString(pileAddress))
 
@@ -16,13 +16,13 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let loans = pool.loans
     let loanId = loans[j]
 
-    log.debug('updateLoans: will query debt for loanId {}, loanIndex {}', [
+    log.info('updateLoans: will query debt for loanId {}, loanIndex {}', [
       loanId,
       loanIndexFromLoanId(loanId).toString(),
     ])
 
     let debt = pile.debt(loanIndexFromLoanId(loanId))
-    log.debug('updateLoans: will update loan {}: debt {}', [loanId, debt.toString()])
+    log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.toString()])
 
     // update loan
     let loan = Loan.load(loanId)

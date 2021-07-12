@@ -1,6 +1,6 @@
 import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
-import { aoRewardsCeiling, secondsInDay } from '../config'
+import { secondsInDay } from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
@@ -16,10 +16,10 @@ export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
 }
 
 export function calculateAORewards(date: BigInt, pool: Pool): void {
-  log.debug('calculateAORewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
+  log.info('calculateAORewards: running for pool {}, on {}', [pool.id.toString(), date.toString()])
 
   let systemRewards = loadOrCreateRewardDayTotal(date)
-  systemRewards = setAORewardRate(systemRewards)
+  systemRewards = setAORewardRate(date, systemRewards)
 
   let tokenAddresses = PoolAddresses.load(pool.id)
 
@@ -45,7 +45,7 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   }
 
   // totalRewards are cumulative across linked addresses
-  log.debug('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
+  log.info('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
   reward.totalRewards = reward.totalRewards.plus(r)
   reward.save()
 
@@ -62,17 +62,39 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function setAORewardRate(systemRewards: RewardDayTotal): RewardDayTotal {
-  log.debug('setting system AO rewards rate, toDateAORewardAggregateValue {}', [
-    systemRewards.toDateAORewardAggregateValue.toString(),
-  ])
-  if (systemRewards.toDateAORewardAggregateValue.lt(BigDecimal.fromString(aoRewardsCeiling))) {
-    systemRewards.aoRewardRate = BigDecimal.fromString('0.0017')
-    systemRewards.save()
-  } else {
-    systemRewards.aoRewardRate = BigDecimal.fromString('0')
-    systemRewards.save()
+function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
+  let firstRate = BigDecimal.fromString('0.0017')
+  let secondRate = BigDecimal.fromString('0.0003')
+  let thirdRate = BigDecimal.fromString('0.0002')
+
+  if (date.le(BigInt.fromI32(1623715200))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
+    return firstRate
   }
-  log.debug('set AO system rewards rate to {}', [systemRewards.aoRewardRate.toString()])
+
+  if (date.le(BigInt.fromI32(1624924800))) {
+    log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+      systemRewards.toDateAORewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
+    return secondRate
+  }
+
+  log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
+    systemRewards.toDateAORewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
+  return thirdRate
+}
+
+function setAORewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTotal {
+  let aoRewardRate = getAORewardRate(date, systemRewards)
+
+  systemRewards.aoRewardRate = aoRewardRate
+  systemRewards.save()
+
   return systemRewards
 }

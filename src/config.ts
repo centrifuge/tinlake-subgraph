@@ -10,9 +10,6 @@ export const blockTimeSeconds = 15
 
 export let fixed27 = BigInt.fromI32(10).pow(27)
 
-export const rewardsCeiling = '5600000000000000000000000000000000'
-export const aoRewardsCeiling = '5600000000000000000000000000000000' // TODO discuss height
-
 export const zeroAddress = '0x0000000000000000000000000000000000000000'
 
 /**
@@ -22,8 +19,8 @@ export const zeroAddress = '0x0000000000000000000000000000000000000000'
  *
  * Therefore, this value should be set to the latest block before every new deployment.
  */
-const fastForwardUntilBlockMainnet = 11978195
-const fastForwardUntilBlockKovan = 23770795
+const fastForwardUntilBlockMainnet = 12788252
+const fastForwardUntilBlockKovan = 25995522
 export let fastForwardUntilBlock =
   dataSource.network() == 'mainnet' ? fastForwardUntilBlockMainnet : fastForwardUntilBlockKovan
 
