@@ -27,6 +27,8 @@ export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): T
       tb.pendingSupplyCurrency = BigInt.fromI32(0)
       tb.supplyAmount = BigInt.fromI32(0)
       tb.supplyValue = BigInt.fromI32(0)
+      tb.pendingRedeemToken = BigInt.fromI32(0)
+      tb.redeemAmount = BigInt.fromI32(0)
       tb.save()
     }
   }
@@ -96,12 +98,19 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
   }
   tb.pendingSupplyCurrency = calcDisburse.value.value2
   tb.supplyAmount = calcDisburse.value.value1
-  log.info('calculateDisburse {} token {}, pendingSupply {}, supplyAmount {}', [
-    tb.owner.toString(),
-    tb.token.toString(),
-    tb.pendingSupplyCurrency.toString(),
-    tb.supplyAmount.toString(),
-  ])
+  tb.pendingRedeemToken = calcDisburse.value.value3
+  tb.redeemAmount = calcDisburse.value.value0
+  log.info(
+    'calculateDisburse {} token {}, pendingSupply {}, supplyAmount {}, pendingRedeemToken {}, redeemAmount {}, ',
+    [
+      tb.owner.toString(),
+      tb.token.toString(),
+      tb.pendingSupplyCurrency.toString(),
+      tb.supplyAmount.toString(),
+      tb.pendingRedeemToken.toString(),
+      tb.redeemAmount.toString(),
+    ]
+  )
   tb.totalAmount = tb.balanceAmount.plus(tb.supplyAmount)
   tb.save()
 }

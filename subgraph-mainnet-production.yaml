@@ -247,4 +247,6 @@ templates:
       callHandlers:
         - function: supplyOrder(address,uint256)
           handler: handleSupplyOrder
+        - function: redeemOrder(address,uint256)
+          handler: handleRedeemOrder
       file: ./src/mappings/Tranche.ts
