@@ -172,6 +172,7 @@ type PoolInvestor @entity {
 type GlobalAccountId @entity {
   id: ID! # systemwide '1'
   accounts: [String!]! # account addresses in system
+  numInvestors: BigInt # number of investors
 }
 
 # system wide by day
