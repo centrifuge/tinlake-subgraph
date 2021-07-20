@@ -95,29 +95,6 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
 export function addYields(pool: Pool, block: ethereum.Block): Pool {
   let dateNow = timestampToDate(block.timestamp)
 
-  let date14Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 14))
-  let day14Ago = Day.load(date14Ago.toString())
-  if (day14Ago == null) {
-    // can return early here, if we don't have data for 14 days ago, we won't have data for more than 14 days
-    return pool
-  }
-
-  let pool14Ago = DailyPoolData.load(pool.id.concat(day14Ago.id))
-  if (pool14Ago == null) {
-    // can return early here, if we don't have data for 14 days ago, we won't have data for more than 14 days
-    return pool
-  }
-
-  let yields14 = calculateYields(
-    pool.juniorTokenPrice,
-    pool14Ago.juniorTokenPrice,
-    pool.seniorTokenPrice,
-    pool14Ago.seniorTokenPrice,
-    14
-  )
-  pool.juniorYield14Days = yields14.junior
-  pool.seniorYield14Days = yields14.senior
-
   let date30Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 30))
   let day30Ago = Day.load(date30Ago.toString())
   if (day30Ago == null) {
@@ -140,6 +117,29 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
   )
   pool.juniorYield30Days = yields30.junior
   pool.seniorYield30Days = yields30.senior
+
+  let date90Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 90))
+  let day90Ago = Day.load(date90Ago.toString())
+  if (day90Ago == null) {
+    // can return early here, if we don't have data for 90 days ago, we won't have data for more than 90 days
+    return pool
+  }
+
+  let pool90Ago = DailyPoolData.load(pool.id.concat(day90Ago.id))
+  if (pool90Ago == null) {
+    // can return early here, if we don't have data for 90 days ago, we won't have data for more than 90 days
+    return pool
+  }
+
+  let yields90 = calculateYields(
+    pool.juniorTokenPrice,
+    pool90Ago.juniorTokenPrice,
+    pool.seniorTokenPrice,
+    pool90Ago.seniorTokenPrice,
+    90
+  )
+  pool.juniorYield90Days = yields90.junior
+  pool.seniorYield90Days = yields90.senior
 
   return pool
 }
