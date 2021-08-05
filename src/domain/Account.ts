@@ -1,6 +1,5 @@
 import { BigInt } from '@graphprotocol/graph-ts'
 import { Account, GlobalAccountId, PoolAddresses } from '../../generated/schema'
-import { Transfer as TransferEvent } from '../../generated/Block/ERC20'
 import { zeroAddress } from '../config'
 import { pushUnique } from '../util/array'
 
@@ -16,6 +15,7 @@ export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   if (ids == null) {
     ids = new GlobalAccountId(id)
     ids.accounts = []
+    ids.numInvestors = BigInt.fromI32(0)
     ids.save()
   }
   return <GlobalAccountId>ids
@@ -24,6 +24,7 @@ export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
 export function ensureSavedInGlobalAccounts(account: string): void {
   let globalAccounts = loadOrCreateGlobalAccounts('1')
   globalAccounts.accounts = pushUnique(globalAccounts.accounts, account)
+  globalAccounts.numInvestors = BigInt.fromI32(globalAccounts.accounts.length)
   globalAccounts.save()
 }
 
