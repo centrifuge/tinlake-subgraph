@@ -41,10 +41,10 @@ export function createPool(poolId: string, shortName: string, addresses: PoolAdd
   pool.totalBorrowsAggregatedAmount = BigInt.fromI32(0)
   pool.seniorTokenPrice = BigInt.fromI32(0)
   pool.juniorTokenPrice = BigInt.fromI32(0)
-  pool.juniorYield14Days = null
-  pool.seniorYield14Days = null
   pool.juniorYield30Days = null
   pool.seniorYield30Days = null
+  pool.juniorYield90Days = null
+  pool.seniorYield90Days = null
   pool.reserve = BigInt.fromI32(0)
   pool.assetValue = BigInt.fromI32(0)
   pool.shortName = shortName
