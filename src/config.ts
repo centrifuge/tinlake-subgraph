@@ -27,3 +27,10 @@ export let fastForwardUntilBlock =
 const registryAddressMainnet = '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
 const registryAddressKovan = '0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de'
 export let registryAddress = dataSource.network() == 'mainnet' ? registryAddressMainnet : registryAddressKovan
+
+const cfgRewardRateAddressMainnet = '0x2d302Ed7d5eB1b558D5ECeD2B4F471d9eEBe618E'
+const cfgRewardRateAddressKovan = '0x2C821E34F737406D27D25C7F28f6b59b42547EfD'
+export let cfgRewardRateAddress =
+  dataSource.network() == 'mainnet' ? cfgRewardRateAddressMainnet : cfgRewardRateAddressKovan
+
+export const cfgRewardRateDeploymentDate = 1629795106

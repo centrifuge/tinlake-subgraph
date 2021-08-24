@@ -1,4 +1,5 @@
 import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
 import {
   DailyInvestorTokenBalance,
   Pool,
@@ -10,7 +11,7 @@ import {
 } from '../../generated/schema'
 import { loadOrCreatePoolInvestors } from './TokenBalance'
 import { rewardsAreClaimable } from './Day'
-import { secondsInDay } from '../config'
+import { secondsInDay, cfgRewardRateAddress, cfgRewardRateDeploymentDate, fixed27 } from '../config'
 
 // add current pool's value to today's system value
 export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
@@ -147,6 +148,23 @@ function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): Big
   let firstRate = BigDecimal.fromString('0.0042')
   let secondRate = BigDecimal.fromString('0.0020')
   let thirdRate = BigDecimal.fromString('0.0010')
+
+  if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
+    let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+    let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
+
+    if (!investorRewardRateOption.reverted) {
+      let investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
+        fixed27.toBigDecimal()
+      )
+
+      log.info('setting system rewards rate from CfgRewardRate contract rewardsToDate {}, rewardRate {}', [
+        systemRewards.toDateRewardAggregateValue.toString(),
+        investorRewardRate.toString(),
+      ])
+      return investorRewardRate
+    }
+  }
 
   if (date.le(BigInt.fromI32(1623801600))) {
     log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
