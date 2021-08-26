@@ -153,6 +153,11 @@ function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): Big
     let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
     let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
 
+    log.info('trying to call CfgRewardRate contract at {}, reverted {}', [
+      cfgRewardRateAddress.toString(),
+      investorRewardRateOption.reverted ? 'true' : 'false',
+    ])
+
     if (!investorRewardRateOption.reverted) {
       let investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
         fixed27.toBigDecimal()

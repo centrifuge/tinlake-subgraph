@@ -72,6 +72,11 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
     let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
     let aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
 
+    log.info('trying to call CfgRewardRate contract for AO at {}, reverted {}', [
+      cfgRewardRateAddress.toString(),
+      aoRewardRateOption.reverted ? 'true' : 'false',
+    ])
+
     if (!aoRewardRateOption.reverted) {
       let aoRewardRate = BigDecimal.fromString(aoRewardRateOption.value.toString()).div(fixed27.toBigDecimal())
 
