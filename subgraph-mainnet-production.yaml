@@ -37,6 +37,8 @@ dataSources:
           file: ./abis/Shelf.json
         - name: Tranche
           file: ./abis/Tranche.json
+        - name: CfgRewardRate
+          file: ./abis/CfgRewardRate.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts

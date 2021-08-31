@@ -1,6 +1,7 @@
-import { BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log, Address } from '@graphprotocol/graph-ts'
+import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
-import { secondsInDay } from '../config'
+import { secondsInDay, cfgRewardRateAddress, cfgRewardRateDeploymentDate, fixed27 } from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
@@ -67,6 +68,25 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
   let secondRate = BigDecimal.fromString('0.0003')
   let thirdRate = BigDecimal.fromString('0.0002')
 
+  if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
+    let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+    let aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
+
+    log.info('trying to call CfgRewardRate contract for AO at {}, reverted {}', [
+      cfgRewardRateAddress.toString(),
+      aoRewardRateOption.reverted ? 'true' : 'false',
+    ])
+
+    if (!aoRewardRateOption.reverted) {
+      let aoRewardRate = BigDecimal.fromString(aoRewardRateOption.value.toString()).div(fixed27.toBigDecimal())
+
+      log.info('setting AO system rewards rate from CfgRewardRate contract rewardsToDate {}, rewardRate {}', [
+        systemRewards.toDateAORewardAggregateValue.toString(),
+        aoRewardRate.toString(),
+      ])
+      return aoRewardRate
+    }
+  }
   if (date.le(BigInt.fromI32(1623715200))) {
     log.info('setting AO system rewards rate aoRewardsToDate {}, aoRewardRate {}', [
       systemRewards.toDateAORewardAggregateValue.toString(),
