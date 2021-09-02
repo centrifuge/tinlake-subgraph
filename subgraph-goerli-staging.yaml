@@ -1,0 +1,255 @@
+specVersion: 0.0.2
+description: Tinlake Goerli Staging
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Block
+    network: goerli
+    source:
+      address: "0x6fdb74c1d6c84640b6f62e3ca95d04a8a4a849aa"
+      abi: Pile
+      startBlock: 5429877
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Reserve
+          file: ./abis/Reserve.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
+        - name: Tranche
+          file: ./abis/Tranche.json
+        - name: CfgRewardRate
+          file: ./abis/CfgRewardRate.json
+      blockHandlers:
+        - handler: handleBlock
+      file: ./src/mappings/Block.ts
+
+  # Proxy registry across pools
+  - kind: ethereum/contract
+    name: ProxyRegistry
+    network: goerli
+    source:
+      address: "0x5476103DAA1828bC7376C7A262635451f6467dF8"
+      abi: ProxyRegistry
+      startBlock: 5429877
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mappings/ProxyRegistry.ts
+
+  # Pool registry
+  - kind: ethereum/contract
+    name: PoolRegistry
+    network: goerli
+    source:
+      address: "0x8FE85CeAe6157C1dfcDD1c5ec99361c9722d97de"
+      abi: PoolRegistry
+      startBlock: 5429877
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: PoolRegistry
+          file: ./abis/PoolRegistry.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+      eventHandlers:
+        - event: PoolCreated(address,bool,string,string)
+          handler: handlePoolCreated
+        - event: PoolUpdated(address,bool,string,string)
+          handler: handlePoolUpdated
+      file: ./src/mappings/PoolRegistry.ts
+
+  # - kind: ethereum/contract
+  #   name: Claim
+  #   network: goerli
+  #   source: 
+  #     address: "0x297237e17F327f8e5C8dEd78b15761A7D513353b"
+  #     abi: TinlakeClaimRad
+  #     startBlock: 5429877
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.4
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - RewardLink
+  #     abis:
+  #       - name: TinlakeClaimRad
+  #         file: ./abis/TinlakeClaimRad.json
+  #     eventHandlers:
+  #       - event: Claimed(address,bytes32)
+  #         handler: handleClaimed
+  #     file: ./src/mappings/TinlakeClaimRad.ts
+
+templates:
+  - kind: ethereum/contract
+    name: Coordinator
+    network: goerli
+    source:
+      abi: Coordinator
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Coordinator
+          file: ./abis/Coordinator.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: executeEpoch()
+          handler: handleCoordinatorExecuteEpoch
+      file: ./src/mappings/Coordinator.ts
+  - kind: ethereum/contract
+    name: Assessor
+    network: goerli
+    source:
+      abi: Assessor
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+      abis:
+        - name: Assessor
+          file: ./abis/Assessor.json
+      callHandlers:
+        - function: file(bytes32,uint256)
+          handler: handleAssessorFile
+      file: ./src/mappings/Assessor.ts
+  - kind: ethereum/contract
+    name: Shelf
+    network: goerli
+    source:
+      abi: Shelf
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+        - name: SeniorTranche
+          file: ./abis/SeniorTranche.json
+        - name: Assessor
+          file: ./abis/Assessor.json
+        - name: NavFeed
+          file: ./abis/NavFeed.json
+      callHandlers:
+        - function: issue(address,uint256)
+          handler: handleShelfIssue
+        - function: close(uint256)
+          handler: handleShelfClose
+        - function: borrow(uint256,uint256)
+          handler: handleShelfBorrow
+        - function: repay(uint256,uint256)
+          handler: handleShelfRepay
+      file: ./src/mappings/Shelf.ts
+  - kind: ethereum/contract
+    name: NftFeed
+    network: goerli
+    source:
+      abi: NftFeed
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Loan
+      abis:
+        - name: NftFeed
+          file: ./abis/NftFeed.json
+        - name: Shelf
+          file: ./abis/Shelf.json
+        - name: Pile
+          file: ./abis/Pile.json
+      callHandlers:
+        - function: update(bytes32,uint256,uint256)
+          handler: handleNftFeedUpdate
+        - function: update(bytes32,uint256)
+          handler: handleNftFeedUpdate
+      file: ./src/mappings/NftFeed.ts
+  - kind: ethereum/contract
+    name: Token
+    network: goerli
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleERC20Transfer
+      file: ./src/mappings/ERC20.ts
+  - kind: ethereum/contract
+    name: Tranche
+    network: goerli
+    source:
+      abi: Tranche
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - TokenBalance
+      abis:
+        - name: Tranche
+          file: ./abis/Tranche.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      callHandlers:
+        - function: supplyOrder(address,uint256)
+          handler: handleSupplyOrder
+        - function: redeemOrder(address,uint256)
+          handler: handleRedeemOrder
+      file: ./src/mappings/Tranche.ts
