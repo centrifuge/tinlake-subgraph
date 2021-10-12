@@ -1,5 +1,5 @@
 import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
-import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
+import { CfgRewardRate } from '../../generated/Block/CfgRewardRate'
 import {
   DailyInvestorTokenBalance,
   Pool,

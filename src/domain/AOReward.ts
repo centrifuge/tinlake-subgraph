@@ -1,5 +1,5 @@
 import { BigInt, BigDecimal, log, Address } from '@graphprotocol/graph-ts'
-import { CfgRewardRate } from '../../generated/CfgRewardRate/CfgRewardRate'
+import { CfgRewardRate } from '../../generated/Block/CfgRewardRate'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
 import { secondsInDay, cfgRewardRateAddress, cfgRewardRateDeploymentDate, fixed27 } from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
