@@ -23,7 +23,7 @@ export function createDailySnapshot(block: ethereum.Block): void {
     let addresses = PoolAddresses.load(pool.id)
     log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
 
-    let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
+    let dailyPoolData = createDailyPoolData(pool, yesterday.id)
     setDailyPoolValues(pool, dailyPoolData)
 
     let juniorToken = loadOrCreateToken(addresses.juniorToken)
@@ -45,10 +45,14 @@ export function createDailySnapshot(block: ethereum.Block): void {
   resetActiveInvestments()
 }
 
-export function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
-  let dailyPoolData = new DailyPoolData(poolId.concat(yesterday))
+export function createDailyPoolData(pool: Pool, yesterday: string): DailyPoolData {
+  let dailyPoolData = new DailyPoolData(pool.id.concat(yesterday))
   dailyPoolData.day = yesterday
-  dailyPoolData.pool = poolId
+  dailyPoolData.pool = pool.id
+  dailyPoolData.juniorYield30Days = pool.juniorYield30Days
+  dailyPoolData.juniorYield90Days = pool.juniorYield90Days
+  dailyPoolData.seniorYield30Days = pool.seniorYield30Days
+  dailyPoolData.seniorYield90Days = pool.seniorYield90Days
   dailyPoolData.reserve = BigInt.fromI32(0)
   dailyPoolData.totalDebt = BigInt.fromI32(0)
   dailyPoolData.assetValue = BigInt.fromI32(0)
