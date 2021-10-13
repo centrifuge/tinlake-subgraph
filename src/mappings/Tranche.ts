@@ -1,6 +1,6 @@
 import { log, dataSource } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
-import { Account, PoolAddresses } from '../../generated/schema'
+import { Account, PoolAddresses, InvestorTransaction, Pool } from '../../generated/schema'
 import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
 import { calculateDisburse, loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { loadOrCreateToken } from '../domain/Token'
@@ -27,7 +27,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     return
   }
   if (Account.load(account) == null) {
-    createAccount(account)
+    account = createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)
   // ensure user is in token owners
@@ -38,6 +38,14 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
+
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex(););
+  investorTx.owner = Account.load(account);
+  investorTx.pool = Pool.load(poolId);
+  investorTx.timeStamp = call.transaction.timestamp;
+  investorTx.type = "SupplyOrder";
+  investorTx.currencyAmount = call.inputs.amount.toHex();
+  investorTx.save();
 }
 
 // redemptions shouldn't count towards balance that users get for rewards
@@ -73,4 +81,11 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex(););
+  investorTx.owner = Account.load(account);
+  investorTx.pool = Pool.load(poolId);
+  investorTx.timeStamp = call.transaction.timestamp;
+  investorTx.type = "RedeemOrder";
+  investorTx.currencyAmount = call.inputs.amount.toHex();
+  investorTx.save();
 }

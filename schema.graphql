@@ -300,3 +300,20 @@ type RewardLink @entity {
   """
   rewardsAccumulated: BigDecimal!
 }
+
+
+type InvestorTransaction @entity {
+  id: ID!
+  owner: Account!
+  pool: Pool!
+  timestamp: BigInt!
+  type: TransactionType!
+  currencyAmount: BigInt!
+}
+
+enum TransactionType {
+  SUPPLY_ORDER
+  REDEEM_ORDER
+  SUPPLY_FULFILLED
+  REDEEM_FULFILLED
+}
