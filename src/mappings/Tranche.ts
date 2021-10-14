@@ -43,7 +43,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
-  investorTx.type = "SupplyOrder";
+  investorTx.type = "SUPPLY_ORDER";
   investorTx.currencyAmount = call.inputs.newSupplyAmount;
   investorTx.save();
 }
@@ -85,7 +85,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
-  investorTx.type = "RedeemOrder";
+  investorTx.type = "REDEEM_ORDER";
   investorTx.currencyAmount = call.inputs.newRedeemAmount;
   investorTx.save();
 }
