@@ -39,12 +39,12 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex(););
-  investorTx.owner = Account.load(account);
-  investorTx.pool = Pool.load(poolId);
-  investorTx.timeStamp = call.transaction.timestamp;
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex());
+  investorTx.owner = account;
+  investorTx.pool = poolId;
+  investorTx.timestamp = call.block.timestamp;
   investorTx.type = "SupplyOrder";
-  investorTx.currencyAmount = call.inputs.amount.toHex();
+  investorTx.currencyAmount = call.inputs.newSupplyAmount;
   investorTx.save();
 }
 
@@ -81,11 +81,11 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex(););
-  investorTx.owner = Account.load(account);
-  investorTx.pool = Pool.load(poolId);
-  investorTx.timeStamp = call.transaction.timestamp;
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex());
+  investorTx.owner = account;
+  investorTx.pool = poolId;
+  investorTx.timestamp = call.block.timestamp;
   investorTx.type = "RedeemOrder";
-  investorTx.currencyAmount = call.inputs.amount.toHex();
+  investorTx.currencyAmount = call.inputs.newRedeemAmount;
   investorTx.save();
 }
