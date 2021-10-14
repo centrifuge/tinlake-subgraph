@@ -27,7 +27,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     return
   }
   if (Account.load(account) == null) {
-    account = createAccount(account)
+    createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)
   // ensure user is in token owners
