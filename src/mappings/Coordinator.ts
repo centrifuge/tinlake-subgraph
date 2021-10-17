@@ -52,8 +52,13 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
     : BigInt.fromI32(0)
 
   let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
-  let approximatedNav = navFeedContract.try_approximatedNAV()
-  pool.assetValue = !approximatedNav.reverted ? approximatedNav.value : BigInt.fromI32(0)
+  let approximatedNav = navFeedContract.try_approximatedNAV() // nav v1
+  let latestNAV = navFeedContract.try_latestNAV() // nav v2
+  pool.assetValue = !approximatedNav.reverted
+    ? approximatedNav.value
+    : !latestNAV.reverted
+    ? latestNAV.value
+    : BigInt.fromI32(0)
 
   let reserveContract = Reserve.bind(<Address>Address.fromHexString(addresses.reserve))
   let reserve = reserveContract.try_totalBalance()
