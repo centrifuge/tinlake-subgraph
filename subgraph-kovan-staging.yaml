@@ -252,4 +252,6 @@ templates:
           handler: handleSupplyOrder
         - function: redeemOrder(address,uint256)
           handler: handleRedeemOrder
+        - function: disburse(address,uint256)
+          handler: handleDisburse
       file: ./src/mappings/Tranche.ts

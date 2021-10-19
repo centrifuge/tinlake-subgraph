@@ -1,5 +1,5 @@
 import { log, dataSource } from '@graphprotocol/graph-ts'
-import { SupplyOrderCall, RedeemOrderCall } from '../../generated/templates/Tranche/Tranche'
+import { SupplyOrderCall, RedeemOrderCall, DisburseCall } from '../../generated/templates/Tranche/Tranche'
 import { Account, PoolAddresses, InvestorTransaction, Pool } from '../../generated/schema'
 import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
 import { calculateDisburse, loadOrCreateTokenBalance } from '../domain/TokenBalance'
@@ -87,5 +87,47 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "REDEEM_ORDER";
   investorTx.currencyAmount = call.inputs.newRedeemAmount;
+  investorTx.save();
+}
+
+export function handleDisburse(call: DisburseCall): void {
+  let tranche = call.to.toHex()
+  let poolId = dataSource.context().getString('id')
+  let account = call.inputs.usr.toHex()
+  log.debug('handle disburse for pool {}, tranche {}, from account {}', [
+    poolId.toString(),
+    tranche.toString(),
+    account,
+  ])
+  let poolAddresses = PoolAddresses.load(poolId)
+  let token = poolAddresses.juniorToken
+  if (poolAddresses.seniorTranche == tranche) {
+    token = poolAddresses.seniorToken
+  }
+
+  // protection from adding system account to internal tracking
+  if (isSystemAccount(poolId, account)) {
+    return
+  }
+  if (Account.load(account) == null) {
+    createAccount(account)
+  }
+  ensureSavedInGlobalAccounts(account)
+
+  // ensure user is in token owners
+  let tk = loadOrCreateToken(token)
+  tk.owners = pushUnique(tk.owners, account)
+  tk.save()
+
+  let tb = loadOrCreateTokenBalance(account, token)
+  calculateDisburse(tb, <PoolAddresses>poolAddresses)
+  tb.save()
+
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex());
+  investorTx.owner = account;
+  investorTx.pool = poolId;
+  investorTx.timestamp = call.block.timestamp;
+  investorTx.type = "REDEEM_FULFILLED";
+  investorTx.currencyAmount = call.outputs.payoutCurrencyAmount;
   investorTx.save();
 }
