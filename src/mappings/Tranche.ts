@@ -127,6 +127,9 @@ export function handleDisburse(call: DisburseCall): void {
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
+  if (call.outputs.payoutCurrencyAmount > (BigInt(0))) {
+
+  }
   investorTx.type = "REDEEM_FULFILLED";
   investorTx.currencyAmount = call.outputs.payoutCurrencyAmount;
   investorTx.save();
