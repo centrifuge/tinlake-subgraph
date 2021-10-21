@@ -2,7 +2,7 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction } from '../../generated/schema'
 import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
@@ -15,6 +15,18 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
 
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex());
+  investorTx.owner = account;
+  investorTx.pool = poolId;
+  investorTx.timestamp = call.block.timestamp;
+  if (call.outputs.payoutCurrencyAmount) {
+    investorTx.type = "REDEEM_FULFILLED";
+    investorTx.currencyAmount = call.outputs.payoutCurrencyAmount;
+  } else if (call.outputs.payoutTokenAmount){
+    investorTx.type = "SUPPLY_FULFILLED";
+    investorTx.currencyAmount = call.outputs.payoutTokenAmount;
+  }
+  investorTx.save();
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
 }
