@@ -58,6 +58,10 @@ type DailyPoolData @entity {
   seniorTokenPrice: BigInt! # assessor
   juniorTokenPrice: BigInt! # assessor
   currentJuniorRatio: BigInt!
+  juniorYield30Days: BigInt
+  seniorYield30Days: BigInt
+  juniorYield90Days: BigInt
+  seniorYield90Days: BigInt
 }
 
 type Loan @entity {
@@ -79,6 +83,7 @@ type Loan @entity {
   repaysAggregatedAmount: BigInt!
   maturityDate: BigInt
   financingDate: BigInt
+  riskGroup: BigInt
 }
 
 type Proxy @entity {

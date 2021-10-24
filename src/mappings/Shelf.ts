@@ -66,6 +66,9 @@ export function handleShelfIssue(call: IssueCall): void {
     return
   }
 
+  // Add risk group
+  loan.riskGroup = riskGroup.value;
+
   // get maturity date
   let maturityDate = navFeed.try_maturityDate(nftHash.value)
   if (maturityDate.reverted) {
