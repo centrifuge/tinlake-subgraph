@@ -2,31 +2,49 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, PoolInvestor, TokenBalance } from '../../generated/schema'
+import { Tranche } from '../../generated/templates/Tranche/Tranche'
 import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
 import { getAllPools } from '../domain/PoolRegistry'
+import { loadOrCreateTokenBalance, calculateDisburse } from '../domain/TokenBalance'
+import { addToDailyAggregate } from '../domain/DailyPoolData'
 import { timestampToDate } from '../util/date'
 import { secondsInDay, zeroAddress } from '../config'
-import { addToDailyAggregate } from '../domain/DailyPoolData'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
+  const poolAddresses = new PoolAddresses(poolId);
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex());
-  investorTx.owner = account;
-  investorTx.pool = poolId;
-  investorTx.timestamp = call.block.timestamp;
-  if (call.outputs.payoutCurrencyAmount) {
-    investorTx.type = "REDEEM_FULFILLED";
-    investorTx.currencyAmount = call.outputs.payoutCurrencyAmount;
-  } else if (call.outputs.payoutTokenAmount){
-    investorTx.type = "SUPPLY_FULFILLED";
-    investorTx.currencyAmount = call.outputs.payoutTokenAmount;
-  }
-  investorTx.save();
+  let investors = PoolInvestor.load(poolId);
+  investors?.accounts.map(address => {
+    const tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
+    if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
+      calculateDisburse(tb, poolAddresses);
+
+      if (tb.supplyAmount) {
+        let investorSupplyTx = new InvestorTransaction(call.transaction.hash.toHex());
+        investorSupplyTx.owner = address;
+        investorSupplyTx.pool = poolId;
+        investorSupplyTx.timestamp = call.block.timestamp;
+        investorSupplyTx.type = "SUPPLY_FULFILLED";
+        investorSupplyTx.currencyAmount = tb.supplyAmount;
+        investorSupplyTx.save();
+      }
+      
+      if (tb.redeemAmount) {
+        let investorRedeemTx = new InvestorTransaction(call.transaction.hash.toHex());
+        investorRedeemTx.owner = address;
+        investorRedeemTx.pool = poolId;
+        investorRedeemTx.timestamp = call.block.timestamp;
+        investorRedeemTx.type = "REDEEM_FULFILLED";
+        investorRedeemTx.currencyAmount = tb.redeemAmount;
+        investorRedeemTx.save();
+      }
+    }
+  })
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
 }
