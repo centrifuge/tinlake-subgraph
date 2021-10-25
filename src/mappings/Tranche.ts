@@ -45,6 +45,8 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "SUPPLY_ORDER";
   investorTx.currencyAmount = call.inputs.newSupplyAmount;
+  investorTx.gasUsed = call.transaction.gasUsed;
+  investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.save();
 }
 
@@ -87,5 +89,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "REDEEM_ORDER";
   investorTx.currencyAmount = call.inputs.newRedeemAmount;
+  investorTx.gasUsed = call.transaction.gasUsed;
+  investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.save();
 }

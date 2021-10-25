@@ -309,6 +309,8 @@ type InvestorTransaction @entity {
   timestamp: BigInt!
   type: TransactionType!
   currencyAmount: BigInt!
+  gasPrice: BigInt!
+  gasUsed: BigInt!
 }
 
 enum TransactionType {

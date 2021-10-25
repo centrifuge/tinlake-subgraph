@@ -31,6 +31,8 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         investorSupplyTx.timestamp = call.block.timestamp;
         investorSupplyTx.type = "SUPPLY_FULFILLED";
         investorSupplyTx.currencyAmount = tb.supplyAmount;
+        investorSupplyTx.gasUsed = call.transaction.gasUsed;
+        investorSupplyTx.gasPrice = call.transaction.gasPrice;
         investorSupplyTx.save();
       }
       
@@ -41,6 +43,8 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         investorRedeemTx.timestamp = call.block.timestamp;
         investorRedeemTx.type = "REDEEM_FULFILLED";
         investorRedeemTx.currencyAmount = tb.redeemAmount;
+        investorRedeemTx.gasUsed = call.transaction.gasUsed;
+        investorRedeemTx.gasPrice = call.transaction.gasPrice;
         investorRedeemTx.save();
       }
     }
