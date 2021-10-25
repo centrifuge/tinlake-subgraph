@@ -16,36 +16,39 @@ import { secondsInDay, zeroAddress } from '../config'
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
-  const poolAddresses = new PoolAddresses(poolId);
-
   let investors = PoolInvestor.load(poolId);
-  investors?.accounts.map(address => {
-    const tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
-    if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
-      calculateDisburse(tb, poolAddresses);
 
-      if (tb.supplyAmount) {
-        let investorSupplyTx = new InvestorTransaction(call.transaction.hash.toHex());
-        investorSupplyTx.owner = address;
-        investorSupplyTx.pool = poolId;
-        investorSupplyTx.timestamp = call.block.timestamp;
-        investorSupplyTx.type = "SUPPLY_FULFILLED";
-        investorSupplyTx.currencyAmount = tb.supplyAmount;
-        investorSupplyTx.gasUsed = call.transaction.gasUsed;
-        investorSupplyTx.gasPrice = call.transaction.gasPrice;
-        investorSupplyTx.save();
-      }
-      
-      if (tb.redeemAmount) {
-        let investorRedeemTx = new InvestorTransaction(call.transaction.hash.toHex());
-        investorRedeemTx.owner = address;
-        investorRedeemTx.pool = poolId;
-        investorRedeemTx.timestamp = call.block.timestamp;
-        investorRedeemTx.type = "REDEEM_FULFILLED";
-        investorRedeemTx.currencyAmount = tb.redeemAmount;
-        investorRedeemTx.gasUsed = call.transaction.gasUsed;
-        investorRedeemTx.gasPrice = call.transaction.gasPrice;
-        investorRedeemTx.save();
+  investors.accounts.forEach(address => {
+    let poolId = dataSource.context().getString('id')
+    let poolAddresses = PoolAddresses.load(poolId);
+    if (poolAddresses) {
+      let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
+      if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
+        calculateDisburse(tb, poolAddresses as PoolAddresses);
+
+        if (tb.supplyAmount) {
+          let investorSupplyTx = new InvestorTransaction(call.transaction.hash.toHex());
+          investorSupplyTx.owner = address;
+          investorSupplyTx.pool = poolId;
+          investorSupplyTx.timestamp = call.block.timestamp;
+          investorSupplyTx.type = "SUPPLY_FULFILLED";
+          investorSupplyTx.currencyAmount = tb.supplyAmount;
+          investorSupplyTx.gasUsed = call.transaction.gasUsed;
+          investorSupplyTx.gasPrice = call.transaction.gasPrice;
+          investorSupplyTx.save();
+        }
+        
+        if (tb.redeemAmount) {
+          let investorRedeemTx = new InvestorTransaction(call.transaction.hash.toHex());
+          investorRedeemTx.owner = address;
+          investorRedeemTx.pool = poolId;
+          investorRedeemTx.timestamp = call.block.timestamp;
+          investorRedeemTx.type = "REDEEM_FULFILLED";
+          investorRedeemTx.currencyAmount = tb.redeemAmount;
+          investorRedeemTx.gasUsed = call.transaction.gasUsed;
+          investorRedeemTx.gasPrice = call.transaction.gasPrice;
+          investorRedeemTx.save();
+        }
       }
     }
   })
