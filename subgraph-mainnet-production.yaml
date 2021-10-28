@@ -133,6 +133,8 @@ templates:
           file: ./abis/Assessor.json
         - name: Pile
           file: ./abis/Pile.json
+        - name: Tranche
+          file: ./abis/Tranche.json
       callHandlers:
         - function: executeEpoch()
           handler: handleCoordinatorExecuteEpoch
