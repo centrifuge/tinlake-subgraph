@@ -16,17 +16,19 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toString()])
   let investors = PoolInvestor.load(poolId);
+  let txHash = call.transaction.hash.toHex();
 
-  investors.accounts.forEach(address => {
-    let poolId = dataSource.context().getString('id')
+  for(let i = 0; i < investors.accounts.length; i++) {
+    let accounts = investors.accounts;
+    let address = accounts[i];
     let poolAddresses = PoolAddresses.load(poolId);
     if (poolAddresses) {
       let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
       if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
-
-        if (tb.supplyAmount) {
-          let investorSupplyTx = new InvestorTransaction(call.transaction.hash.toHex());
+        
+        if (tb.supplyAmount > new BigInt(0)) {
+          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SUPPLY_FULFILLED'));
           investorSupplyTx.owner = address;
           investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
@@ -37,8 +39,8 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.save();
         }
         
-        if (tb.redeemAmount) {
-          let investorRedeemTx = new InvestorTransaction(call.transaction.hash.toHex());
+        if (tb.redeemAmount > new BigInt(0)) {
+          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('REDEEM_FULFILLED'));
           investorRedeemTx.owner = address;
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
@@ -50,7 +52,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         }
       }
     }
-  })
+  }
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
 }
