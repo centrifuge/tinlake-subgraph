@@ -96,6 +96,7 @@ type Account @entity {
   dailyTokenBalances: [DailyInvestorTokenBalance!] @derivedFrom(field: "account")
   # used for reward calculations to determine if an investor has an active investment
   rewardCalcBitFlip: Boolean!
+  hasLinkedCfgAccount: Boolean!
 }
 
 type ERC20Transfer @entity {
