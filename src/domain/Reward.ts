@@ -3,6 +3,7 @@ import { Address, BigInt, BigDecimal, log, ethereum } from '@graphprotocol/graph
 import { CfgRewardRate } from '../../generated/Block/CfgRewardRate'
 import { CfgSplitRewardRate } from '../../generated/Block/CfgSplitRewardRate'
 import {
+  Account,
   DailyInvestorTokenBalance,
   Pool,
   PoolAddresses,
@@ -106,6 +107,11 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
     if (!!ditb) {
       let reward = loadOrCreateRewardBalance(ditb.account)
+
+      let accountEntity = Account.load(account)
+      if (accountEntity != null && accountEntity.hasLinkedCfgAccount == false) {
+        continue
+      }
 
       updateInvestorRewardsByToken(
         <PoolAddresses>tokenAddresses,
