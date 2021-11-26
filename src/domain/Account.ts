@@ -6,6 +6,7 @@ import { pushUnique } from '../util/array'
 export function createAccount(address: string): Account {
   let account = new Account(address)
   account.rewardCalcBitFlip = false
+  account.hasLinkedCfgAccount = false
   account.save()
   return account
 }
