@@ -303,12 +303,13 @@ type RewardLink @entity {
 
 
 type InvestorTransaction @entity {
-  id: ID!
+  id: ID! #TX hash + owner address + tranche + transaction type enum
   owner: Account!
   pool: Pool!
   timestamp: BigInt!
   type: TransactionType!
   currencyAmount: BigInt!
+  tokenPrice: BigInt!
   gasPrice: BigInt!
   gasUsed: BigInt!
 }
