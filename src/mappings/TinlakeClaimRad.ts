@@ -23,6 +23,7 @@ export function handleClaimed(claimed: Claimed): void {
   let account = Account.load(sender);
   if (account != null) {
     account.hasLinkedCfgAccount = true;
+    account.save();
   }
   // update both investor and AO reward balances. An eth address could be used for both, so update both.
 
