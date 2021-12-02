@@ -16,11 +16,17 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     tranche.toString(),
     account,
   ])
+  let pool = Pool.load(poolId);
   let poolAddresses = PoolAddresses.load(poolId)
   let token = poolAddresses.juniorToken
+  let trancheString = "JUNIOR";
+  let tokenPrice = pool.juniorTokenPrice;
   if (poolAddresses.seniorTranche == tranche) {
     token = poolAddresses.seniorToken
+    trancheString = "SENIOR";
+    tokenPrice = pool.seniorTokenPrice;
   }
+
 
   // protection from adding system account to internal tracking
   if (isSystemAccount(poolId, account)) {
@@ -39,14 +45,16 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat("SUPPLY_ORDER"));
+  
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("SUPPLY_ORDER"));
   investorTx.owner = account;
-  investorTx.pool = poolId;
+  investorTx.pool = pool;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "SUPPLY_ORDER";
   investorTx.currencyAmount = call.inputs.newSupplyAmount;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
+  investorTx.tokenPrice = tokenPrice;
   investorTx.save();
 }
 
@@ -60,10 +68,15 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
     tranche.toString(),
     account,
   ])
+  let pool = Pool.load(poolId);
   let poolAddresses = PoolAddresses.load(poolId)
   let token = poolAddresses.juniorToken
+  let trancheString = "JUNIOR";
+  let tokenPrice = pool.juniorTokenPrice;
   if (poolAddresses.seniorTranche == tranche) {
     token = poolAddresses.seniorToken
+    trancheString = "SENIOR";
+    tokenPrice = pool.seniorTokenPrice;
   }
 
   // protection from adding system account to internal tracking
@@ -83,7 +96,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat("REDEEM_ORDER"));
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("REDEEM_ORDER"));
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
@@ -91,5 +104,6 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.currencyAmount = call.inputs.newRedeemAmount;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
+  investorTx.tokenPrice = tokenPrice;
   investorTx.save();
 }
