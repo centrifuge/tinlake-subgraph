@@ -38,6 +38,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
+          investorSupplyTx.newBalance = tb.balanceAmount;
           investorSupplyTx.save();
         }
         
@@ -51,6 +52,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
+          investorRedeemTx.newBalance = tb.balanceAmount;
           investorRedeemTx.save();
         }
       }

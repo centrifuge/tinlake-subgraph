@@ -309,6 +309,7 @@ type InvestorTransaction @entity {
   timestamp: BigInt!
   type: TransactionType!
   currencyAmount: BigInt!
+  newBalance: BigInt!
   tokenPrice: BigInt!
   gasPrice: BigInt!
   gasUsed: BigInt!
