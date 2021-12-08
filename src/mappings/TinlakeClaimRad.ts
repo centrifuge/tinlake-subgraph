@@ -8,6 +8,7 @@ import { timestampToDate } from '../util/date'
 import { secondsInDay } from '../config'
 import { rewardsAreClaimable } from '../domain/Day'
 import { Account, PoolsByAORewardRecipient } from '../../generated/schema'
+import { loadOrCreateAccount } from '../domain/Account'
 
 export function handleClaimed(claimed: Claimed): void {
   let date = timestampToDate(claimed.block.timestamp)
@@ -20,11 +21,9 @@ export function handleClaimed(claimed: Claimed): void {
 
   let link = loadOrCreateRewardLink(sender, centAddress)
 
-  let account = Account.load(sender);
-  if (account != null) {
-    account.hasLinkedCfgAccount = true;
-    account.save();
-  }
+  let account = loadOrCreateAccount(sender)
+  account.hasLinkedCfgAccount = true;
+  account.save();
   // update both investor and AO reward balances. An eth address could be used for both, so update both.
 
   // update investor reward balance

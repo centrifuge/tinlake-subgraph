@@ -11,6 +11,17 @@ export function createAccount(address: string): Account {
   return account
 }
 
+export function loadOrCreateAccount(address: string): Account {
+  let account = Account.load(address);
+  if (account == null) {
+    account = new Account(address)
+    account.rewardCalcBitFlip = false
+    account.hasLinkedCfgAccount = false
+    account.save()
+  }
+  return <Account>account
+}
+
 export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   let ids = GlobalAccountId.load(id)
   if (!ids) {
