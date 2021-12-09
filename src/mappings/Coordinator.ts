@@ -2,7 +2,7 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, PoolInvestor, Token, TokenBalance, TransactionType, Tranche } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, PoolInvestor, Token, TokenBalance } from '../../generated/schema'
 import { ExecuteEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
@@ -27,62 +27,66 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
       let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
       if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
+        tb.save()
         
         if (tb.supplyAmount > new BigInt(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('SUPPLY_FULFILLED'));
           investorSupplyTx.owner = address;
-          investorSupplyTx.pool = pool;
+          investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
           investorSupplyTx.type = "SUPPLY_FULFILLED";
           investorSupplyTx.currencyAmount = tb.supplyAmount;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
-          investorSupplyTx.newBalance = tb.balanceAmount;
+          investorSupplyTx.newBalance = tb.balanceValue;
           investorSupplyTx.save();
         }
         
         if (tb.redeemAmount > new BigInt(0)) {
           let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_FULFILLED'));
           investorRedeemTx.owner = address;
-          investorRedeemTx.pool = pool;
+          investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
           investorRedeemTx.currencyAmount = tb.redeemAmount;
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
-          investorRedeemTx.newBalance = tb.balanceAmount;
+          investorRedeemTx.newBalance = tb.balanceValue;
           investorRedeemTx.save();
         }
       }
       tb = loadOrCreateTokenBalance(address, poolAddresses.juniorToken);
       if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
+        tb.save()
         
         if (tb.supplyAmount > new BigInt(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('SUPPLY_FULFILLED'));
           investorSupplyTx.owner = address;
-          investorSupplyTx.pool = pool;
+          investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
           investorSupplyTx.type = "SUPPLY_FULFILLED";
           investorSupplyTx.currencyAmount = tb.supplyAmount;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
+          investorSupplyTx.newBalance = tb.balanceValue;
           investorSupplyTx.save();
         }
         
         if (tb.redeemAmount > new BigInt(0)) {
           let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('REDEEM_FULFILLED'));
           investorRedeemTx.owner = address;
-          investorRedeemTx.pool = pool;
+          investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
           investorRedeemTx.currencyAmount = tb.redeemAmount;
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
+          investorRedeemTx.newBalance = tb.balanceValue;
           investorRedeemTx.save();
         }
       }

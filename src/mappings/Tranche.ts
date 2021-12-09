@@ -44,17 +44,17 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
-
   
   let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("SUPPLY_ORDER"));
   investorTx.owner = account;
-  investorTx.pool = pool;
+  investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "SUPPLY_ORDER";
   investorTx.currencyAmount = call.inputs.newSupplyAmount;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
+  investorTx.newBalance = tb.balanceValue;
   investorTx.save();
 }
 
@@ -96,6 +96,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
+  
   let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("REDEEM_ORDER"));
   investorTx.owner = account;
   investorTx.pool = poolId;
@@ -105,5 +106,6 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
+  investorTx.newBalance = tb.balanceValue;
   investorTx.save();
 }
