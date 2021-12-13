@@ -29,7 +29,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
         tb.save()
         
-        if (tb.supplyAmount > new BigInt(0)) {
+        if (tb.supplyAmount > BigInt.fromI32(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('SUPPLY_FULFILLED'));
           investorSupplyTx.owner = address;
           investorSupplyTx.pool = poolId;
@@ -43,7 +43,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.save();
         }
         
-        if (tb.redeemAmount > new BigInt(0)) {
+        if (tb.redeemAmount > BigInt.fromI32(0)) {
           let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_FULFILLED'));
           investorRedeemTx.owner = address;
           investorRedeemTx.pool = poolId;

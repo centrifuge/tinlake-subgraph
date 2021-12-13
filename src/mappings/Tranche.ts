@@ -1,4 +1,4 @@
-import { log, dataSource } from '@graphprotocol/graph-ts'
+import { log, BigInt, dataSource } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall, DisburseCall } from '../../generated/templates/Tranche/Tranche'
 import { Account, PoolAddresses, InvestorTransaction, Pool } from '../../generated/schema'
 import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
@@ -45,11 +45,16 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
   
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("SUPPLY_ORDER"));
+  let type = "SUPPLY_ORDER";
+  if (call.inputs.newSupplyAmount == BigInt.fromI32(0)) {
+    type = "SUPPLY_CANCELLED";
+  }
+
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type));
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
-  investorTx.type = "SUPPLY_ORDER";
+  investorTx.type = type;
   investorTx.currencyAmount = call.inputs.newSupplyAmount;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
@@ -97,6 +102,11 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
   
+  let type = "REDEEM_ORDER";
+  if (call.inputs.newRedeemAmount == BigInt.fromI32(0)) {
+    type = "REDEEM_CANCELLED";
+  }
+
   let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("REDEEM_ORDER"));
   investorTx.owner = account;
   investorTx.pool = poolId;
