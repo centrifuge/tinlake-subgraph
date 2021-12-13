@@ -5,6 +5,7 @@ import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../
 import { calculateDisburse, loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { loadOrCreateToken } from '../domain/Token'
 import { pushUnique } from '../util/array'
+import { fixed27 } from '../config'
 
 // the supply order is the first contact an investor has with tinlake
 export function handleSupplyOrder(call: SupplyOrderCall): void {
@@ -59,7 +60,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
-  investorTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
+  investorTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
 }
@@ -113,11 +114,11 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = "REDEEM_ORDER";
-  investorTx.currencyAmount = BigInt.fromI32(call.inputs.newRedeemAmount.toI32() * tokenPrice.toI32() / 10**27);
+  investorTx.currencyAmount = call.inputs.newRedeemAmount.times(tokenPrice.div(fixed27));
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
-  investorTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * tokenPrice.toI32() / 10**27);
+  investorTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(tokenPrice.div(fixed27)));
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
 }

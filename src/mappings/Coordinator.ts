@@ -10,7 +10,7 @@ import { getAllPools } from '../domain/PoolRegistry'
 import { loadOrCreateTokenBalance, calculateDisburse } from '../domain/TokenBalance'
 import { addToDailyAggregate } from '../domain/DailyPoolData'
 import { timestampToDate } from '../util/date'
-import { secondsInDay, zeroAddress } from '../config'
+import { fixed27, secondsInDay, zeroAddress } from '../config'
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
@@ -39,7 +39,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
-          investorSupplyTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
+          investorSupplyTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
@@ -50,11 +50,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
-          investorRedeemTx.currencyAmount = BigInt.fromI32(tb.redeemAmount.toI32() * pool.seniorTokenPrice.toI32() / 10**27);
+          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.seniorTokenPrice).div(fixed27);
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
-          investorRedeemTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * pool.seniorTokenPrice.toI32() / 10**27);
+          investorRedeemTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(pool.seniorTokenPrice.div(fixed27)));
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
@@ -74,7 +74,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
-          investorSupplyTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
+          investorSupplyTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
@@ -85,11 +85,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
-          investorRedeemTx.currencyAmount = BigInt.fromI32(tb.redeemAmount.toI32() * pool.juniorTokenPrice.toI32() / 10**27);
+          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.juniorTokenPrice.div(fixed27));
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
-          investorRedeemTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * pool.juniorTokenPrice.toI32() / 10**27);
+          investorRedeemTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(pool.juniorTokenPrice.div(fixed27)));
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
