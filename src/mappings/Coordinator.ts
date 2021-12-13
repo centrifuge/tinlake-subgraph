@@ -28,7 +28,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
       if (!!tb.pendingSupplyCurrency || !!tb.pendingRedeemToken) {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
         tb.save()
-        
+
         if (tb.supplyAmount > BigInt.fromI32(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('SUPPLY_FULFILLED'));
           investorSupplyTx.owner = address;
@@ -40,6 +40,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
           investorSupplyTx.newBalance = tb.balanceValue;
+          investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
         
@@ -54,6 +55,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
           investorRedeemTx.newBalance = tb.balanceValue;
+          investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
       }
@@ -73,6 +75,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
           investorSupplyTx.newBalance = tb.balanceValue;
+          investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
         
@@ -87,6 +90,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
           investorRedeemTx.newBalance = tb.balanceValue;
+          investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
       }

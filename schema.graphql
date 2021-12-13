@@ -304,6 +304,7 @@ type RewardLink @entity {
 
 type InvestorTransaction @entity {
   id: ID! #TX hash + owner address + tranche + transaction type enum
+  transaction: String! # txhash
   owner: Account!
   pool: Pool!
   timestamp: BigInt!
