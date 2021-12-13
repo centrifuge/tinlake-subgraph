@@ -50,7 +50,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
-          investorRedeemTx.currencyAmount = tb.redeemAmount;
+          investorRedeemTx.currencyAmount = BigInt.fromI32(tb.redeemAmount.toI32() * pool.seniorTokenPrice.toI32() / 10**27);
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
@@ -85,7 +85,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_FULFILLED";
-          investorRedeemTx.currencyAmount = tb.redeemAmount;
+          investorRedeemTx.currencyAmount = BigInt.fromI32(tb.redeemAmount.toI32() * pool.juniorTokenPrice.toI32() / 10**27);
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
