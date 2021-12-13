@@ -59,7 +59,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
-  investorTx.newBalance = tb.balanceValue;
+  investorTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
 }
@@ -117,7 +117,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
-  investorTx.newBalance = tb.balanceValue;
+  investorTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * tokenPrice.toI32() / 10**27);
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
 }

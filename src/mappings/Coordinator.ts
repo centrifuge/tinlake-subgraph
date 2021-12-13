@@ -39,7 +39,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
-          investorSupplyTx.newBalance = tb.balanceValue;
+          investorSupplyTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
@@ -54,7 +54,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
-          investorRedeemTx.newBalance = tb.balanceValue;
+          investorRedeemTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * pool.seniorTokenPrice.toI32() / 10**27);
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
@@ -74,7 +74,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
-          investorSupplyTx.newBalance = tb.balanceValue;
+          investorSupplyTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingSupplyCurrency.toI32());
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
         }
@@ -89,7 +89,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
-          investorRedeemTx.newBalance = tb.balanceValue;
+          investorRedeemTx.newBalance = BigInt.fromI32(tb.balanceValue.toI32() + tb.pendingRedeemToken.toI32() * pool.juniorTokenPrice.toI32() / 10**27);
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
         }
