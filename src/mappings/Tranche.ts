@@ -113,7 +113,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
-  investorTx.type = "REDEEM_ORDER";
+  investorTx.type = type;
   investorTx.currencyAmount = call.inputs.newRedeemAmount.times(tokenPrice.div(fixed27));
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
