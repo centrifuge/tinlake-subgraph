@@ -30,11 +30,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         tb.save()
 
         if (tb.supplyAmount > BigInt.fromI32(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('SUPPLY_FULFILLED'));
+          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('INVEST_EXECUTION'));
           investorSupplyTx.owner = address;
           investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "SUPPLY_FULFILLED";
+          investorSupplyTx.type = "INVEST_EXECUTION";
           investorSupplyTx.currencyAmount = tb.supplyAmount;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
@@ -45,11 +45,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         }
         
         if (tb.redeemAmount > BigInt.fromI32(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_FULFILLED'));
+          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_EXECUTION'));
           investorRedeemTx.owner = address;
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_FULFILLED";
+          investorRedeemTx.type = "REDEEM_EXECUTION";
           investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.seniorTokenPrice).div(fixed27);
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
@@ -65,11 +65,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         tb.save()
         
         if (tb.supplyAmount > new BigInt(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('SUPPLY_FULFILLED'));
+          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('INVEST_EXECUTION'));
           investorSupplyTx.owner = address;
           investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "SUPPLY_FULFILLED";
+          investorSupplyTx.type = "INVEST_EXECUTION";
           investorSupplyTx.currencyAmount = tb.supplyAmount;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
@@ -80,11 +80,11 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         }
         
         if (tb.redeemAmount > new BigInt(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('REDEEM_FULFILLED'));
+          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('REDEEM_EXECUTION'));
           investorRedeemTx.owner = address;
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_FULFILLED";
+          investorRedeemTx.type = "REDEEM_EXECUTION";
           investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.juniorTokenPrice.div(fixed27));
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;

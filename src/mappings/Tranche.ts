@@ -46,9 +46,9 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
   tb.save()
   
-  let type = "SUPPLY_ORDER";
+  let type = "INVEST_ORDER";
   if (call.inputs.newSupplyAmount == BigInt.fromI32(0)) {
-    type = "SUPPLY_CANCELLED";
+    type = "INVEST_CANCEL";
   }
 
   let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type));
@@ -106,10 +106,10 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   
   let type = "REDEEM_ORDER";
   if (call.inputs.newRedeemAmount == BigInt.fromI32(0)) {
-    type = "REDEEM_CANCELLED";
+    type = "REDEEM_CANCEL";
   }
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat("REDEEM_ORDER"));
+  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type));
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
