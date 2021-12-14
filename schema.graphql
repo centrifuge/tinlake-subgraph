@@ -307,6 +307,7 @@ type InvestorTransaction @entity {
   transaction: String! # txhash
   owner: Account!
   pool: Pool!
+  symbol: String!
   timestamp: BigInt!
   type: TransactionType!
   currencyAmount: BigInt!

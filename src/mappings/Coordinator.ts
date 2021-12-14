@@ -29,6 +29,9 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
         tb.save()
 
+        let token = tb.token;
+        let symbol = Token.load(token) ? Token.load(token).symbol : "-";
+
         if (tb.supplyAmount > BigInt.fromI32(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('INVEST_EXECUTION'));
           investorSupplyTx.owner = address;
@@ -39,6 +42,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
+          investorSupplyTx.symbol = symbol;
           investorSupplyTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
@@ -54,6 +58,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
+          investorRedeemTx.symbol = symbol;
           investorRedeemTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(pool.seniorTokenPrice.div(fixed27)));
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
@@ -64,6 +69,9 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
         calculateDisburse(tb, poolAddresses as PoolAddresses);
         tb.save()
         
+        let token = tb.token;
+        let symbol = Token.load(token) ? Token.load(token).symbol : "-";
+
         if (tb.supplyAmount > new BigInt(0)) {
           let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('INVEST_EXECUTION'));
           investorSupplyTx.owner = address;
@@ -74,6 +82,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
+          investorSupplyTx.symbol = symbol;
           investorSupplyTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
           investorSupplyTx.transaction = txHash;
           investorSupplyTx.save();
@@ -89,6 +98,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
+          investorRedeemTx.symbol = symbol;
           investorRedeemTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(pool.juniorTokenPrice.div(fixed27)));
           investorRedeemTx.transaction = txHash;
           investorRedeemTx.save();
