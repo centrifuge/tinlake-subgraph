@@ -139,6 +139,8 @@ templates:
       callHandlers:
         - function: executeEpoch()
           handler: handleCoordinatorExecuteEpoch
+        - function: closeEpoch()
+          handler: handleCoordinatorCloseEpoch
       file: ./src/mappings/Coordinator.ts
   - kind: ethereum/contract
     name: Assessor
