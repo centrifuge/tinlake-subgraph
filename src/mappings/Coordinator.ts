@@ -36,7 +36,7 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
           investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
           investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyAmount;
+          investorSupplyTx.currencyAmount = tb.supplyValue;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
@@ -52,7 +52,7 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.seniorTokenPrice).div(fixed27);
+          investorRedeemTx.currencyAmount = tb.redeemAmount;
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
@@ -76,7 +76,7 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
           investorSupplyTx.pool = poolId;
           investorSupplyTx.timestamp = call.block.timestamp;
           investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyAmount;
+          investorSupplyTx.currencyAmount = tb.supplyValue;
           investorSupplyTx.gasUsed = call.transaction.gasUsed;
           investorSupplyTx.gasPrice = call.transaction.gasPrice;
           investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
@@ -92,7 +92,7 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
           investorRedeemTx.pool = poolId;
           investorRedeemTx.timestamp = call.block.timestamp;
           investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.juniorTokenPrice.div(fixed27));
+          investorRedeemTx.currencyAmount = tb.redeemAmount;
           investorRedeemTx.gasUsed = call.transaction.gasUsed;
           investorRedeemTx.gasPrice = call.transaction.gasPrice;
           investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
