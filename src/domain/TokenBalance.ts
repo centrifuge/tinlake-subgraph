@@ -12,6 +12,7 @@ import {
 import { fixed27 } from '../config'
 import { createAccount, ensureSavedInGlobalAccounts } from './Account'
 import { pushUnique } from '../util/array'
+import { loadOrCreateToken } from './Token'
 
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
   let tb = TokenBalance.load(owner.concat(tokenAddress))
@@ -111,7 +112,8 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
       tb.redeemAmount.toString(),
     ]
   )
-  tb.totalAmount = tb.balanceAmount.plus(tb.supplyAmount)
+  let token = loadOrCreateToken(tb.token);
+  updateTokenBalanceValues(tb, token);
   tb.save()
 }
 
