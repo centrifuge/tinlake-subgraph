@@ -12,9 +12,7 @@ import { addToDailyAggregate } from '../domain/DailyPoolData'
 import { timestampToDate } from '../util/date'
 import { fixed27, secondsInDay, zeroAddress } from '../config'
 
-export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
-  let poolId = dataSource.context().getString('id')
-  log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHex()])
+function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId: string): void {
   let investors = loadOrCreatePoolInvestors(poolId);
   let txHash = call.transaction.hash.toHex();
   let pool = Pool.load(poolId);
@@ -106,6 +104,12 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
       }
     }
   }
+}
+
+export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
+  let poolId = dataSource.context().getString('id')
+  log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHex()])
+  addInvestorTransactions(call, poolId);
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
 }
@@ -113,95 +117,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
 export function handleCoordinatorCloseEpoch(call: CloseEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorCloseEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHex()])
-  let investors = loadOrCreatePoolInvestors(poolId);
-  let txHash = call.transaction.hash.toHex();
-  let pool = Pool.load(poolId);
-  for(let i = 0; i < investors.accounts.length; i++) {
-    let accounts = investors.accounts;
-    let address = accounts[i];
-    let poolAddresses = PoolAddresses.load(poolId);
-    if (poolAddresses) {
-      let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
-      if (tb.pendingSupplyCurrency > BigInt.fromI32(0) || tb.pendingRedeemToken > BigInt.fromI32(0)) {
-        calculateDisburse(tb, poolAddresses as PoolAddresses);
-        tb.save()
-        let token = tb.token;
-        let symbol = Token.load(token) ? Token.load(token).symbol : "-";
-
-        if (tb.supplyAmount > BigInt.fromI32(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('INVEST_EXECUTION'));
-          investorSupplyTx.owner = address;
-          investorSupplyTx.pool = poolId;
-          investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyAmount;
-          investorSupplyTx.gasUsed = call.transaction.gasUsed;
-          investorSupplyTx.gasPrice = call.transaction.gasPrice;
-          investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
-          investorSupplyTx.symbol = symbol;
-          investorSupplyTx.newBalance = tb.totalValue;
-          investorSupplyTx.transaction = txHash;
-          investorSupplyTx.save();
-        }
-        
-        if (tb.redeemAmount > BigInt.fromI32(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_EXECUTION'));
-          investorRedeemTx.owner = address;
-          investorRedeemTx.pool = poolId;
-          investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.seniorTokenPrice).div(fixed27);
-          investorRedeemTx.gasUsed = call.transaction.gasUsed;
-          investorRedeemTx.gasPrice = call.transaction.gasPrice;
-          investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
-          investorRedeemTx.symbol = symbol;
-          investorRedeemTx.newBalance = tb.totalValue;
-          investorRedeemTx.transaction = txHash;
-          investorRedeemTx.save();
-        }
-      }
-      tb = loadOrCreateTokenBalance(address, poolAddresses.juniorToken);
-      if (tb.pendingSupplyCurrency > BigInt.fromI32(0) || tb.pendingRedeemToken > BigInt.fromI32(0)) {
-        calculateDisburse(tb, poolAddresses as PoolAddresses);
-        tb.save()
-        
-        let token = tb.token;
-        let symbol = Token.load(token) ? Token.load(token).symbol : "-";
-
-        if (tb.supplyAmount > new BigInt(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('INVEST_EXECUTION'));
-          investorSupplyTx.owner = address;
-          investorSupplyTx.pool = poolId;
-          investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyAmount;
-          investorSupplyTx.gasUsed = call.transaction.gasUsed;
-          investorSupplyTx.gasPrice = call.transaction.gasPrice;
-          investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
-          investorSupplyTx.symbol = symbol;
-          investorSupplyTx.newBalance = tb.totalValue;
-          investorSupplyTx.transaction = txHash;
-          investorSupplyTx.save();
-        }
-        
-        if (tb.redeemAmount > new BigInt(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('REDEEM_EXECUTION'));
-          investorRedeemTx.owner = address;
-          investorRedeemTx.pool = poolId;
-          investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount.times(pool.juniorTokenPrice.div(fixed27));
-          investorRedeemTx.gasUsed = call.transaction.gasUsed;
-          investorRedeemTx.gasPrice = call.transaction.gasPrice;
-          investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
-          investorRedeemTx.symbol = symbol;
-          investorRedeemTx.newBalance = tb.totalValue;
-          investorRedeemTx.transaction = txHash;
-          investorRedeemTx.save();
-        }
-      }
-    }
-  }
+  addInvestorTransactions(call, poolId);
 }
 
 export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
