@@ -159,14 +159,14 @@ type DailyInvestorTokenBalance @entity {
   account: Account!
   day: Day!
   pool: Pool!
-  seniorTokenAmount: BigInt!
-  seniorTokenValue: BigInt!
-  seniorSupplyAmount: BigInt!
-  seniorPendingSupplyCurrency: BigInt!
-  juniorTokenAmount: BigInt!
-  juniorTokenValue: BigInt!
-  juniorSupplyAmount: BigInt!
-  juniorPendingSupplyCurrency: BigInt!
+  seniorTokenAmount: BigInt! # tb.balanceAmount
+  seniorTokenValue: BigInt! # pool.seniorTokenPrice
+  seniorSupplyAmount: BigInt! # tb.supplyAmount
+  seniorPendingSupplyCurrency: BigInt! # tb.pendingSupplyAmount
+  juniorTokenAmount: BigInt! # tb.balanceAmount
+  juniorTokenValue: BigInt! # pool.juniorTokenPrice
+  juniorSupplyAmount: BigInt! # tb.supplyAmount
+  juniorPendingSupplyCurrency: BigInt! # tb.pendingSupplyAmount
 }
 
 type PoolInvestor @entity {
@@ -324,4 +324,9 @@ enum TransactionType {
   REDEEM_CANCEL
   INVEST_EXECUTION
   REDEEM_EXECUTION
+}
+
+type PrevInvestorTransactionByToken @entity {
+  id: ID! #owner address + token address
+  prevTransaction: InvestorTransaction
 }

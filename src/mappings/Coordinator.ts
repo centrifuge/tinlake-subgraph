@@ -2,7 +2,7 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, PoolInvestor, Token, TokenBalance } from '../../generated/schema'
+import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, Token } from '../../generated/schema'
 import { ExecuteEpochCall, CloseEpochCall } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
@@ -10,9 +10,10 @@ import { getAllPools } from '../domain/PoolRegistry'
 import { loadOrCreateTokenBalance, calculateDisburse, loadOrCreatePoolInvestors } from '../domain/TokenBalance'
 import { addToDailyAggregate } from '../domain/DailyPoolData'
 import { timestampToDate } from '../util/date'
-import { fixed27, secondsInDay, zeroAddress } from '../config'
+import { secondsInDay, zeroAddress } from '../config'
+import { loadOrCreatePreviousTransaction } from '../domain/PrevInvestorTransactionByToken'
 
-function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId: string): void {
+function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
   let investors = loadOrCreatePoolInvestors(poolId);
   let txHash = call.transaction.hash.toHex();
   let pool = Pool.load(poolId);
@@ -23,83 +24,109 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
     let poolAddresses = PoolAddresses.load(poolId);
     if (poolAddresses) {
       let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken);
-      if (tb.pendingSupplyCurrency > BigInt.fromI32(0) || tb.pendingRedeemToken > BigInt.fromI32(0)) {
+      if (tb.pendingSupplyCurrency.plus(tb.pendingRedeemToken).plus(tb.supplyAmount).plus(tb.redeemAmount).gt(BigInt.fromI32(0))) {
+
         calculateDisburse(tb, poolAddresses as PoolAddresses);
-        tb.save()
 
         let token = tb.token;
         let symbol = Token.load(token) ? Token.load(token).symbol : "-";
 
+        let previousTokenTransaction = loadOrCreatePreviousTransaction(address.concat(token));
+        let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction);
+
         if (tb.supplyAmount > BigInt.fromI32(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('INVEST_EXECUTION'));
-          investorSupplyTx.owner = address;
-          investorSupplyTx.pool = poolId;
-          investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyValue;
-          investorSupplyTx.gasUsed = call.transaction.gasUsed;
-          investorSupplyTx.gasPrice = call.transaction.gasPrice;
-          investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
-          investorSupplyTx.symbol = symbol;
-          investorSupplyTx.newBalance = tb.totalValue;
-          investorSupplyTx.transaction = txHash;
-          investorSupplyTx.save();
+          if(prevTx === null || prevTx.type != "INVEST_EXECUTION") {
+            let id = txHash.concat(address).concat('SENIOR').concat('INVEST_EXECUTION');
+            let investorSupplyTx = new InvestorTransaction(id);
+            investorSupplyTx.owner = address;
+            investorSupplyTx.pool = poolId;
+            investorSupplyTx.timestamp = call.block.timestamp;
+            investorSupplyTx.type = "INVEST_EXECUTION";
+            investorSupplyTx.currencyAmount = tb.supplyValue;
+            investorSupplyTx.gasUsed = call.transaction.gasUsed;
+            investorSupplyTx.gasPrice = call.transaction.gasPrice;
+            investorSupplyTx.tokenPrice = pool.seniorTokenPrice;
+            investorSupplyTx.symbol = symbol;
+            investorSupplyTx.newBalance = tb.totalValue;
+            investorSupplyTx.transaction = txHash;
+            investorSupplyTx.save();
+            previousTokenTransaction.prevTransaction = id;
+            previousTokenTransaction.save();
+          }
         }
         
         if (tb.redeemAmount > BigInt.fromI32(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('SENIOR').concat('REDEEM_EXECUTION'));
-          investorRedeemTx.owner = address;
-          investorRedeemTx.pool = poolId;
-          investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount;
-          investorRedeemTx.gasUsed = call.transaction.gasUsed;
-          investorRedeemTx.gasPrice = call.transaction.gasPrice;
-          investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
-          investorRedeemTx.symbol = symbol;
-          investorRedeemTx.newBalance = tb.totalValue;
-          investorRedeemTx.transaction = txHash;
-          investorRedeemTx.save();
+          if(prevTx === null || prevTx.type != "REDEEM_EXECUTION") {
+            let id = txHash.concat(address).concat('SENIOR').concat('REDEEM_EXECUTION');
+            let investorRedeemTx = new InvestorTransaction(id);
+            investorRedeemTx.owner = address;
+            investorRedeemTx.pool = poolId;
+            investorRedeemTx.timestamp = call.block.timestamp;
+            investorRedeemTx.type = "REDEEM_EXECUTION";
+            investorRedeemTx.currencyAmount = tb.redeemAmount;
+            investorRedeemTx.gasUsed = call.transaction.gasUsed;
+            investorRedeemTx.gasPrice = call.transaction.gasPrice;
+            investorRedeemTx.tokenPrice = pool.seniorTokenPrice;
+            investorRedeemTx.symbol = symbol;
+            investorRedeemTx.newBalance = tb.totalValue;
+            investorRedeemTx.transaction = txHash;
+            investorRedeemTx.save();
+            previousTokenTransaction.prevTransaction = id;
+            previousTokenTransaction.save();
+          }
         }
       }
       tb = loadOrCreateTokenBalance(address, poolAddresses.juniorToken);
-      if (tb.pendingSupplyCurrency > BigInt.fromI32(0) || tb.pendingRedeemToken > BigInt.fromI32(0)) {
+      if (tb.pendingSupplyCurrency.plus(tb.pendingRedeemToken).plus(tb.supplyAmount).plus(tb.redeemAmount).gt(BigInt.fromI32(0))) {
+
         calculateDisburse(tb, poolAddresses as PoolAddresses);
-        tb.save()
-        
+
         let token = tb.token;
         let symbol = Token.load(token) ? Token.load(token).symbol : "-";
+        
+        let previousTokenTransaction = loadOrCreatePreviousTransaction(address.concat(token));
+        let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction);
 
         if (tb.supplyAmount > new BigInt(0)) {
-          let investorSupplyTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('INVEST_EXECUTION'));
-          investorSupplyTx.owner = address;
-          investorSupplyTx.pool = poolId;
-          investorSupplyTx.timestamp = call.block.timestamp;
-          investorSupplyTx.type = "INVEST_EXECUTION";
-          investorSupplyTx.currencyAmount = tb.supplyValue;
-          investorSupplyTx.gasUsed = call.transaction.gasUsed;
-          investorSupplyTx.gasPrice = call.transaction.gasPrice;
-          investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
-          investorSupplyTx.symbol = symbol;
-          investorSupplyTx.newBalance = tb.totalValue;
-          investorSupplyTx.transaction = txHash;
-          investorSupplyTx.save();
+          if(prevTx === null || prevTx.type != "INVEST_EXECUTION") {
+            let id = txHash.concat(address).concat('JUNIOR').concat('INVEST_EXECUTION');
+            let investorSupplyTx = new InvestorTransaction(id);
+            investorSupplyTx.owner = address;
+            investorSupplyTx.pool = poolId;
+            investorSupplyTx.timestamp = call.block.timestamp;
+            investorSupplyTx.type = "INVEST_EXECUTION";
+            investorSupplyTx.currencyAmount = tb.supplyValue;
+            investorSupplyTx.gasUsed = call.transaction.gasUsed;
+            investorSupplyTx.gasPrice = call.transaction.gasPrice;
+            investorSupplyTx.tokenPrice = pool.juniorTokenPrice;
+            investorSupplyTx.symbol = symbol;
+            investorSupplyTx.newBalance = tb.totalValue;
+            investorSupplyTx.transaction = txHash;
+            investorSupplyTx.save();
+            previousTokenTransaction.prevTransaction = id;
+            previousTokenTransaction.save();
+          }
         }
         
         if (tb.redeemAmount > new BigInt(0)) {
-          let investorRedeemTx = new InvestorTransaction(txHash.concat(address).concat('JUNIOR').concat('REDEEM_EXECUTION'));
-          investorRedeemTx.owner = address;
-          investorRedeemTx.pool = poolId;
-          investorRedeemTx.timestamp = call.block.timestamp;
-          investorRedeemTx.type = "REDEEM_EXECUTION";
-          investorRedeemTx.currencyAmount = tb.redeemAmount;
-          investorRedeemTx.gasUsed = call.transaction.gasUsed;
-          investorRedeemTx.gasPrice = call.transaction.gasPrice;
-          investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
-          investorRedeemTx.symbol = symbol;
-          investorRedeemTx.newBalance = tb.totalValue;
-          investorRedeemTx.transaction = txHash;
-          investorRedeemTx.save();
+          if(prevTx === null || prevTx.type != "REDEEM_EXECUTION") {
+            let id = txHash.concat(address).concat('JUNIOR').concat('REDEEM_EXECUTION');
+            let investorRedeemTx = new InvestorTransaction(id);
+            investorRedeemTx.owner = address;
+            investorRedeemTx.pool = poolId;
+            investorRedeemTx.timestamp = call.block.timestamp;
+            investorRedeemTx.type = "REDEEM_EXECUTION";
+            investorRedeemTx.currencyAmount = tb.redeemAmount;
+            investorRedeemTx.gasUsed = call.transaction.gasUsed;
+            investorRedeemTx.gasPrice = call.transaction.gasPrice;
+            investorRedeemTx.tokenPrice = pool.juniorTokenPrice;
+            investorRedeemTx.symbol = symbol;
+            investorRedeemTx.newBalance = tb.totalValue;
+            investorRedeemTx.transaction = txHash;
+            investorRedeemTx.save();
+            previousTokenTransaction.prevTransaction = id;
+            previousTokenTransaction.save();
+          }
         }
       }
     }
@@ -109,7 +136,7 @@ function addInvestorTransactions(call: ExecuteEpochCall | CloseEpochCall, poolId
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHex()])
-  addInvestorTransactions(call, poolId);
+  addInvestorTransactions(poolId, call);
   // TODO: re add this at some point
   // updatePoolValues(poolId, null)
 }
@@ -117,7 +144,7 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
 export function handleCoordinatorCloseEpoch(call: CloseEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorCloseEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHex()])
-  addInvestorTransactions(call, poolId);
+  addInvestorTransactions(poolId, <ExecuteEpochCall>call);
 }
 
 export function updateAllPoolValues(block: ethereum.Block, today: Day): void {

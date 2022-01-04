@@ -6,6 +6,7 @@ import { calculateDisburse, loadOrCreateTokenBalance } from '../domain/TokenBala
 import { loadOrCreateToken } from '../domain/Token'
 import { pushUnique } from '../util/array'
 import { fixed27 } from '../config'
+import { loadOrCreatePreviousTransaction } from '../domain/PrevInvestorTransactionByToken'
 
 // the supply order is the first contact an investor has with tinlake
 export function handleSupplyOrder(call: SupplyOrderCall): void {
@@ -28,7 +29,6 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     tokenPrice = pool.seniorTokenPrice;
   }
 
-
   // protection from adding system account to internal tracking
   if (isSystemAccount(poolId, account)) {
     return
@@ -44,16 +44,16 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
 
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
-  tb.save()
-  
+
   let type = "INVEST_ORDER";
-  if (call.inputs.newSupplyAmount == BigInt.fromI32(0)) {
+  if (call.inputs.newSupplyAmount.equals(BigInt.fromI32(0))) {
     type = "INVEST_CANCEL";
   }
 
   let symbol = Token.load(token) ? Token.load(token).symbol : "-";
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type));
+  let id = call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type);
+  let investorTx = new InvestorTransaction(id);
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
@@ -63,9 +63,12 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
   investorTx.symbol = symbol;
-  investorTx.newBalance = tb.balanceValue.plus(tb.pendingSupplyCurrency);
+  investorTx.newBalance = tb.totalValue;
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
+  let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token));
+  previousTokenTransaction.prevTransaction = id;
+  previousTokenTransaction.save();
 }
 
 // redemptions shouldn't count towards balance that users get for rewards
@@ -105,26 +108,29 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
 
   let tb = loadOrCreateTokenBalance(account, token)
   calculateDisburse(tb, <PoolAddresses>poolAddresses)
-  tb.save()
 
   let type = "REDEEM_ORDER";
-  if (call.inputs.newRedeemAmount == BigInt.fromI32(0)) {
+  if (call.inputs.newRedeemAmount.equals(BigInt.fromI32(0))) {
     type = "REDEEM_CANCEL";
   }
 
   let symbol = Token.load(token) ? Token.load(token).symbol : "-";
 
-  let investorTx = new InvestorTransaction(call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type));
+  let id = call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type);
+  let investorTx = new InvestorTransaction(id);
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = type;
-  investorTx.currencyAmount = call.inputs.newRedeemAmount.times(tokenPrice.div(fixed27));
+  investorTx.currencyAmount = tb.pendingRedeemToken.times(tokenPrice.div(fixed27));
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
   investorTx.symbol = symbol;
-  investorTx.newBalance = tb.balanceValue.plus(tb.pendingRedeemToken.times(tokenPrice.div(fixed27)));
+  investorTx.newBalance = tb.totalValue.plus(tb.pendingRedeemToken.times(tokenPrice.div(fixed27)));
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
+  let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token));
+  previousTokenTransaction.prevTransaction = id;
+  previousTokenTransaction.save();
 }
