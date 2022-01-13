@@ -30,7 +30,9 @@ export let registryAddress = dataSource.network() == 'mainnet' ? registryAddress
 
 const cfgRewardRateAddressMainnet = '0x92F4f80C9B1bd14bCE5a9c868255547f60B205AC'
 const cfgRewardRateAddressKovan = '0x2C821E34F737406D27D25C7F28f6b59b42547EfD'
+export const cfgSplitRewardRateAddressMainnet = '0x626821843804cf86C090d38020c3A3f6B79B8C8A'
 export let cfgRewardRateAddress =
   dataSource.network() == 'mainnet' ? cfgRewardRateAddressMainnet : cfgRewardRateAddressKovan
 
 export const cfgRewardRateDeploymentDate = 1629986028
+export const cfgSplitRewardRateDeploymentDate = 1641909394 // Block 13983238
