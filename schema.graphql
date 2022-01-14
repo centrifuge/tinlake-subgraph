@@ -310,8 +310,10 @@ type InvestorTransaction @entity {
   symbol: String!
   timestamp: BigInt!
   type: TransactionType!
+  tokenAmount: BigInt!
   currencyAmount: BigInt!
   newBalance: BigInt!
+  newBalanceValue: BigInt!
   tokenPrice: BigInt!
   gasPrice: BigInt!
   gasUsed: BigInt!

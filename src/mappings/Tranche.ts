@@ -53,17 +53,20 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   let symbol = Token.load(token) ? Token.load(token).symbol : "-";
 
   let id = call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type);
+  log.info('AddInvestorTransaction: id {}, block{}', [id, call.block.number.toString()]);
   let investorTx = new InvestorTransaction(id);
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = type;
-  investorTx.currencyAmount = call.inputs.newSupplyAmount;
+  investorTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0)) ? tb.pendingSupplyCurrency.div(tokenPrice.div(fixed27)) : tb.pendingSupplyCurrency;
+  investorTx.currencyAmount = tb.pendingSupplyCurrency;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
   investorTx.symbol = symbol;
-  investorTx.newBalance = tb.totalValue;
+  investorTx.newBalance = tb.totalAmount;
+  investorTx.newBalanceValue = tb.totalValue;
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
   let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token));
@@ -117,17 +120,20 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let symbol = Token.load(token) ? Token.load(token).symbol : "-";
 
   let id = call.transaction.hash.toHex().concat(account).concat(trancheString).concat(type);
+  log.info('AddInvestorTransaction: id {}, block{}', [id, call.block.number.toString()]);
   let investorTx = new InvestorTransaction(id);
   investorTx.owner = account;
   investorTx.pool = poolId;
   investorTx.timestamp = call.block.timestamp;
   investorTx.type = type;
-  investorTx.currencyAmount = tb.pendingRedeemToken.times(tokenPrice.div(fixed27));
+  investorTx.tokenAmount = tb.pendingRedeemToken;
+  investorTx.currencyAmount = tokenPrice.gt(BigInt.fromI32(0)) ? tb.pendingRedeemToken.times(tokenPrice.div(fixed27)) : tb.pendingRedeemToken;
   investorTx.gasUsed = call.transaction.gasUsed;
   investorTx.gasPrice = call.transaction.gasPrice;
   investorTx.tokenPrice = tokenPrice;
   investorTx.symbol = symbol;
-  investorTx.newBalance = tb.totalValue.plus(tb.pendingRedeemToken.times(tokenPrice.div(fixed27)));
+  investorTx.newBalance = tb.totalAmount;
+  investorTx.newBalanceValue = tb.totalValue;
   investorTx.transaction = call.transaction.hash.toHex();
   investorTx.save();
   let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token));
