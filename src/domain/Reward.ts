@@ -113,8 +113,9 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
       systemRewards.tinRewardRate
     )
 
-    let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-    let r = tokenValues.times(systemRewards.dropRewardRate)
+    let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
+    let juniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
+    let r = seniorRewards.plus(juniorRewards)
 
     // if rewards are claimable, and an address is linked
     // add them to the most recently linked address
