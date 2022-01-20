@@ -114,7 +114,7 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     )
 
     let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
-    let juniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
+    let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
     let r = seniorRewards.plus(juniorRewards)
 
     // if rewards are claimable, and an address is linked
@@ -266,8 +266,8 @@ function setRewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTo
   let investorDropRewardRates = getInvestorDropRewardRate(date, systemRewards)
   let investorTinRewardRates = getInvestorTinRewardRate(date, systemRewards)
 
-  systemRewards.tinRewardRate = investorDropRewardRates
-  systemRewards.dropRewardRate = investorTinRewardRates
+  systemRewards.tinRewardRate = investorTinRewardRates
+  systemRewards.dropRewardRate = investorDropRewardRates
   systemRewards.save()
 
   return systemRewards
