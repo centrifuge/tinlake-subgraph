@@ -1,5 +1,7 @@
-import { Address, BigInt, BigDecimal, log } from '@graphprotocol/graph-ts'
+import { cfgSplitRewardRateDeploymentDate, cfgSplitRewardRateAddressMainnet } from './../config'
+import { Address, BigInt, BigDecimal, log, ethereum } from '@graphprotocol/graph-ts'
 import { CfgRewardRate } from '../../generated/Block/CfgRewardRate'
+import { CfgSplitRewardRate } from '../../generated/Block/CfgSplitRewardRate'
 import {
   DailyInvestorTokenBalance,
   Pool,
@@ -30,7 +32,8 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
-    rewardDayTotal.rewardRate = BigDecimal.fromString('0')
+    rewardDayTotal.tinRewardRate = BigDecimal.fromString('0')
+    rewardDayTotal.dropRewardRate = BigDecimal.fromString('0')
     rewardDayTotal.aoRewardRate = BigDecimal.fromString('0')
     rewardDayTotal.todayReward = BigDecimal.fromString('0')
     rewardDayTotal.todayAOReward = BigDecimal.fromString('0')
@@ -70,18 +73,19 @@ export function loadOrCreateRewardByToken(account: string, token: string): Rewar
 function updateInvestorRewardsByToken(
   addresses: PoolAddresses,
   ditb: DailyInvestorTokenBalance,
-  rate: BigDecimal
+  dropRate: BigDecimal,
+  tinRate: BigDecimal
 ): void {
   // add an entity per token that they have invested in
   if (ditb.seniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.seniorToken)
-    let val = ditb.seniorTokenValue.toBigDecimal().times(rate)
+    let val = ditb.seniorTokenValue.toBigDecimal().times(dropRate)
     rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
   if (ditb.juniorTokenValue.gt(BigInt.fromI32(0))) {
     let rbt = loadOrCreateRewardByToken(ditb.account, addresses.juniorToken)
-    let val = ditb.juniorTokenValue.toBigDecimal().times(rate)
+    let val = ditb.juniorTokenValue.toBigDecimal().times(tinRate)
     rbt.rewards = rbt.rewards.plus(val)
     rbt.save()
   }
@@ -105,11 +109,13 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
     updateInvestorRewardsByToken(
       <PoolAddresses>tokenAddresses,
       <DailyInvestorTokenBalance>ditb,
-      systemRewards.rewardRate
+      systemRewards.dropRewardRate,
+      systemRewards.tinRewardRate
     )
 
-    let tokenValues = ditb.seniorTokenValue.plus(ditb.juniorTokenValue).toBigDecimal()
-    let r = tokenValues.times(systemRewards.rewardRate)
+    let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
+    let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
+    let r = seniorRewards.plus(juniorRewards)
 
     // if rewards are claimable, and an address is linked
     // add them to the most recently linked address
@@ -144,30 +150,92 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   systemRewards.save()
 }
 
-function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
+function getInvestorDropRewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
   let firstRate = BigDecimal.fromString('0.0042')
   let secondRate = BigDecimal.fromString('0.0020')
   let thirdRate = BigDecimal.fromString('0.0010')
 
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
-    let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
-    let investorRewardRateOption = cfgRewardRate.try_investorRewardRate()
+    let investorDropRewardRateOption: ethereum.CallResult<BigInt>
+    if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
+      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      investorDropRewardRateOption = cfgRewardRate.try_investorRewardRate()
+    } else {
+      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      investorDropRewardRateOption = cfgRewardRate.try_dropInvestorRewardRate()
+    }
 
-    log.info('trying to call CfgRewardRate contract at {}, reverted {}', [
+    log.info('trying to call CfgDropRewardRate contract at {}, reverted {}', [
       cfgRewardRateAddress.toString(),
-      investorRewardRateOption.reverted ? 'true' : 'false',
+      investorDropRewardRateOption.reverted ? 'true' : 'false',
     ])
 
-    if (!investorRewardRateOption.reverted) {
-      let investorRewardRate = BigDecimal.fromString(investorRewardRateOption.value.toString()).div(
+    if (!investorDropRewardRateOption.reverted) {
+      let investorDropRewardRate = BigDecimal.fromString(investorDropRewardRateOption.value.toString()).div(
         fixed27.toBigDecimal()
       )
 
-      log.info('setting system rewards rate from CfgRewardRate contract rewardsToDate {}, rewardRate {}', [
+      log.info('setting system rewards rate from CfgRewardRate contract rewardsToDate {}, dropRewardRate {}', [
         systemRewards.toDateRewardAggregateValue.toString(),
-        investorRewardRate.toString(),
+        investorDropRewardRate.toString(),
       ])
-      return investorRewardRate
+      return investorDropRewardRate
+    }
+  }
+
+  if (date.le(BigInt.fromI32(1623801600))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      firstRate.toString(),
+    ])
+    return firstRate
+  }
+
+  if (date.le(BigInt.fromI32(1624924800))) {
+    log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+      systemRewards.toDateRewardAggregateValue.toString(),
+      secondRate.toString(),
+    ])
+    return secondRate
+  }
+
+  log.info('setting system rewards rate rewardsToDate {}, rewardRate {}', [
+    systemRewards.toDateRewardAggregateValue.toString(),
+    thirdRate.toString(),
+  ])
+  return thirdRate
+}
+
+function getInvestorTinRewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {
+  let firstRate = BigDecimal.fromString('0.0042')
+  let secondRate = BigDecimal.fromString('0.0020')
+  let thirdRate = BigDecimal.fromString('0.0010')
+
+  if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
+    let investorTinRewardRateOption: ethereum.CallResult<BigInt>
+    if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
+      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      investorTinRewardRateOption = cfgRewardRate.try_investorRewardRate()
+    } else {
+      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      investorTinRewardRateOption = cfgRewardRate.try_tinInvestorRewardRate()
+    }
+
+    log.info('trying to call CfgTinRewardRate contract at {}, reverted {}', [
+      cfgRewardRateAddress.toString(),
+      investorTinRewardRateOption.reverted ? 'true' : 'false',
+    ])
+
+    if (!investorTinRewardRateOption.reverted) {
+      let investorTinRewardRate = BigDecimal.fromString(investorTinRewardRateOption.value.toString()).div(
+        fixed27.toBigDecimal()
+      )
+
+      log.info('setting system rewards rate from CfgRewardRate contract rewardsToDate {}, TinRewardRate {}', [
+        systemRewards.toDateRewardAggregateValue.toString(),
+        investorTinRewardRate.toString(),
+      ])
+      return investorTinRewardRate
     }
   }
 
@@ -195,9 +263,11 @@ function getInvestorRewardRate(date: BigInt, systemRewards: RewardDayTotal): Big
 }
 
 function setRewardRate(date: BigInt, systemRewards: RewardDayTotal): RewardDayTotal {
-  let investorRewardRate = getInvestorRewardRate(date, systemRewards)
+  let investorDropRewardRates = getInvestorDropRewardRate(date, systemRewards)
+  let investorTinRewardRates = getInvestorTinRewardRate(date, systemRewards)
 
-  systemRewards.rewardRate = investorRewardRate
+  systemRewards.tinRewardRate = investorTinRewardRates
+  systemRewards.dropRewardRate = investorDropRewardRates
   systemRewards.save()
 
   return systemRewards

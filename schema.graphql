@@ -185,7 +185,8 @@ type RewardDayTotal @entity {
   id: ID! # date
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
-  rewardRate: BigDecimal!
+  dropRewardRate: BigDecimal!
+  tinRewardRate: BigDecimal!
   aoRewardRate: BigDecimal!
   todayReward: BigDecimal!
   todayAOReward: BigDecimal!
