@@ -64,7 +64,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.timestamp = call.block.timestamp
   investorTx.type = type
   investorTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
-    ? tb.pendingSupplyCurrency.div(tokenPrice).div(fixed27)
+    ? tb.pendingSupplyCurrency.div(tokenPrice.div(fixed27))
     : tb.pendingSupplyCurrency
   investorTx.currencyAmount = tb.pendingSupplyCurrency
   investorTx.gasUsed = call.transaction.gasUsed

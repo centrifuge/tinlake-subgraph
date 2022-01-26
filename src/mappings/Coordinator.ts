@@ -21,6 +21,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
   let coordinator = Coordinator.bind(<Address>call.to)
   let seniorTokenPrice = coordinator.try_epochSeniorTokenPrice()
   let juniorTokenPrice = coordinator.try_epochJuniorTokenPrice()
+
   log.info('trying to call Coordinator at {}, seniorTokenPrice reverted: {}, juniorTokenPrice reverted: {}', [
     call.to.toHexString(),
     seniorTokenPrice.reverted ? 'true' : 'false',
@@ -49,7 +50,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
         let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction)
 
         if (tb.supplyAmount > BigInt.fromI32(0)) {
-          if (prevTx === null || prevTx.type != 'INVEST_EXECUTION') {
+          if (tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) || prevTx === null || prevTx.type != 'INVEST_EXECUTION') {
             let id = txHash
               .concat(address)
               .concat('SENIOR')
@@ -76,7 +77,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
         }
 
         if (tb.redeemAmount > BigInt.fromI32(0)) {
-          if (prevTx === null || prevTx.type != 'REDEEM_EXECUTION') {
+          if (tb.pendingRedeemToken.gt(BigInt.fromI32(0)) || prevTx === null || prevTx.type != 'REDEEM_EXECUTION') {
             let id = txHash
               .concat(address)
               .concat('SENIOR')
@@ -121,7 +122,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
         let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction)
 
         if (tb.supplyAmount > new BigInt(0)) {
-          if (prevTx === null || prevTx.type != 'INVEST_EXECUTION') {
+          if (tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) || prevTx === null || prevTx.type != 'INVEST_EXECUTION') {
             let id = txHash
               .concat(address)
               .concat('JUNIOR')
@@ -148,7 +149,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
         }
 
         if (tb.redeemAmount > new BigInt(0)) {
-          if (prevTx === null || prevTx.type != 'REDEEM_EXECUTION') {
+          if (tb.pendingRedeemToken.gt(BigInt.fromI32(0)) || prevTx === null || prevTx.type != 'REDEEM_EXECUTION') {
             let id = txHash
               .concat(address)
               .concat('JUNIOR')
@@ -181,7 +182,6 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
 }
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
-  dataSource.context().get()
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHexString()])
   addInvestorTransactions(poolId, call)
