@@ -64,7 +64,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.timestamp = call.block.timestamp
   investorTx.type = type
   investorTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
-    ? tb.pendingSupplyCurrency.div(tokenPrice.div(fixed27))
+    ? tb.pendingSupplyCurrency.times(fixed27).div(tokenPrice)
     : tb.pendingSupplyCurrency
   investorTx.currencyAmount = tb.pendingSupplyCurrency
   investorTx.gasUsed = call.transaction.gasUsed
@@ -77,6 +77,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   investorTx.save()
   let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token))
   previousTokenTransaction.prevTransaction = id
+  previousTokenTransaction.pendingExecution = false
   previousTokenTransaction.save()
 }
 
@@ -151,4 +152,5 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   let previousTokenTransaction = loadOrCreatePreviousTransaction(account.concat(token))
   previousTokenTransaction.prevTransaction = id
   previousTokenTransaction.save()
+  previousTokenTransaction.pendingExecution = false
 }

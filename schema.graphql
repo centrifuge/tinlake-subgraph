@@ -302,7 +302,6 @@ type RewardLink @entity {
   rewardsAccumulated: BigDecimal!
 }
 
-
 type InvestorTransaction @entity {
   id: ID! #TX hash + owner address + tranche + transaction type enum
   transaction: String! # txhash
@@ -332,4 +331,5 @@ enum TransactionType {
 type PrevInvestorTransactionByToken @entity {
   id: ID! #owner address + token address
   prevTransaction: InvestorTransaction
+  pendingExecution: Boolean # Indicates whether the transaction was not fully executed and thus a follow-up execution should be expected
 }

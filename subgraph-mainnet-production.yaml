@@ -77,6 +77,7 @@ dataSources:
     source:
       address: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
       abi: PoolRegistry
+      # startBlock: 11113233
       startBlock: 11113233
     mapping:
       kind: ethereum/events
@@ -103,7 +104,8 @@ dataSources:
     source:
       address: '0x1cA3B2E7FfCAF83d9228a64e4726402B1d5CC054'
       abi: TinlakeClaimRad
-      startBlock: 11686325
+      # startBlock: 11686325
+      startBlock: 11113233
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
