@@ -21,6 +21,12 @@ export let mainnetPreloadedPools: PreloadedPool[] = [
     assessorStartBlock: 11063166,
     network: 'mainnet',
   },
+  {
+    id: '0x53b2d22d07e069a3b132bfeaad275b10273d381e',
+    ipfsHash: 'QmR3xMxpm5Wr52LAKkVyozbGEjYyqK56mZNyVnfypcKTGd',
+    assessorStartBlock: 12786540,
+    network: 'mainnet',
+  },
 ]
 
 export let kovanPreloadedPools: PreloadedPool[] = []
