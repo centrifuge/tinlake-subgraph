@@ -93,7 +93,7 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
     log.warning('calculateDisburse failed - owner {}, token {}, tranche {}', [
       tb.owner.toString(),
       tb.token.toString(),
-      tranche._address.toString(),
+      tranche._address.toHexString(),
     ])
     return
   }
@@ -112,8 +112,8 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
       tb.redeemAmount.toString(),
     ]
   )
-  let token = loadOrCreateToken(tb.token);
-  updateTokenBalanceValues(tb, token);
+  let token = loadOrCreateToken(tb.token)
+  updateTokenBalanceValues(tb, token)
   tb.save()
 }
 
