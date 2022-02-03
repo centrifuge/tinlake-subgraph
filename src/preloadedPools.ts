@@ -22,9 +22,9 @@ export let mainnetPreloadedPools: PreloadedPool[] = [
     network: 'mainnet',
   },
   {
-    id: '0x4cA805cE8EcE2E63FfC1F9f8F2731D3F48DF89Df', // HTC2 new coordinator April 2021
+    id: '0x4ca805ce8ece2e63ffc1f9f8f2731d3f48df89df', // HTC2 new coordinator April 2021
     ipfsHash: 'QmZBa62V6s4AMbLA3katcMKCXXRS6Kku2GSARZAauUVSDG',
-    assessorStartBlock: 12342098,
+    assessorStartBlock: 12342687,
     network: 'mainnet',
   },
   {
