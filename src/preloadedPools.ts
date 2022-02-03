@@ -21,6 +21,18 @@ export let mainnetPreloadedPools: PreloadedPool[] = [
     assessorStartBlock: 11063166,
     network: 'mainnet',
   },
+  {
+    id: '0x4cA805cE8EcE2E63FfC1F9f8F2731D3F48DF89Df', // HTC2 new coordinator April 2021
+    ipfsHash: 'QmZBa62V6s4AMbLA3katcMKCXXRS6Kku2GSARZAauUVSDG',
+    assessorStartBlock: 12342098,
+    network: 'mainnet',
+  },
+  {
+    id: '0x53b2d22d07e069a3b132bfeaad275b10273d381e', // NS2 new coordinator July 2021
+    ipfsHash: 'QmR3xMxpm5Wr52LAKkVyozbGEjYyqK56mZNyVnfypcKTGd',
+    assessorStartBlock: 12786540,
+    network: 'mainnet',
+  },
 ]
 
 export let kovanPreloadedPools: PreloadedPool[] = []

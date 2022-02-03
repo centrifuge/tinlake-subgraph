@@ -8,7 +8,7 @@ dataSources:
     name: Block
     network: mainnet
     source:
-      address: "0x95b74eF13fF280A89cE3d7bBEfc822c210e9939F"
+      address: '0x95b74eF13fF280A89cE3d7bBEfc822c210e9939F'
       abi: Pile
       startBlock: 11063000
     mapping:
@@ -39,6 +39,8 @@ dataSources:
           file: ./abis/Tranche.json
         - name: CfgRewardRate
           file: ./abis/CfgRewardRate.json
+        - name: CfgSplitRewardRate
+          file: ./abis/CfgSplitRewardRate.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
@@ -48,7 +50,7 @@ dataSources:
     name: ProxyRegistry
     network: mainnet
     source:
-      address: "0xc9045c815bf123ad12ea75b9a7c579c1e05051f9"
+      address: '0xc9045c815bf123ad12ea75b9a7c579c1e05051f9'
       abi: ProxyRegistry
       startBlock: 9994872
     mapping:
@@ -71,7 +73,7 @@ dataSources:
     name: PoolRegistry
     network: mainnet
     source:
-      address: "0xddf1c516cf87126c6c610b52fd8d609e67fb6033"
+      address: '0xddf1c516cf87126c6c610b52fd8d609e67fb6033'
       abi: PoolRegistry
       startBlock: 11113233
     mapping:
@@ -96,8 +98,8 @@ dataSources:
   - kind: ethereum/contract
     name: Claim
     network: mainnet
-    source: 
-      address: "0x1cA3B2E7FfCAF83d9228a64e4726402B1d5CC054"
+    source:
+      address: '0x1cA3B2E7FfCAF83d9228a64e4726402B1d5CC054'
       abi: TinlakeClaimRad
       startBlock: 11686325
     mapping:
@@ -113,7 +115,7 @@ dataSources:
         - event: Claimed(address,bytes32)
           handler: handleClaimed
       file: ./src/mappings/TinlakeClaimRad.ts
-      
+
 templates:
   - kind: ethereum/contract
     name: Coordinator
@@ -133,9 +135,13 @@ templates:
           file: ./abis/Assessor.json
         - name: Pile
           file: ./abis/Pile.json
+        - name: Tranche
+          file: ./abis/Tranche.json
       callHandlers:
         - function: executeEpoch()
           handler: handleCoordinatorExecuteEpoch
+        - function: closeEpoch()
+          handler: handleCoordinatorCloseEpoch
       file: ./src/mappings/Coordinator.ts
   - kind: ethereum/contract
     name: Assessor

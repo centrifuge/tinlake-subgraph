@@ -6,6 +6,7 @@ import { loadOrCreateToken } from '../domain/Token'
 import { loadOrCreateTokenBalance } from '../domain/TokenBalance'
 import { isSystemAccount } from '../domain/Account'
 import { pushUnique } from '../util/array'
+import { fixed27 } from '../config'
 
 export function handleERC20Transfer(event: TransferEvent): void {
   let tokenAddress = dataSource.context().getString('tokenAddress')
@@ -28,13 +29,17 @@ export function handleERC20Transfer(event: TransferEvent): void {
     token.save()
     let tb = loadOrCreateTokenBalance(dst, tokenAddress)
     tb.balanceAmount = tb.balanceAmount.plus(event.params.wad)
+    tb.totalValue = tb.balanceAmount.times(token.price).div(fixed27)
     tb.totalAmount = tb.balanceAmount.plus(tb.supplyAmount)
+    tb.totalValue = tb.totalAmount.times(token.price).div(fixed27)
     tb.save()
   }
   if (!isSystemAccount(poolId, src)) {
     let tb = loadOrCreateTokenBalance(src, tokenAddress)
     tb.balanceAmount = tb.balanceAmount.minus(event.params.wad)
+    tb.totalValue = tb.balanceAmount.times(token.price).div(fixed27)
     tb.totalAmount = tb.balanceAmount.minus(tb.supplyAmount)
+    tb.totalValue = tb.totalAmount.times(token.price).div(fixed27)
     tb.save()
   }
 
