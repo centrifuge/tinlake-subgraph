@@ -8,7 +8,7 @@ export class PreloadedPool {
 }
 
 /**
- * These pools were used before they were added to the registry, so if we only start
+ * These pools were used before they were added to the registry OR they had an update that was never added to the registry, so if we only start
  * indexing their events after the block of the PoolCreated event in the pool registry,
  * then we would miss some data. To address this, we check in the block handler for the startBlock
  * values in this array and load the data from IPFS if a preloaded pool is found.

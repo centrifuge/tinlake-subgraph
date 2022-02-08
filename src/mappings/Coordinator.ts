@@ -210,6 +210,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
 
 export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
   let poolId = dataSource.context().getString('id')
+
   log.info('handleCoordinatorExecuteEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHexString()])
   addInvestorTransactions(poolId, call)
   // TODO: re add this at some point
@@ -219,7 +220,13 @@ export function handleCoordinatorExecuteEpoch(call: ExecuteEpochCall): void {
 export function handleCoordinatorCloseEpoch(call: CloseEpochCall): void {
   let poolId = dataSource.context().getString('id')
   log.info('handleCoordinatorCloseEpoch: pool id {}, to {}', [poolId.toString(), call.to.toHexString()])
-  addInvestorTransactions(poolId, <ExecuteEpochCall>call)
+  let coordinator = Coordinator.bind(<Address>call.to)
+  let submissionPeriod = coordinator.try_submissionPeriod()
+  if (!submissionPeriod.reverted) {
+    if (!submissionPeriod.value) {
+      addInvestorTransactions(poolId, <ExecuteEpochCall>call)
+    }
+  }
 }
 
 export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
