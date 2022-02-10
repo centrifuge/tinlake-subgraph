@@ -45,28 +45,28 @@ dataSources:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
 
-  # Proxy registry across pools
-  # - kind: ethereum/contract
-  #   name: ProxyRegistry
-  #   network: mainnet
-  #   source:
-  #     address: '0xc9045c815bf123ad12ea75b9a7c579c1e05051f9'
-  #     abi: ProxyRegistry
-  #     startBlock: 9994872
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.4
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Pool
-  #       - Loan
-  #     abis:
-  #       - name: ProxyRegistry
-  #         file: ./abis/ProxyRegistry.json
-  #     eventHandlers:
-  #       - event: Created(indexed address,indexed address,address,uint256)
-  #         handler: handleCreateProxy
-  #     file: ./src/mappings/ProxyRegistry.ts
+  Proxy registry across pools
+  - kind: ethereum/contract
+    name: ProxyRegistry
+    network: mainnet
+    source:
+      address: '0xc9045c815bf123ad12ea75b9a7c579c1e05051f9'
+      abi: ProxyRegistry
+      startBlock: 9994872
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Pool
+        - Loan
+      abis:
+        - name: ProxyRegistry
+          file: ./abis/ProxyRegistry.json
+      eventHandlers:
+        - event: Created(indexed address,indexed address,address,uint256)
+          handler: handleCreateProxy
+      file: ./src/mappings/ProxyRegistry.ts
 
   # Pool registry
   - kind: ethereum/contract
