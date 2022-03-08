@@ -45,7 +45,7 @@ dataSources:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
 
-  Proxy registry across pools
+  # Proxy registry across pools
   - kind: ethereum/contract
     name: ProxyRegistry
     network: mainnet
