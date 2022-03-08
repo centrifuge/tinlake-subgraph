@@ -123,7 +123,7 @@ type TokenBalance @entity {
   owner: Account!
   balanceAmount: BigInt!
   balanceValue: BigInt!
-  totalAmount: BigInt!
+  totalAmount: BigInt! # balanceAmount + supplyAmount
   totalValue: BigInt!
   token: Token!
 
@@ -159,14 +159,14 @@ type DailyInvestorTokenBalance @entity {
   account: Account!
   day: Day!
   pool: Pool!
-  seniorTokenAmount: BigInt!
-  seniorTokenValue: BigInt!
-  seniorSupplyAmount: BigInt!
-  seniorPendingSupplyCurrency: BigInt!
-  juniorTokenAmount: BigInt!
-  juniorTokenValue: BigInt!
-  juniorSupplyAmount: BigInt!
-  juniorPendingSupplyCurrency: BigInt!
+  seniorTokenAmount: BigInt! # tb.balanceAmount
+  seniorTokenValue: BigInt! # pool.seniorTokenPrice
+  seniorSupplyAmount: BigInt! # tb.supplyAmount
+  seniorPendingSupplyCurrency: BigInt! # tb.pendingSupplyAmount
+  juniorTokenAmount: BigInt! # tb.balanceAmount
+  juniorTokenValue: BigInt! # pool.juniorTokenPrice
+  juniorSupplyAmount: BigInt! # tb.supplyAmount
+  juniorPendingSupplyCurrency: BigInt! # tb.pendingSupplyAmount
 }
 
 type PoolInvestor @entity {
@@ -185,7 +185,8 @@ type RewardDayTotal @entity {
   id: ID! # date
   todayValue: BigInt!
   toDateAggregateValue: BigInt!
-  rewardRate: BigDecimal!
+  dropRewardRate: BigDecimal!
+  tinRewardRate: BigDecimal!
   aoRewardRate: BigDecimal!
   todayReward: BigDecimal!
   todayAOReward: BigDecimal!
@@ -299,4 +300,36 @@ type RewardLink @entity {
   Rewards that are claimable by the Centrifuge Chain account
   """
   rewardsAccumulated: BigDecimal!
+}
+
+type InvestorTransaction @entity {
+  id: ID! #TX hash + owner address + tranche + transaction type enum
+  transaction: String! # txhash
+  owner: Account!
+  pool: Pool!
+  symbol: String!
+  timestamp: BigInt!
+  type: TransactionType!
+  tokenAmount: BigInt!
+  currencyAmount: BigInt!
+  newBalance: BigInt!
+  newBalanceValue: BigInt!
+  tokenPrice: BigInt!
+  gasPrice: BigInt!
+  gasUsed: BigInt!
+}
+
+enum TransactionType {
+  INVEST_ORDER
+  REDEEM_ORDER
+  INVEST_CANCEL
+  REDEEM_CANCEL
+  INVEST_EXECUTION
+  REDEEM_EXECUTION
+}
+
+type PrevInvestorTransactionByToken @entity {
+  id: ID! #owner address + token address
+  prevTransaction: InvestorTransaction
+  pendingExecution: Boolean # Indicates whether the transaction was not fully executed and thus a follow-up execution should be expected
 }

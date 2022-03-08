@@ -40,6 +40,8 @@ dataSources:
           file: ./abis/Tranche.json
         - name: CfgRewardRate
           file: ./abis/CfgRewardRate.json
+        - name: CfgSplitRewardRate
+          file: ./abis/CfgSplitRewardRate.json
       blockHandlers:
         - handler: handleBlock
       file: ./src/mappings/Block.ts
@@ -134,9 +136,13 @@ templates:
           file: ./abis/Assessor.json
         - name: Pile
           file: ./abis/Pile.json
+        - name: Tranche
+          file: ./abis/Tranche.json
       callHandlers:
         - function: executeEpoch()
           handler: handleCoordinatorExecuteEpoch
+        - function: closeEpoch()
+          handler: handleCoordinatorCloseEpoch
       file: ./src/mappings/Coordinator.ts
   - kind: ethereum/contract
     name: Assessor
