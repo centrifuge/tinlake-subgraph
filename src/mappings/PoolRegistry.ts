@@ -44,7 +44,7 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   upsertPool(poolId, hash);
 }
 
-export function upsertPool(poolId: string, hash: string) {
+export function upsertPool(poolId: string, hash: string): void {
   let oldPoolAddresses = PoolAddresses.load(poolId)
 
   if (oldPoolAddresses == null) {
