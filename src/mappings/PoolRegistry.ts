@@ -40,12 +40,17 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   ])
   let poolId = call.params.pool.toHexString()
   let hash = call.params.data
+
+  upsertPool(poolId, hash);
+}
+
+export function upsertPool(poolId: string, hash: string) {
   let oldPoolAddresses = PoolAddresses.load(poolId)
 
   if (oldPoolAddresses == null) {
-    // If handling the PoolCreated event failed (e.g. due to a missing hash), then we will try to create it here
+    // If this is a new pool or handling the PoolCreated event failed (e.g. due to a missing hash), then we will try to create it here
     log.error('handlePoolUpdated: could not load old pool addresses, attempting to create a new pool', [])
-    loadPoolFromIPFS(call.params.data)
+    loadPoolFromIPFS(hash)
     return
   }
 

@@ -4,7 +4,7 @@ import { createDailySnapshot } from '../domain/DailyPoolData'
 import { getToday, createDay } from '../domain/Day'
 import { updateAllPoolValues } from './Coordinator'
 import { preloadedPoolByStartBlock } from '../preloadedPools'
-import { loadPoolFromIPFS } from './PoolRegistry'
+import { upsertPool } from './PoolRegistry'
 import { fastForwardUntilBlock, handleBlockFrequencyMinutes, blockTimeSeconds } from '../config'
 import { timestampToDate } from '../util/date'
 
@@ -12,7 +12,7 @@ export function handleBlock(block: ethereum.Block): void {
   // Check if there's a preloaded pool for this block
   if (preloadedPoolByStartBlock.has(block.number.toI32())) {
     log.info('handleBlock: preload pool - IPFS hash {}', [preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash])
-    loadPoolFromIPFS(preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash)
+    upsertPool(preloadedPoolByStartBlock.get(block.number.toI32()).id, preloadedPoolByStartBlock.get(block.number.toI32()).ipfsHash)
   }
 
   // Handle block every n minutes only (e.g. every 5 minutes)
