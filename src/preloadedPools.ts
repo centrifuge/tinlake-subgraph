@@ -21,18 +21,18 @@ export let mainnetPreloadedPools: PreloadedPool[] = [
     assessorStartBlock: 11063166,
     network: 'mainnet',
   },
-  // {
-  //   id: '0x4ca805ce8ece2e63ffc1f9f8f2731d3f48df89df', // HTC2 new coordinator April 2021
-  //   ipfsHash: 'QmYBV6TvKYXVoBdW2kBm28RVgbbfJv4KEXHWsHc7ZKB6fr',
-  //   assessorStartBlock: 12342687,
-  //   network: 'mainnet',
-  // },
-  // {
-  //   id: '0x53b2d22d07e069a3b132bfeaad275b10273d381e', // NS2 new coordinator July 2021
-  //   ipfsHash: 'QmR3xMxpm5Wr52LAKkVyozbGEjYyqK56mZNyVnfypcKTGd',
-  //   assessorStartBlock: 12786540,
-  //   network: 'mainnet',
-  // },
+  {
+    id: '0x4ca805ce8ece2e63ffc1f9f8f2731d3f48df89df', // HTC2 new coordinator April 2021
+    ipfsHash: 'QmYBV6TvKYXVoBdW2kBm28RVgbbfJv4KEXHWsHc7ZKB6fr',
+    assessorStartBlock: 12342687,
+    network: 'mainnet',
+  },
+  {
+    id: '0x53b2d22d07e069a3b132bfeaad275b10273d381e', // NS2 new coordinator July 2021
+    ipfsHash: 'QmR3xMxpm5Wr52LAKkVyozbGEjYyqK56mZNyVnfypcKTGd',
+    assessorStartBlock: 12786540,
+    network: 'mainnet',
+  },
 ]
 
 export let kovanPreloadedPools: PreloadedPool[] = []
