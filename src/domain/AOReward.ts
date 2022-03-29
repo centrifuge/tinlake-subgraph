@@ -1,7 +1,15 @@
-import { BigInt, BigDecimal, log, Address } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, log, Address, ethereum } from '@graphprotocol/graph-ts'
 import { CfgRewardRate } from '../../generated/Block/CfgRewardRate'
+import { CfgSplitRewardRate } from '../../generated/Block/CfgSplitRewardRate'
 import { Pool, PoolAddresses, RewardDayTotal, RewardLink, AORewardBalance } from '../../generated/schema'
-import { secondsInDay, cfgRewardRateAddress, cfgRewardRateDeploymentDate, fixed27 } from '../config'
+import {
+  secondsInDay,
+  cfgRewardRateAddress,
+  cfgRewardRateDeploymentDate,
+  fixed27,
+  cfgSplitRewardRateDeploymentDate,
+  cfgSplitRewardRateAddressMainnet,
+} from '../config'
 import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
@@ -69,8 +77,14 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
   let thirdRate = BigDecimal.fromString('0.0002')
 
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
-    let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
-    let aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
+    let aoRewardRateOption: ethereum.CallResult<BigInt>
+    if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
+      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      aoRewardRateOption = cfgRewardRate.try_investorRewardRate()
+    } else {
+      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
+    }
 
     log.info('trying to call CfgRewardRate contract for AO at {}, reverted {}', [
       cfgRewardRateAddress.toString(),
