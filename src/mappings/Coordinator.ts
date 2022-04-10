@@ -24,6 +24,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
     let seniorTokenPrice = coordinator.try_epochSeniorTokenPrice()
     let juniorTokenPrice = coordinator.try_epochJuniorTokenPrice()
 
+    
     log.info('trying to call Coordinator at {}, seniorTokenPrice reverted: {}, juniorTokenPrice reverted: {}', [
       call.to.toHexString(),
       seniorTokenPrice.reverted ? 'true' : 'false',
