@@ -13,6 +13,8 @@ import { timestampToDate } from '../util/date'
 import { fixed27, secondsInDay, zeroAddress } from '../config'
 import { loadOrCreatePreviousTransaction } from '../domain/PrevInvestorTransactionByToken'
 
+// comment to change IPFS hash
+
 function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
   let paperchainRoot = '0x82B8617A16e388256617FeBBa1826093401a3fE5'
   if (poolId != paperchainRoot) {
@@ -24,7 +26,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
     let seniorTokenPrice = coordinator.try_epochSeniorTokenPrice()
     let juniorTokenPrice = coordinator.try_epochJuniorTokenPrice()
 
-    
+
     log.info('trying to call Coordinator at {}, seniorTokenPrice reverted: {}, juniorTokenPrice reverted: {}', [
       call.to.toHexString(),
       seniorTokenPrice.reverted ? 'true' : 'false',
