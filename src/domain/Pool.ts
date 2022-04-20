@@ -83,6 +83,23 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
 
   log.info('createUpdatedPoolHandlers: {} => {}', [prevAddresses.id, newAddresses.id])
 
+  log.info("PREVIOUS: coordinator: {}, assesor: {}, reserve: {}, senior Tranche: {}, junior tranche: {}, mgr: {}", [
+    prevAddresses.coordinator,
+    prevAddresses.assessor,
+    prevAddresses.reserve,
+    prevAddresses.seniorTranche,
+    prevAddresses.juniorTranche,
+    prevAddresses.makerMgr
+  ])
+  log.info("NEW: coordinator: {}, assesor: {}, reserve: {}, senior Tranche: {}, junior tranche: {}, mgr: {}", [
+    newAddresses.coordinator,
+    newAddresses.assessor,
+    newAddresses.reserve,
+    newAddresses.seniorTranche,
+    newAddresses.juniorTranche,
+    newAddresses.makerMgr
+  ])
+
   if (prevAddresses.coordinator != newAddresses.coordinator) {
     log.info('createUpdatedPoolHandlers: creating handler for changed coordinator {} => {}', [
       prevAddresses.coordinator,
@@ -143,6 +160,7 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
       newAddresses.seniorTranche,
     ])
     TrancheTemplate.createWithContext(Address.fromString(newAddresses.seniorTranche), context)
+    log.info("senior tranche updated", [])
   }
 
   if (prevAddresses.juniorTranche != newAddresses.juniorTranche) {
