@@ -1,5 +1,8 @@
 specVersion: 0.0.2
 description: Tinlake Mainnet Production
+graft:
+  base: QmNXmoKc82AHzMupxisVCAn1PHHMazqAdjjWcHyXm8m3Bj
+  block: 14000000
 schema:
   file: ./schema.graphql
 dataSources:
@@ -13,7 +16,7 @@ dataSources:
       startBlock: 11063000
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -55,7 +58,7 @@ dataSources:
       startBlock: 9994872
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -78,7 +81,7 @@ dataSources:
       startBlock: 11113233
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -104,7 +107,7 @@ dataSources:
       startBlock: 11686325
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - RewardLink
@@ -124,7 +127,7 @@ templates:
       abi: Coordinator
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -150,7 +153,7 @@ templates:
       abi: Assessor
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -168,7 +171,7 @@ templates:
       abi: Shelf
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Pool
@@ -201,7 +204,7 @@ templates:
       abi: NftFeed
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Loan
@@ -225,7 +228,7 @@ templates:
       abi: ERC20
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - Transfer
@@ -243,7 +246,7 @@ templates:
       abi: Tranche
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.5
       language: wasm/assemblyscript
       entities:
         - TokenBalance
