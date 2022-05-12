@@ -115,7 +115,7 @@ export function handleShelfClose(call: CloseCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfClose: loan {} not found', [loanId])
     return
   }
@@ -144,7 +144,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfBorrow: loan {} not found', [loanId])
     return
   }
@@ -164,7 +164,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.save()
 
   let pool = Pool.load(poolId)
-  if (pool == null) {
+  if (!pool) {
     log.error('handleShelfBorrow: pool {} not found', [poolId])
     return
   }
@@ -194,7 +194,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfRepay: loan {} not found', [loanId])
     return
   }
@@ -207,7 +207,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   loan.save()
 
   let pool = Pool.load(poolId)
-  if (pool == null) {
+  if (!pool) {
     log.error('handleShelfRepay: pool {} not found', [poolId])
     return
   }

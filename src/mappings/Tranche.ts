@@ -33,7 +33,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   if (isSystemAccount(poolId, account)) {
     return
   }
-  if (Account.load(account) == null) {
+  if (!Account.load(account)) {
     createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)
@@ -106,7 +106,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   if (isSystemAccount(poolId, account)) {
     return
   }
-  if (Account.load(account) == null) {
+  if (!Account.load(account)) {
     createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)

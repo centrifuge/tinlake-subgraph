@@ -36,7 +36,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleNftFeedUpdate: loan {} not found', [loanId])
     return
   }

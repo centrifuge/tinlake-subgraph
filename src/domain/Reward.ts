@@ -28,7 +28,7 @@ export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
 
 export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
   let rewardDayTotal = RewardDayTotal.load(date.toString())
-  if (rewardDayTotal == null) {
+  if (!rewardDayTotal) {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
@@ -46,7 +46,7 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
 
 export function loadOrCreateRewardBalance(address: string): RewardBalance {
   let rb = RewardBalance.load(address)
-  if (rb == null) {
+  if (!rb) {
     rb = new RewardBalance(address)
     rb.links = []
     rb.linkableRewards = BigDecimal.fromString('0')
@@ -60,7 +60,7 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
 export function loadOrCreateRewardByToken(account: string, token: string): RewardByToken {
   let id = account.concat(token)
   let rbt = RewardByToken.load(id)
-  if (rbt == null) {
+  if (!rbt){
     rbt = new RewardByToken(id)
     rbt.account = account
     rbt.token = token

@@ -26,7 +26,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
 
     // update loan
     let loan = Loan.load(loanId)
-    if (loan == null) {
+    if (!loan) {
       log.critical('updateLoans: loan {} not found', [loanId])
     }
 
@@ -34,7 +34,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     loan.save()
 
     totalDebt = totalDebt.plus(debt)
-    if (loan.interestRatePerSecond == null) {
+    if (!loan.interestRatePerSecond) {
       log.warning('updateLoans: interestRatePerSecond on loan {} is null', [loanId])
       continue
     }

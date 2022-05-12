@@ -12,7 +12,7 @@ export function createAccount(address: string): Account {
 
 export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   let ids = GlobalAccountId.load(id)
-  if (ids == null) {
+  if (!ids) {
     ids = new GlobalAccountId(id)
     ids.accounts = []
     ids.numInvestors = BigInt.fromI32(0)

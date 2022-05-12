@@ -14,7 +14,7 @@ import { loadOrCreateRewardDayTotal } from './Reward'
 
 export function loadOrCreateAORewardBalance(address: string): AORewardBalance {
   let rb = AORewardBalance.load(address)
-  if (rb == null) {
+  if (!rb) {
     rb = new AORewardBalance(address)
     rb.links = []
     rb.linkableRewards = BigDecimal.fromString('0')

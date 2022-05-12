@@ -94,7 +94,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     let address = investors[i]
 
     let account = Account.load(address)
-    if (account == null) {
+    if (!account) {
       account = createAccount(address)
     }
     let accountRewardBalance = loadOrCreateRewardBalance(address)
@@ -107,7 +107,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
 
     // if they an active investment and the nzbs exists, keep it as it is
     else {
-      if (accountRewardBalance.nonZeroBalanceSince == null) {
+      if (!accountRewardBalance.nonZeroBalanceSince) {
         // if they have an active investment and the nzbs is null
         // then set the nzbS to yesterdayTimestamp
         accountRewardBalance.nonZeroBalanceSince = date
@@ -124,7 +124,7 @@ function resetActiveInvestments(): void {
     let address = investors[i]
 
     let account = Account.load(address)
-    if (account == null) {
+    if (!account) {
       account = createAccount(address)
     }
     account.rewardCalcBitFlip = false

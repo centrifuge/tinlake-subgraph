@@ -23,7 +23,7 @@ export function addPoolToRegistry(poolId: string): void {
 
 export function getAllPools(): string[] {
   let registry = PoolRegistry.load(registryAddress)
-  if (registry == null) {
+  if (!registry) {
     return []
   }
 

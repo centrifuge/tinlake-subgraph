@@ -9,7 +9,7 @@ export function handleAssessorFile(call: AssessorFileCall): void {
 
   let poolId = dataSource.context().getString('id')
   let pool = Pool.load(poolId)
-  if (pool == null) {
+  if (!pool) {
     log.error('handleAssessorFile: pool {} not found', [poolId])
     return
   }

@@ -17,7 +17,7 @@ export function createToken(address: string): Token {
 
 export function loadOrCreateToken(address: string): Token {
   let token = Token.load(address)
-  if (token == null) {
+  if (!token) {
     token = createToken(address)
   }
   return <Token>token

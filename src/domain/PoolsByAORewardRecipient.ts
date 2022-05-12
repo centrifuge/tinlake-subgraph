@@ -5,7 +5,7 @@ import { pushUnique } from '../util/array'
 
 export function loadOrCreatePoolsByAORewardRecipient(recipient: string): PoolsByAORewardRecipient {
   let p = PoolsByAORewardRecipient.load(recipient)
-  if (p == null) {
+  if (!p) {
     p = new PoolsByAORewardRecipient(recipient)
     p.pools = []
     p.save()

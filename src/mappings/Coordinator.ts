@@ -54,7 +54,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
           if (tb.supplyAmount > BigInt.fromI32(0)) {
             if (
               (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-              prevTx === null ||
+              !prevTx ||
               prevTx.type != 'INVEST_EXECUTION'
             ) {
               let id = txHash
@@ -87,7 +87,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
           if (tb.redeemAmount > BigInt.fromI32(0)) {
             if (
               (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-              prevTx === null ||
+              !prevTx||
               prevTx.type != 'REDEEM_EXECUTION'
             ) {
               let id = txHash
@@ -138,7 +138,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
           if (tb.supplyAmount > new BigInt(0)) {
             if (
               (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-              prevTx === null ||
+              !prevTx||
               prevTx.type != 'INVEST_EXECUTION'
             ) {
               let id = txHash
@@ -171,7 +171,7 @@ function addInvestorTransactions(poolId: string, call: ExecuteEpochCall): void {
           if (tb.redeemAmount > new BigInt(0)) {
             if (
               (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-              prevTx === null ||
+              !prevTx||
               prevTx.type != 'REDEEM_EXECUTION'
             ) {
               let id = txHash
@@ -307,13 +307,13 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
 
   let date30Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 30))
   let day30Ago = Day.load(date30Ago.toString())
-  if (day30Ago == null) {
+  if (!day30Ago) {
     // can return early here, if we don't have data for 30 days ago, we won't have data for more than 30 days
     return pool
   }
 
   let pool30Ago = DailyPoolData.load(pool.id.concat(day30Ago.id))
-  if (pool30Ago == null) {
+  if (!pool30Ago) {
     // can return early here, if we don't have data for 30 days ago, we won't have data for more than 30 days
     return pool
   }
@@ -330,13 +330,13 @@ export function addYields(pool: Pool, block: ethereum.Block): Pool {
 
   let date90Ago = dateNow.minus(BigInt.fromI32(secondsInDay * 90))
   let day90Ago = Day.load(date90Ago.toString())
-  if (day90Ago == null) {
+  if (!day90Ago) {
     // can return early here, if we don't have data for 90 days ago, we won't have data for more than 90 days
     return pool
   }
 
   let pool90Ago = DailyPoolData.load(pool.id.concat(day90Ago.id))
-  if (pool90Ago == null) {
+  if (!pool90Ago) {
     // can return early here, if we don't have data for 90 days ago, we won't have data for more than 90 days
     return pool
   }

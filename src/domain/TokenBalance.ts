@@ -17,7 +17,7 @@ import { loadOrCreateToken } from './Token'
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
   let tb = TokenBalance.load(owner.concat(tokenAddress))
   {
-    if (tb == null) {
+    if (!tb) {
       tb = new TokenBalance(owner.concat(tokenAddress))
       tb.owner = owner
       tb.balanceAmount = BigInt.fromI32(0)
@@ -44,7 +44,7 @@ export function loadOrCreateDailyInvestorTokenBalance(
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
   let ditb = DailyInvestorTokenBalance.load(id)
-  if (ditb == null) {
+  if (!ditb) {
     ditb = new DailyInvestorTokenBalance(id)
     ditb.account = tokenBalance.owner
     ditb.day = timestamp.toString()
@@ -120,7 +120,7 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
 // made up currently junior and senior token.owners
 export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   let ids = PoolInvestor.load(poolId)
-  if (ids == null) {
+  if (!ids) {
     ids = new PoolInvestor(poolId)
     ids.accounts = []
     ids.save()
@@ -172,7 +172,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       // if token balance value is greater than 0, they have an active investment
       if (investmentGreaterThanZero(<TokenBalance>tb)) {
         let account = Account.load(ditb.account)
-        if (account == null) {
+        if (!account) {
           account = createAccount(ditb.account)
         }
         account.rewardCalcBitFlip = true

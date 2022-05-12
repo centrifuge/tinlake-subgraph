@@ -17,7 +17,7 @@ export function isNewDay(block: ethereum.Block): boolean {
   let date = timestampToDate(block.timestamp)
   let today = Day.load(date.toString())
 
-  if (today == null) {
+  if (!today) {
     createDay(date.toString())
     return true
   } else return false
@@ -32,7 +32,7 @@ export function getToday(block: ethereum.Block): Day {
 // and today's timestamp are greater than or equal to sixty days in seconds
 // if kovan, we want to make rewards claimable after 1 day
 export function rewardsAreClaimable(today: BigInt, nonZeroSince: BigInt | null): boolean {
-  if (nonZeroSince == null) return false
+  if (!nonZeroSince) return false
   return dataSource.network() == 'mainnet'
     ? today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInThirtyDays))
     : today.minus(<BigInt>nonZeroSince).ge(BigInt.fromI32(secondsInDay))

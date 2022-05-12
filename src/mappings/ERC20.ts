@@ -47,7 +47,7 @@ export function handleERC20Transfer(event: TransferEvent): void {
     .toString()
     .concat('-')
     .concat(event.logIndex.toString())
-  if (ERC20Transfer.load(id) == null) {
+  if (!ERC20Transfer.load(id)) {
     createERC20Transfer(id, event, dataSource.context().getString('id'))
   }
 }
