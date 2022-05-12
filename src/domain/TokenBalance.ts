@@ -61,22 +61,24 @@ export function loadOrCreateDailyInvestorTokenBalance(
 
   // update token values
   let addresses = PoolAddresses.load(pool.id)
-  if (tokenBalance.token == addresses.seniorToken) {
-    ditb.seniorTokenAmount = tokenBalance.balanceAmount
-    ditb.seniorSupplyAmount = tokenBalance.supplyAmount
-    ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
-    ditb.seniorTokenValue = pool.seniorTokenPrice
-      .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
-      .div(fixed27)
-  } else {
-    ditb.juniorTokenAmount = tokenBalance.balanceAmount
-    ditb.juniorSupplyAmount = tokenBalance.supplyAmount
-    ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
-    ditb.juniorTokenValue = pool.juniorTokenPrice
-      .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
-      .div(fixed27)
+  if (!!addresses) {
+    if (tokenBalance.token == addresses.seniorToken) {
+      ditb.seniorTokenAmount = tokenBalance.balanceAmount
+      ditb.seniorSupplyAmount = tokenBalance.supplyAmount
+      ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+      ditb.seniorTokenValue = pool.seniorTokenPrice
+        .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
+        .div(fixed27)
+    } else {
+      ditb.juniorTokenAmount = tokenBalance.balanceAmount
+      ditb.juniorSupplyAmount = tokenBalance.supplyAmount
+      ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+      ditb.juniorTokenValue = pool.juniorTokenPrice
+        .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
+        .div(fixed27)
+    }
+    ditb.save()
   }
-  ditb.save()
   return <DailyInvestorTokenBalance>ditb
 }
 

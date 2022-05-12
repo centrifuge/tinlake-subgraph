@@ -31,44 +31,47 @@ export function calculateAORewards(date: BigInt, pool: Pool): void {
   systemRewards = setAORewardRate(date, systemRewards)
 
   let tokenAddresses = PoolAddresses.load(pool.id)
+  if (tokenAddresses) {
+    let reward = loadOrCreateAORewardBalance(tokenAddresses.id)
 
-  let reward = loadOrCreateAORewardBalance(tokenAddresses.id)
+    let r = pool.totalDebt.toBigDecimal().times(systemRewards.aoRewardRate)
 
-  let r = pool.totalDebt.toBigDecimal().times(systemRewards.aoRewardRate)
+    // if an address is linked add rewards to the most recently linked address
+    if (reward.links.length > 0) {
+      let arr = reward.links
+      let lastLinked = RewardLink.load(arr[arr.length - 1])
+      if (lastLinked) {
+        lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+        // write the linkable rewards
+        lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
+        lastLinked.save()
+      }
 
-  // if an address is linked add rewards to the most recently linked address
-  if (reward.links.length > 0) {
-    let arr = reward.links
-    let lastLinked = RewardLink.load(arr[arr.length - 1])
-    lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
-    // write the linkable rewards
-    lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
-    lastLinked.save()
+      // reset linkableRewards to 0
+      reward.linkableRewards = BigDecimal.fromString('0')
+    }
+    // if no linked address is found, we track reward in linkableRewards
+    else {
+      reward.linkableRewards = reward.linkableRewards.plus(r)
+    }
 
-    // reset linkableRewards to 0
-    reward.linkableRewards = BigDecimal.fromString('0')
+    // totalRewards are cumulative across linked addresses
+    log.info('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
+    reward.totalRewards = reward.totalRewards.plus(r)
+    reward.save()
+
+    // add AO's today reward to today's rewards obj
+    systemRewards.todayAOReward = systemRewards.todayAOReward.plus(r)
+
+    // add yesterday's aggregate value to today's toDate aggregate
+    let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))
+    let prevDayRewards = loadOrCreateRewardDayTotal(prevDayRewardId)
+    systemRewards.toDateAORewardAggregateValue = systemRewards.todayAOReward.plus(
+      prevDayRewards.toDateAORewardAggregateValue
+    )
+
+    systemRewards.save()
   }
-  // if no linked address is found, we track reward in linkableRewards
-  else {
-    reward.linkableRewards = reward.linkableRewards.plus(r)
-  }
-
-  // totalRewards are cumulative across linked addresses
-  log.info('calculateAORewards: AO for pool {} earned {} today', [pool.id.toString(), r.toString()])
-  reward.totalRewards = reward.totalRewards.plus(r)
-  reward.save()
-
-  // add AO's today reward to today's rewards obj
-  systemRewards.todayAOReward = systemRewards.todayAOReward.plus(r)
-
-  // add yesterday's aggregate value to today's toDate aggregate
-  let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))
-  let prevDayRewards = loadOrCreateRewardDayTotal(prevDayRewardId)
-  systemRewards.toDateAORewardAggregateValue = systemRewards.todayAOReward.plus(
-    prevDayRewards.toDateAORewardAggregateValue
-  )
-
-  systemRewards.save()
 }
 
 function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecimal {

@@ -22,7 +22,7 @@ export function updatePoolAddresses(poolId: string, addresses: TypedMap<string, 
     poolAddresses.aoRewardRecipient = toLowerCaseAddress(aoRewardRecipient.toString())
   }
   let makerMgr = addresses.get('MAKER_MGR')
-  if (!makerMgr.isNull() && makerMgr.toString() != '') {
+  if (!!makerMgr && makerMgr.toString() != '') {
     poolAddresses.makerMgr = toLowerCaseAddress(makerMgr.toString())
   }
   poolAddresses.save()

@@ -62,7 +62,7 @@ export function upsertPool(poolId: string, hash: string): void {
   }
 
   let obj = json.fromBytes(data as Bytes).toObject()
-  let addresses = obj.get('addresses').toObject()
+  let addresses = (obj.get('addresses') as JSONValue).toObject()
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed

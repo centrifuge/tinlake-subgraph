@@ -28,6 +28,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let loan = Loan.load(loanId)
     if (!loan) {
       log.critical('updateLoans: loan {} not found', [loanId])
+      return [new BigInt(0), new BigInt(0)]
     }
 
     loan.debt = debt

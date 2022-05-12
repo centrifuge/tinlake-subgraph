@@ -104,44 +104,48 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   for (let i = 0; i < accounts.length; i++) {
     let account = accounts[i]
     let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
-    let reward = loadOrCreateRewardBalance(ditb.account)
+    if (!!ditb) {
+      let reward = loadOrCreateRewardBalance(ditb.account)
 
-    updateInvestorRewardsByToken(
-      <PoolAddresses>tokenAddresses,
-      <DailyInvestorTokenBalance>ditb,
-      systemRewards.dropRewardRate,
-      systemRewards.tinRewardRate
-    )
+      updateInvestorRewardsByToken(
+        <PoolAddresses>tokenAddresses,
+        <DailyInvestorTokenBalance>ditb,
+        systemRewards.dropRewardRate,
+        systemRewards.tinRewardRate
+      )
 
-    let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
-    let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
-    let r = seniorRewards.plus(juniorRewards)
+      let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
+      let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
+      let r = seniorRewards.plus(juniorRewards)
 
-    // if rewards are claimable, and an address is linked
-    // add them to the most recently linked address
-    if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
-      let arr = reward.links
-      let lastLinked = RewardLink.load(arr[arr.length - 1])
-      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
-      // write the linkable rewards
-      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
-      lastLinked.save()
+      // if rewards are claimable, and an address is linked
+      // add them to the most recently linked address
+      if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
+        let arr = reward.links
+        let lastLinked = RewardLink.load(arr[arr.length - 1])
+        if (lastLinked) {
+          lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+          // write the linkable rewards
+          lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
+          lastLinked.save()
+        }
 
-      // reset linkableRewards to 0
-      reward.linkableRewards = BigDecimal.fromString('0')
+        // reset linkableRewards to 0
+        reward.linkableRewards = BigDecimal.fromString('0')
+      }
+      // if no linked address is found, we track reward in linkableRewards
+      else {
+        reward.linkableRewards = reward.linkableRewards.plus(r)
+      }
+      // totalRewards are cumulative across linked addresses
+      log.info('calculateRewards: {} earned {} today', [account, r.toString()])
+      reward.totalRewards = reward.totalRewards.plus(r)
+
+      // add user's today reward to today's rewards obj
+      systemRewards.todayReward = systemRewards.todayReward.plus(r)
+      systemRewards.save()
+      reward.save()
     }
-    // if no linked address is found, we track reward in linkableRewards
-    else {
-      reward.linkableRewards = reward.linkableRewards.plus(r)
-    }
-    // totalRewards are cumulative across linked addresses
-    log.info('calculateRewards: {} earned {} today', [account, r.toString()])
-    reward.totalRewards = reward.totalRewards.plus(r)
-
-    // add user's today reward to today's rewards obj
-    systemRewards.todayReward = systemRewards.todayReward.plus(r)
-    systemRewards.save()
-    reward.save()
   }
   // add yesterday's aggregate value to today's toDate aggregate
   let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))

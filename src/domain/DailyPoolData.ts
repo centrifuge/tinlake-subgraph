@@ -17,32 +17,36 @@ export function createDailySnapshot(block: ethereum.Block): void {
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
-  let pools = getAllPools()
-  for (let i = 0; i < pools.length; i++) {
-    let pool = Pool.load(pools[i]) as Pool
-    let addresses = PoolAddresses.load(pool.id)
-    log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
+  if (!!yesterday) {
+    let pools = getAllPools()
+    for (let i = 0; i < pools.length; i++) {
+      let pool = Pool.load(pools[i]) as Pool
+      let addresses = PoolAddresses.load(pool.id)
+      if (!!addresses) {
+        log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
 
-    let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
-    setDailyPoolValues(pool, dailyPoolData)
+        let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
+        setDailyPoolValues(pool, dailyPoolData)
 
-    let juniorToken = loadOrCreateToken(addresses.juniorToken)
-    createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
+        let juniorToken = loadOrCreateToken(addresses.juniorToken)
+        createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
 
-    let seniorToken = loadOrCreateToken(addresses.seniorToken)
-    createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+        let seniorToken = loadOrCreateToken(addresses.seniorToken)
+        createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+      }
+    }
+
+    updateSystemWideNonZeroBalances(yesterdayTimeStamp)
+
+    // another pool loop to now update rewards
+    for (let i = 0; i < pools.length; i++) {
+      let pool = Pool.load(pools[i]) as Pool
+      updateRewardDayTotal(yesterdayTimeStamp, pool)
+      calculateRewards(yesterdayTimeStamp, pool)
+      calculateAORewards(yesterdayTimeStamp, pool)
+    }
+    resetActiveInvestments()
   }
-
-  updateSystemWideNonZeroBalances(yesterdayTimeStamp)
-
-  // another pool loop to now update rewards
-  for (let i = 0; i < pools.length; i++) {
-    let pool = Pool.load(pools[i]) as Pool
-    updateRewardDayTotal(yesterdayTimeStamp, pool)
-    calculateRewards(yesterdayTimeStamp, pool)
-    calculateAORewards(yesterdayTimeStamp, pool)
-  }
-  resetActiveInvestments()
 }
 
 export function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {

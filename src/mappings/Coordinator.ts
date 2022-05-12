@@ -245,9 +245,14 @@ export function updateAllPoolValues(block: ethereum.Block, today: Day): void {
 
 export function updatePoolValues(poolId: string, block: ethereum.Block, today: Day): void {
   let pool = Pool.load(poolId)
+  if (!pool) {
+    return
+  }
 
   let addresses = PoolAddresses.load(poolId)
-
+  if (!addresses) {
+    return
+  }
   // Update loans and return weightedInterestRate and totalDebt
   let loanValues = updateLoans(pool as Pool, addresses.pile)
 
