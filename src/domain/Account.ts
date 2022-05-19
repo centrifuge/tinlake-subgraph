@@ -33,6 +33,10 @@ export function ensureSavedInGlobalAccounts(account: string): void {
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
 
+  if (!addresses) {
+    return false
+  }
+
   if (addresses.seniorToken == account) return true
   if (addresses.juniorToken == account) return true
   if (addresses.seniorTranche == account) return true

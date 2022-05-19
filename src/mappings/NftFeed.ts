@@ -13,6 +13,10 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let poolId = dataSource.context().getString('id')
   let addresses = PoolAddresses.load(poolId)
 
+  if (!addresses) {
+    return
+  }
+
   let shelf = Shelf.bind(<Address>Address.fromHexString(addresses.shelf))
   let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
   let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))

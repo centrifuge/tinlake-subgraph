@@ -26,6 +26,10 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let pool = Pool.load(poolId)
 
+  if (!pool) {
+    return
+  }
+
   if (!pool.loans.includes(loanId)) {
     // TODO: maybe optimize by using a binary search on a sorted array instead
     let loans = pool.loans
@@ -50,6 +54,9 @@ export function handleShelfIssue(call: IssueCall): void {
 
   // get risk group and interest rate from navFeed
   let addresses = PoolAddresses.load(poolId)
+  if (!addresses) {
+    return
+  }
   let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
   let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
 
@@ -67,7 +74,7 @@ export function handleShelfIssue(call: IssueCall): void {
   }
 
   // Add risk group
-  loan.riskGroup = riskGroup.value;
+  loan.riskGroup = riskGroup.value
 
   // get maturity date
   let maturityDate = navFeed.try_maturityDate(nftHash.value)
@@ -156,6 +163,9 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.debt = loan.debt.plus(amount)
 
   let addresses = PoolAddresses.load(poolId)
+  if (!addresses) {
+    return
+  }
   let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
   loan.ceiling = navFeed.ceiling(loanIndex)
   let nftID = navFeed.nftID(loanIndex)
