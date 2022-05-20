@@ -2,6 +2,8 @@ import { BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts'
 import { Day } from '../../generated/schema'
 import { timestampToDate } from '../util/date'
 import { secondsInDay, secondsInThirtyDays } from '../config'
+import { loadOrCreateRewardDayTotal } from '../domain/Reward'
+import { createDailySnapshot } from '../domain/DailyPoolData'
 
 export function createDay(dateString: string): Day {
   let day = new Day(dateString)
@@ -25,7 +27,16 @@ export function isNewDay(block: ethereum.Block): boolean {
 
 export function getToday(block: ethereum.Block): Day {
   let date = timestampToDate(block.timestamp)
-  return <Day>Day.load(date.toString())
+  let today = Day.load(date.toString())
+  let newDay = today == null
+  if (newDay) {
+    let date = timestampToDate(block.timestamp)
+    today = createDay(date.toString())
+
+    loadOrCreateRewardDayTotal(date)
+    createDailySnapshot(block)
+  }
+  return <Day>today
 }
 
 // if the difference between days since nonzerobalance
