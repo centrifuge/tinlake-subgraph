@@ -86,11 +86,11 @@ export function loadOrCreateDailyInvestorTokenBalance(
 export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses): void {
   let tranche: Tranche
   if (tb.token == poolAddresses.seniorToken) {
-    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.seniorTranche))
+    tranche = Tranche.bind(Address.fromString(poolAddresses.seniorTranche))
   } else {
-    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
+    tranche = Tranche.bind(Address.fromString(poolAddresses.juniorTranche))
   }
-  let calcDisburse = tranche.try_calcDisburse(<Address>Address.fromHexString(tb.owner))
+  let calcDisburse = tranche.try_calcDisburse(Address.fromString(tb.owner))
   if (calcDisburse.reverted) {
     log.warning('calculateDisburse failed - owner {}, token {}, tranche {}', [
       tb.owner.toString(),

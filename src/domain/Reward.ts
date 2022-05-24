@@ -60,7 +60,7 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
 export function loadOrCreateRewardByToken(account: string, token: string): RewardByToken {
   let id = account.concat(token)
   let rbt = RewardByToken.load(id)
-  if (!rbt){
+  if (!rbt) {
     rbt = new RewardByToken(id)
     rbt.account = account
     rbt.token = token
@@ -162,10 +162,10 @@ function getInvestorDropRewardRate(date: BigInt, systemRewards: RewardDayTotal):
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
     let investorDropRewardRateOption: ethereum.CallResult<BigInt>
     if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
-      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      let cfgRewardRate = CfgRewardRate.bind(Address.fromString(cfgRewardRateAddress))
       investorDropRewardRateOption = cfgRewardRate.try_investorRewardRate()
     } else {
-      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      let cfgRewardRate = CfgSplitRewardRate.bind(Address.fromString(cfgSplitRewardRateAddressMainnet))
       investorDropRewardRateOption = cfgRewardRate.try_dropInvestorRewardRate()
     }
 
@@ -218,10 +218,10 @@ function getInvestorTinRewardRate(date: BigInt, systemRewards: RewardDayTotal): 
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
     let investorTinRewardRateOption: ethereum.CallResult<BigInt>
     if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
-      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      let cfgRewardRate = CfgRewardRate.bind(Address.fromString(cfgRewardRateAddress))
       investorTinRewardRateOption = cfgRewardRate.try_investorRewardRate()
     } else {
-      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      let cfgRewardRate = CfgSplitRewardRate.bind(Address.fromString(cfgSplitRewardRateAddressMainnet))
       investorTinRewardRateOption = cfgRewardRate.try_tinInvestorRewardRate()
     }
 

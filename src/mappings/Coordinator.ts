@@ -263,17 +263,17 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   pool.weightedInterestRate = loanValues[0]
   pool.totalDebt = loanValues[1]
 
-  let assessor = Assessor.bind(<Address>Address.fromHexString(addresses.assessor))
+  let assessor = Assessor.bind(Address.fromString(addresses.assessor))
   let currentSeniorRatioResult = assessor.try_seniorRatio()
   pool.currentJuniorRatio = !currentSeniorRatioResult.reverted
     ? seniorToJuniorRatio(currentSeniorRatioResult.value)
     : BigInt.fromI32(0)
 
-  let navFeedContract = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  let navFeedContract = NavFeed.bind(Address.fromString(addresses.feed))
   let currentNav = navFeedContract.try_currentNAV()
   pool.assetValue = !currentNav.reverted ? currentNav.value : BigInt.fromI32(0)
 
-  let reserveContract = Reserve.bind(<Address>Address.fromHexString(addresses.reserve))
+  let reserveContract = Reserve.bind(Address.fromString(addresses.reserve))
   let reserve = reserveContract.try_totalBalance()
   pool.reserve = !reserve.reverted ? reserve.value : BigInt.fromI32(0)
 
@@ -288,7 +288,7 @@ export function updatePoolValues(poolId: string, block: ethereum.Block, today: D
   // Check if senior tranche exists
   if (addresses.seniorTranche != zeroAddress) {
     let seniorDebtResult = new ethereum.CallResult<BigInt>()
-    let assessor = Assessor.bind(<Address>Address.fromHexString(addresses.assessor))
+    let assessor = Assessor.bind(Address.fromString(addresses.assessor))
     seniorDebtResult = assessor.try_seniorDebt_()
 
     pool.seniorDebt = !seniorDebtResult.reverted ? seniorDebtResult.value : BigInt.fromI32(0)

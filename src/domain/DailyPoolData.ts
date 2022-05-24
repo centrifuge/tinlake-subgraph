@@ -82,10 +82,10 @@ export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): vo
   dailyPoolData.currentJuniorRatio = <BigInt>pool.currentJuniorRatio
   dailyPoolData.juniorTokenPrice = <BigInt>pool.juniorTokenPrice
   dailyPoolData.seniorTokenPrice = <BigInt>pool.seniorTokenPrice
-  dailyPoolData.juniorYield30Days = <BigInt>pool.juniorYield30Days
-  dailyPoolData.juniorYield90Days = <BigInt>pool.juniorYield90Days
-  dailyPoolData.seniorYield30Days = <BigInt>pool.seniorYield30Days
-  dailyPoolData.seniorYield90Days = <BigInt>pool.seniorYield90Days
+  dailyPoolData.juniorYield30Days = <BigInt | null>pool.juniorYield30Days
+  dailyPoolData.juniorYield90Days = <BigInt | null>pool.juniorYield90Days
+  dailyPoolData.seniorYield30Days = <BigInt | null>pool.seniorYield30Days
+  dailyPoolData.seniorYield90Days = <BigInt | null>pool.seniorYield90Days
   dailyPoolData.save()
 }
 

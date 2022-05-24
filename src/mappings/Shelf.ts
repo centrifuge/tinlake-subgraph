@@ -57,8 +57,8 @@ export function handleShelfIssue(call: IssueCall): void {
   if (!addresses) {
     return
   }
-  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
-  let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
+  let navFeed = NavFeed.bind(Address.fromString(addresses.feed))
+  let pile = Pile.bind(Address.fromString(addresses.pile))
 
   // generate hash from nftId & registry
   let nftHash = navFeed.try_nftID(loanIndex)
@@ -166,7 +166,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   if (!addresses) {
     return
   }
-  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  let navFeed = NavFeed.bind(Address.fromString(addresses.feed))
   loan.ceiling = navFeed.ceiling(loanIndex)
   let nftID = navFeed.nftID(loanIndex)
   loan.maturityDate = navFeed.maturityDate(nftID)

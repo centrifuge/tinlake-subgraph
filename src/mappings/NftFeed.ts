@@ -17,9 +17,9 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
     return
   }
 
-  let shelf = Shelf.bind(<Address>Address.fromHexString(addresses.shelf))
-  let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  let shelf = Shelf.bind(Address.fromString(addresses.shelf))
+  let pile = Pile.bind(Address.fromString(addresses.pile))
+  let nftFeed = NftFeed.bind(Address.fromString(addresses.feed))
 
   let loanIndex = shelf.nftlookup(nftId)
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)

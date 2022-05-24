@@ -17,14 +17,14 @@ export function removePoolFromPoolsByAORewardRecipient(
   pool: string,
   p: PoolsByAORewardRecipient
 ): PoolsByAORewardRecipient {
-  p.pools = filter(p,pool)
+  p.pools = filter(p, pool)
   return p
 }
 
 // AssemblyScript doesn't support closures so we need our own filter function
-function filter(p: PoolsByAORewardRecipient, pool: string):string[] {
+function filter(p: PoolsByAORewardRecipient, pool: string): string[] {
   let output: string[] = []
-  for (let i = 0; i<p.pools.length; i++) {
+  for (let i = 0; i < p.pools.length; i++) {
     if (p.pools[i] != pool) {
       output.push(p.pools[i])
     }
@@ -33,7 +33,10 @@ function filter(p: PoolsByAORewardRecipient, pool: string):string[] {
 }
 
 export function addPoolsByAORewardRecipient(addr: PoolAddresses): void {
-  log.info('addPoolsByAORewardRecipient: pool: {}, recipient: {}', [addr.id.toString(), addr.aoRewardRecipient as string])
+  log.info('addPoolsByAORewardRecipient: pool: {}, recipient: {}', [
+    addr.id.toString(),
+    (addr.aoRewardRecipient || 'null') as string,
+  ])
 
   // add pool to new recipient
   if (addr.aoRewardRecipient != null) {
@@ -46,8 +49,8 @@ export function addPoolsByAORewardRecipient(addr: PoolAddresses): void {
 export function updatePoolsByAORewardRecipient(oldAddr: PoolAddresses, addr: PoolAddresses): void {
   log.info('updatePoolsByAORewardRecipient: pool: {}, old recipient: {}, new recipient: {}', [
     oldAddr.id.toString(),
-    oldAddr.aoRewardRecipient as string,
-    addr.aoRewardRecipient as string,
+    (oldAddr.aoRewardRecipient || 'null') as string,
+    (addr.aoRewardRecipient || 'null') as string,
   ])
   if (oldAddr.aoRewardRecipient == addr.aoRewardRecipient) {
     return

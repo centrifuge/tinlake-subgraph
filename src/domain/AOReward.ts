@@ -82,10 +82,10 @@ function getAORewardRate(date: BigInt, systemRewards: RewardDayTotal): BigDecima
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
     let aoRewardRateOption: ethereum.CallResult<BigInt>
     if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
-      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      let cfgRewardRate = CfgRewardRate.bind(Address.fromString(cfgRewardRateAddress))
       aoRewardRateOption = cfgRewardRate.try_investorRewardRate()
     } else {
-      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      let cfgRewardRate = CfgSplitRewardRate.bind(Address.fromString(cfgSplitRewardRateAddressMainnet))
       aoRewardRateOption = cfgRewardRate.try_aoRewardRate()
     }
 

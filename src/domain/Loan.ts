@@ -6,7 +6,7 @@ import { loanIndexFromLoanId } from '../util/typecasts'
 export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
   log.info('updateLoans: {}', [pool.id])
 
-  let pile = Pile.bind(<Address>Address.fromHexString(pileAddress))
+  let pile = Pile.bind(Address.fromString(pileAddress))
 
   let totalDebt = BigInt.fromI32(0)
   let totalWeightedDebt = BigInt.fromI32(0)
