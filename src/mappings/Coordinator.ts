@@ -23,8 +23,6 @@ function addInvestorTransactions(poolId: string, tx: ethereum.Transaction, to: A
       return
     }
 
-    log.info(' ', [])
-
     let coordinator = Coordinator.bind(<Address>to)
     let seniorTokenPrice = coordinator.try_epochSeniorTokenPrice()
     let juniorTokenPrice = coordinator.try_epochJuniorTokenPrice()
