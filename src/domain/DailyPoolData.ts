@@ -17,32 +17,36 @@ export function createDailySnapshot(block: ethereum.Block): void {
   let yesterdayTimeStamp = date.minus(BigInt.fromI32(secondsInDay))
   let yesterday = Day.load(yesterdayTimeStamp.toString())
 
-  let pools = getAllPools()
-  for (let i = 0; i < pools.length; i++) {
-    let pool = Pool.load(pools[i]) as Pool
-    let addresses = PoolAddresses.load(pool.id)
-    log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
+  if (!!yesterday) {
+    let pools = getAllPools()
+    for (let i = 0; i < pools.length; i++) {
+      let pool = Pool.load(pools[i]) as Pool
+      let addresses = PoolAddresses.load(pool.id)
+      if (!!addresses) {
+        log.info('createDailySnapshot: loaded pool {}', [pool.shortName])
 
-    let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
-    setDailyPoolValues(pool, dailyPoolData)
+        let dailyPoolData = createDailyPoolData(pool.id, yesterday.id)
+        setDailyPoolValues(pool, dailyPoolData)
 
-    let juniorToken = loadOrCreateToken(addresses.juniorToken)
-    createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
+        let juniorToken = loadOrCreateToken(addresses.juniorToken)
+        createDailyTokenBalances(juniorToken, pool, yesterdayTimeStamp)
 
-    let seniorToken = loadOrCreateToken(addresses.seniorToken)
-    createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+        let seniorToken = loadOrCreateToken(addresses.seniorToken)
+        createDailyTokenBalances(seniorToken, pool, yesterdayTimeStamp)
+      }
+    }
+
+    updateSystemWideNonZeroBalances(yesterdayTimeStamp)
+
+    // another pool loop to now update rewards
+    for (let i = 0; i < pools.length; i++) {
+      let pool = Pool.load(pools[i]) as Pool
+      updateRewardDayTotal(yesterdayTimeStamp, pool)
+      calculateRewards(yesterdayTimeStamp, pool)
+      calculateAORewards(yesterdayTimeStamp, pool)
+    }
+    resetActiveInvestments()
   }
-
-  updateSystemWideNonZeroBalances(yesterdayTimeStamp)
-
-  // another pool loop to now update rewards
-  for (let i = 0; i < pools.length; i++) {
-    let pool = Pool.load(pools[i]) as Pool
-    updateRewardDayTotal(yesterdayTimeStamp, pool)
-    calculateRewards(yesterdayTimeStamp, pool)
-    calculateAORewards(yesterdayTimeStamp, pool)
-  }
-  resetActiveInvestments()
 }
 
 export function createDailyPoolData(poolId: string, yesterday: string): DailyPoolData {
@@ -78,10 +82,10 @@ export function setDailyPoolValues(pool: Pool, dailyPoolData: DailyPoolData): vo
   dailyPoolData.currentJuniorRatio = <BigInt>pool.currentJuniorRatio
   dailyPoolData.juniorTokenPrice = <BigInt>pool.juniorTokenPrice
   dailyPoolData.seniorTokenPrice = <BigInt>pool.seniorTokenPrice
-  dailyPoolData.juniorYield30Days = <BigInt>pool.juniorYield30Days
-  dailyPoolData.juniorYield90Days = <BigInt>pool.juniorYield90Days
-  dailyPoolData.seniorYield30Days = <BigInt>pool.seniorYield30Days
-  dailyPoolData.seniorYield90Days = <BigInt>pool.seniorYield90Days
+  dailyPoolData.juniorYield30Days = <BigInt | null>pool.juniorYield30Days
+  dailyPoolData.juniorYield90Days = <BigInt | null>pool.juniorYield90Days
+  dailyPoolData.seniorYield30Days = <BigInt | null>pool.seniorYield30Days
+  dailyPoolData.seniorYield90Days = <BigInt | null>pool.seniorYield90Days
   dailyPoolData.save()
 }
 
@@ -94,7 +98,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
     let address = investors[i]
 
     let account = Account.load(address)
-    if (account == null) {
+    if (!account) {
       account = createAccount(address)
     }
     let accountRewardBalance = loadOrCreateRewardBalance(address)
@@ -107,7 +111,7 @@ function updateSystemWideNonZeroBalances(date: BigInt): void {
 
     // if they an active investment and the nzbs exists, keep it as it is
     else {
-      if (accountRewardBalance.nonZeroBalanceSince == null) {
+      if (!accountRewardBalance.nonZeroBalanceSince) {
         // if they have an active investment and the nzbs is null
         // then set the nzbS to yesterdayTimestamp
         accountRewardBalance.nonZeroBalanceSince = date
@@ -124,7 +128,7 @@ function resetActiveInvestments(): void {
     let address = investors[i]
 
     let account = Account.load(address)
-    if (account == null) {
+    if (!account) {
       account = createAccount(address)
     }
     account.rewardCalcBitFlip = false

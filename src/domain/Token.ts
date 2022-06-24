@@ -4,7 +4,7 @@ import { ERC20 } from '../../generated/templates/Token/ERC20'
 
 export function createToken(address: string): Token {
   let token = new Token(address)
-  let erc20 = ERC20.bind(<Address>Address.fromHexString(address))
+  let erc20 = ERC20.bind(Address.fromString(address))
   let symbol = erc20.try_symbol()
   if (!symbol.reverted) {
     token.symbol = symbol.value
@@ -17,7 +17,7 @@ export function createToken(address: string): Token {
 
 export function loadOrCreateToken(address: string): Token {
   let token = Token.load(address)
-  if (token == null) {
+  if (!token) {
     token = createToken(address)
   }
   return <Token>token

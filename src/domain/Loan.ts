@@ -6,7 +6,7 @@ import { loanIndexFromLoanId } from '../util/typecasts'
 export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
   log.info('updateLoans: {}', [pool.id])
 
-  let pile = Pile.bind(<Address>Address.fromHexString(pileAddress))
+  let pile = Pile.bind(Address.fromString(pileAddress))
 
   let totalDebt = BigInt.fromI32(0)
   let totalWeightedDebt = BigInt.fromI32(0)
@@ -26,15 +26,16 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
 
     // update loan
     let loan = Loan.load(loanId)
-    if (loan == null) {
+    if (!loan) {
       log.critical('updateLoans: loan {} not found', [loanId])
+      return [new BigInt(0), new BigInt(0)]
     }
 
     loan.debt = debt
     loan.save()
 
     totalDebt = totalDebt.plus(debt)
-    if (loan.interestRatePerSecond == null) {
+    if (!loan.interestRatePerSecond) {
       log.warning('updateLoans: interestRatePerSecond on loan {} is null', [loanId])
       continue
     }

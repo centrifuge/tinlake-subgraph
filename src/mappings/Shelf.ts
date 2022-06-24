@@ -26,6 +26,10 @@ export function handleShelfIssue(call: IssueCall): void {
 
   let pool = Pool.load(poolId)
 
+  if (!pool) {
+    return
+  }
+
   if (!pool.loans.includes(loanId)) {
     // TODO: maybe optimize by using a binary search on a sorted array instead
     let loans = pool.loans
@@ -50,8 +54,11 @@ export function handleShelfIssue(call: IssueCall): void {
 
   // get risk group and interest rate from navFeed
   let addresses = PoolAddresses.load(poolId)
-  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
-  let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
+  if (!addresses) {
+    return
+  }
+  let navFeed = NavFeed.bind(Address.fromString(addresses.feed))
+  let pile = Pile.bind(Address.fromString(addresses.pile))
 
   // generate hash from nftId & registry
   let nftHash = navFeed.try_nftID(loanIndex)
@@ -67,7 +74,7 @@ export function handleShelfIssue(call: IssueCall): void {
   }
 
   // Add risk group
-  loan.riskGroup = riskGroup.value;
+  loan.riskGroup = riskGroup.value
 
   // get maturity date
   let maturityDate = navFeed.try_maturityDate(nftHash.value)
@@ -115,7 +122,7 @@ export function handleShelfClose(call: CloseCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfClose: loan {} not found', [loanId])
     return
   }
@@ -144,7 +151,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfBorrow: loan {} not found', [loanId])
     return
   }
@@ -156,7 +163,10 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.debt = loan.debt.plus(amount)
 
   let addresses = PoolAddresses.load(poolId)
-  let navFeed = NavFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  if (!addresses) {
+    return
+  }
+  let navFeed = NavFeed.bind(Address.fromString(addresses.feed))
   loan.ceiling = navFeed.ceiling(loanIndex)
   let nftID = navFeed.nftID(loanIndex)
   loan.maturityDate = navFeed.maturityDate(nftID)
@@ -164,7 +174,7 @@ export function handleShelfBorrow(call: BorrowCall): void {
   loan.save()
 
   let pool = Pool.load(poolId)
-  if (pool == null) {
+  if (!pool) {
     log.error('handleShelfBorrow: pool {} not found', [poolId])
     return
   }
@@ -194,7 +204,7 @@ export function handleShelfRepay(call: BorrowCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleShelfRepay: loan {} not found', [loanId])
     return
   }
@@ -207,7 +217,7 @@ export function handleShelfRepay(call: BorrowCall): void {
   loan.save()
 
   let pool = Pool.load(poolId)
-  if (pool == null) {
+  if (!pool) {
     log.error('handleShelfRepay: pool {} not found', [poolId])
     return
   }

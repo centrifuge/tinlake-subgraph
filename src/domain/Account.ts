@@ -12,7 +12,7 @@ export function createAccount(address: string): Account {
 
 export function loadOrCreateGlobalAccounts(id: string): GlobalAccountId {
   let ids = GlobalAccountId.load(id)
-  if (ids == null) {
+  if (!ids) {
     ids = new GlobalAccountId(id)
     ids.accounts = []
     ids.numInvestors = BigInt.fromI32(0)
@@ -32,6 +32,10 @@ export function ensureSavedInGlobalAccounts(account: string): void {
 // todo: add operators (they are in json but not in PoolAddresses)
 export function isSystemAccount(poolId: string, account: string): boolean {
   let addresses = PoolAddresses.load(poolId)
+
+  if (!addresses) {
+    return false
+  }
 
   if (addresses.seniorToken == account) return true
   if (addresses.juniorToken == account) return true

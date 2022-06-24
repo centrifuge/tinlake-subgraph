@@ -28,7 +28,7 @@ export function updateRewardDayTotal(date: BigInt, pool: Pool): RewardDayTotal {
 
 export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
   let rewardDayTotal = RewardDayTotal.load(date.toString())
-  if (rewardDayTotal == null) {
+  if (!rewardDayTotal) {
     rewardDayTotal = new RewardDayTotal(date.toString())
     rewardDayTotal.todayValue = BigInt.fromI32(0)
     rewardDayTotal.toDateAggregateValue = BigInt.fromI32(0)
@@ -46,7 +46,7 @@ export function loadOrCreateRewardDayTotal(date: BigInt): RewardDayTotal {
 
 export function loadOrCreateRewardBalance(address: string): RewardBalance {
   let rb = RewardBalance.load(address)
-  if (rb == null) {
+  if (!rb) {
     rb = new RewardBalance(address)
     rb.links = []
     rb.linkableRewards = BigDecimal.fromString('0')
@@ -60,7 +60,7 @@ export function loadOrCreateRewardBalance(address: string): RewardBalance {
 export function loadOrCreateRewardByToken(account: string, token: string): RewardByToken {
   let id = account.concat(token)
   let rbt = RewardByToken.load(id)
-  if (rbt == null) {
+  if (!rbt) {
     rbt = new RewardByToken(id)
     rbt.account = account
     rbt.token = token
@@ -104,44 +104,48 @@ export function calculateRewards(date: BigInt, pool: Pool): void {
   for (let i = 0; i < accounts.length; i++) {
     let account = accounts[i]
     let ditb = DailyInvestorTokenBalance.load(account.concat(pool.id).concat(date.toString()))
-    let reward = loadOrCreateRewardBalance(ditb.account)
+    if (!!ditb) {
+      let reward = loadOrCreateRewardBalance(ditb.account)
 
-    updateInvestorRewardsByToken(
-      <PoolAddresses>tokenAddresses,
-      <DailyInvestorTokenBalance>ditb,
-      systemRewards.dropRewardRate,
-      systemRewards.tinRewardRate
-    )
+      updateInvestorRewardsByToken(
+        <PoolAddresses>tokenAddresses,
+        <DailyInvestorTokenBalance>ditb,
+        systemRewards.dropRewardRate,
+        systemRewards.tinRewardRate
+      )
 
-    let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
-    let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
-    let r = seniorRewards.plus(juniorRewards)
+      let seniorRewards = ditb.seniorTokenValue.toBigDecimal().times(systemRewards.dropRewardRate)
+      let juniorRewards = ditb.juniorTokenValue.toBigDecimal().times(systemRewards.tinRewardRate)
+      let r = seniorRewards.plus(juniorRewards)
 
-    // if rewards are claimable, and an address is linked
-    // add them to the most recently linked address
-    if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
-      let arr = reward.links
-      let lastLinked = RewardLink.load(arr[arr.length - 1])
-      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
-      // write the linkable rewards
-      lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
-      lastLinked.save()
+      // if rewards are claimable, and an address is linked
+      // add them to the most recently linked address
+      if (rewardsAreClaimable(date, reward.nonZeroBalanceSince) && reward.links.length > 0) {
+        let arr = reward.links
+        let lastLinked = RewardLink.load(arr[arr.length - 1])
+        if (lastLinked) {
+          lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(r)
+          // write the linkable rewards
+          lastLinked.rewardsAccumulated = lastLinked.rewardsAccumulated.plus(reward.linkableRewards)
+          lastLinked.save()
+        }
 
-      // reset linkableRewards to 0
-      reward.linkableRewards = BigDecimal.fromString('0')
+        // reset linkableRewards to 0
+        reward.linkableRewards = BigDecimal.fromString('0')
+      }
+      // if no linked address is found, we track reward in linkableRewards
+      else {
+        reward.linkableRewards = reward.linkableRewards.plus(r)
+      }
+      // totalRewards are cumulative across linked addresses
+      log.info('calculateRewards: {} earned {} today', [account, r.toString()])
+      reward.totalRewards = reward.totalRewards.plus(r)
+
+      // add user's today reward to today's rewards obj
+      systemRewards.todayReward = systemRewards.todayReward.plus(r)
+      systemRewards.save()
+      reward.save()
     }
-    // if no linked address is found, we track reward in linkableRewards
-    else {
-      reward.linkableRewards = reward.linkableRewards.plus(r)
-    }
-    // totalRewards are cumulative across linked addresses
-    log.info('calculateRewards: {} earned {} today', [account, r.toString()])
-    reward.totalRewards = reward.totalRewards.plus(r)
-
-    // add user's today reward to today's rewards obj
-    systemRewards.todayReward = systemRewards.todayReward.plus(r)
-    systemRewards.save()
-    reward.save()
   }
   // add yesterday's aggregate value to today's toDate aggregate
   let prevDayRewardId = date.minus(BigInt.fromI32(secondsInDay))
@@ -158,10 +162,10 @@ function getInvestorDropRewardRate(date: BigInt, systemRewards: RewardDayTotal):
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
     let investorDropRewardRateOption: ethereum.CallResult<BigInt>
     if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
-      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      let cfgRewardRate = CfgRewardRate.bind(Address.fromString(cfgRewardRateAddress))
       investorDropRewardRateOption = cfgRewardRate.try_investorRewardRate()
     } else {
-      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      let cfgRewardRate = CfgSplitRewardRate.bind(Address.fromString(cfgSplitRewardRateAddressMainnet))
       investorDropRewardRateOption = cfgRewardRate.try_dropInvestorRewardRate()
     }
 
@@ -214,10 +218,10 @@ function getInvestorTinRewardRate(date: BigInt, systemRewards: RewardDayTotal): 
   if (date.gt(BigInt.fromI32(cfgRewardRateDeploymentDate))) {
     let investorTinRewardRateOption: ethereum.CallResult<BigInt>
     if (date.lt(BigInt.fromI32(cfgSplitRewardRateDeploymentDate))) {
-      let cfgRewardRate = CfgRewardRate.bind(<Address>Address.fromHexString(cfgRewardRateAddress))
+      let cfgRewardRate = CfgRewardRate.bind(Address.fromString(cfgRewardRateAddress))
       investorTinRewardRateOption = cfgRewardRate.try_investorRewardRate()
     } else {
-      let cfgRewardRate = CfgSplitRewardRate.bind(<Address>Address.fromHexString(cfgSplitRewardRateAddressMainnet))
+      let cfgRewardRate = CfgSplitRewardRate.bind(Address.fromString(cfgSplitRewardRateAddressMainnet))
       investorTinRewardRateOption = cfgRewardRate.try_tinInvestorRewardRate()
     }
 

@@ -12,7 +12,7 @@ import { Pool, PoolAddresses } from '../../generated/schema'
 import { seniorToJuniorRatio } from '../util/pool'
 
 export function createPool(poolId: string, shortName: string, addresses: PoolAddresses): void {
-  let assessor = Assessor.bind(<Address>Address.fromHexString(addresses.assessor))
+  let assessor = Assessor.bind(Address.fromString(addresses.assessor))
   let interestRateResult = assessor.try_seniorInterestRate()
 
   if (interestRateResult.reverted) {

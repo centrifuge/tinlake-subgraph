@@ -1,4 +1,4 @@
-import { log, Bytes, ipfs, json } from '@graphprotocol/graph-ts'
+import { log, Bytes, JSONValue, ipfs, json } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers, createUpdatedPoolHandlers } from '../domain/Pool'
 import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
@@ -47,7 +47,7 @@ export function handlePoolUpdated(call: PoolUpdated): void {
 export function upsertPool(poolId: string, hash: string): void {
   let oldPoolAddresses = PoolAddresses.load(poolId)
 
-  if (oldPoolAddresses == null) {
+  if (!oldPoolAddresses) {
     // If this is a new pool or handling the PoolCreated event failed (e.g. due to a missing hash), then we will try to create it here
     log.error('handlePoolUpdated: could not load old pool addresses, attempting to create a new pool', [])
     loadPoolFromIPFS(hash)
@@ -56,13 +56,13 @@ export function upsertPool(poolId: string, hash: string): void {
 
   // Update pool addresses
   let data = ipfs.cat(hash)
-  if (data == null) {
+  if (!data) {
     log.error('handlePoolUpdated: IPFS data is null - hash {}', [hash])
     return
   }
 
   let obj = json.fromBytes(data as Bytes).toObject()
-  let addresses = obj.get('addresses').toObject()
+  let addresses = (obj.get('addresses') as JSONValue).toObject()
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed
@@ -74,28 +74,28 @@ export function upsertPool(poolId: string, hash: string): void {
 export function loadPoolFromIPFS(hash: string): void {
   log.info('loadPoolFromIPFS: {}', [hash])
 
-  if (PoolRegistry.load(registryAddress) == null) {
+  if (!PoolRegistry.load(registryAddress)) {
     log.info('loadPoolFromIPFS: create pool registry {}', [registryAddress])
     createPoolRegistry()
   }
 
   let data = ipfs.cat(hash)
-  if (data == null) {
+  if (!data) {
     log.error('loadPoolFromIPFS: IPFS data is null - hash {}', [hash])
     return
   }
 
   let obj = json.fromBytes(data as Bytes).toObject()
-  let metadata = obj.get('metadata').toObject()
-  let addresses = obj.get('addresses').toObject()
+  let metadata = (obj.get('metadata') as JSONValue).toObject()
+  let addresses = (obj.get('addresses') as JSONValue).toObject()
 
-  if (metadata == null || addresses == null) {
+  if (!metadata || !addresses) {
     log.error('loadPoolFromIPFS: metadata or addresses is null - hash {}', [hash])
     return
   }
 
-  let poolId = toLowerCaseAddress(addresses.get('ROOT_CONTRACT').toString())
-  let shortName = metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name').toString()
+  let poolId = toLowerCaseAddress((addresses.get('ROOT_CONTRACT') as JSONValue).toString())
+  let shortName = (metadata.get(metadata.isSet('shortName') ? 'shortName' : 'name') as JSONValue).toString()
 
   let poolAddresses = updatePoolAddresses(poolId, addresses)
   createPool(poolId, shortName, poolAddresses)

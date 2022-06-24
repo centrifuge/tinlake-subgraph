@@ -17,7 +17,7 @@ import { loadOrCreateToken } from './Token'
 export function loadOrCreateTokenBalance(owner: string, tokenAddress: string): TokenBalance {
   let tb = TokenBalance.load(owner.concat(tokenAddress))
   {
-    if (tb == null) {
+    if (!tb) {
       tb = new TokenBalance(owner.concat(tokenAddress))
       tb.owner = owner
       tb.balanceAmount = BigInt.fromI32(0)
@@ -44,7 +44,7 @@ export function loadOrCreateDailyInvestorTokenBalance(
   let id = tokenBalance.owner.concat(pool.id).concat(timestamp.toString()) // investor address + poolId + date
 
   let ditb = DailyInvestorTokenBalance.load(id)
-  if (ditb == null) {
+  if (!ditb) {
     ditb = new DailyInvestorTokenBalance(id)
     ditb.account = tokenBalance.owner
     ditb.day = timestamp.toString()
@@ -61,22 +61,24 @@ export function loadOrCreateDailyInvestorTokenBalance(
 
   // update token values
   let addresses = PoolAddresses.load(pool.id)
-  if (tokenBalance.token == addresses.seniorToken) {
-    ditb.seniorTokenAmount = tokenBalance.balanceAmount
-    ditb.seniorSupplyAmount = tokenBalance.supplyAmount
-    ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
-    ditb.seniorTokenValue = pool.seniorTokenPrice
-      .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
-      .div(fixed27)
-  } else {
-    ditb.juniorTokenAmount = tokenBalance.balanceAmount
-    ditb.juniorSupplyAmount = tokenBalance.supplyAmount
-    ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
-    ditb.juniorTokenValue = pool.juniorTokenPrice
-      .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
-      .div(fixed27)
+  if (!!addresses) {
+    if (tokenBalance.token == addresses.seniorToken) {
+      ditb.seniorTokenAmount = tokenBalance.balanceAmount
+      ditb.seniorSupplyAmount = tokenBalance.supplyAmount
+      ditb.seniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+      ditb.seniorTokenValue = pool.seniorTokenPrice
+        .times(ditb.seniorTokenAmount.plus(ditb.seniorSupplyAmount))
+        .div(fixed27)
+    } else {
+      ditb.juniorTokenAmount = tokenBalance.balanceAmount
+      ditb.juniorSupplyAmount = tokenBalance.supplyAmount
+      ditb.juniorPendingSupplyCurrency = tokenBalance.pendingSupplyCurrency
+      ditb.juniorTokenValue = pool.juniorTokenPrice
+        .times(ditb.juniorTokenAmount.plus(ditb.juniorSupplyAmount))
+        .div(fixed27)
+    }
+    ditb.save()
   }
-  ditb.save()
   return <DailyInvestorTokenBalance>ditb
 }
 
@@ -84,11 +86,11 @@ export function loadOrCreateDailyInvestorTokenBalance(
 export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses): void {
   let tranche: Tranche
   if (tb.token == poolAddresses.seniorToken) {
-    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.seniorTranche))
+    tranche = Tranche.bind(Address.fromString(poolAddresses.seniorTranche))
   } else {
-    tranche = Tranche.bind(<Address>Address.fromHexString(poolAddresses.juniorTranche))
+    tranche = Tranche.bind(Address.fromString(poolAddresses.juniorTranche))
   }
-  let calcDisburse = tranche.try_calcDisburse(<Address>Address.fromHexString(tb.owner))
+  let calcDisburse = tranche.try_calcDisburse(Address.fromString(tb.owner))
   if (calcDisburse.reverted) {
     log.warning('calculateDisburse failed - owner {}, token {}, tranche {}', [
       tb.owner.toString(),
@@ -120,7 +122,7 @@ export function calculateDisburse(tb: TokenBalance, poolAddresses: PoolAddresses
 // made up currently junior and senior token.owners
 export function loadOrCreatePoolInvestors(poolId: string): PoolInvestor {
   let ids = PoolInvestor.load(poolId)
-  if (ids == null) {
+  if (!ids) {
     ids = new PoolInvestor(poolId)
     ids.accounts = []
     ids.save()
@@ -172,7 +174,7 @@ export function createDailyTokenBalances(token: Token, pool: Pool, timestamp: Bi
       // if token balance value is greater than 0, they have an active investment
       if (investmentGreaterThanZero(<TokenBalance>tb)) {
         let account = Account.load(ditb.account)
-        if (account == null) {
+        if (!account) {
           account = createAccount(ditb.account)
         }
         account.rewardCalcBitFlip = true

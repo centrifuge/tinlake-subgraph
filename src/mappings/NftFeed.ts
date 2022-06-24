@@ -13,9 +13,13 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
   let poolId = dataSource.context().getString('id')
   let addresses = PoolAddresses.load(poolId)
 
-  let shelf = Shelf.bind(<Address>Address.fromHexString(addresses.shelf))
-  let pile = Pile.bind(<Address>Address.fromHexString(addresses.pile))
-  let nftFeed = NftFeed.bind(<Address>Address.fromHexString(addresses.feed))
+  if (!addresses) {
+    return
+  }
+
+  let shelf = Shelf.bind(Address.fromString(addresses.shelf))
+  let pile = Pile.bind(Address.fromString(addresses.pile))
+  let nftFeed = NftFeed.bind(Address.fromString(addresses.feed))
 
   let loanIndex = shelf.nftlookup(nftId)
   let loanId = loanIdFromPoolIdAndIndex(poolId, loanIndex)
@@ -36,7 +40,7 @@ export function handleNftFeedUpdate(call: UpdateCall): void {
 
   // update loan
   let loan = Loan.load(loanId)
-  if (loan == null) {
+  if (!loan) {
     log.error('handleNftFeedUpdate: loan {} not found', [loanId])
     return
   }

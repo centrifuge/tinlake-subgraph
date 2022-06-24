@@ -19,7 +19,13 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     account,
   ])
   let pool = Pool.load(poolId)
+  if (!pool) {
+    return
+  }
   let poolAddresses = PoolAddresses.load(poolId)
+  if (!poolAddresses) {
+    return
+  }
   let token = poolAddresses.juniorToken
   let trancheString = 'JUNIOR'
   let tokenPrice = pool.juniorTokenPrice
@@ -33,7 +39,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
   if (isSystemAccount(poolId, account)) {
     return
   }
-  if (Account.load(account) == null) {
+  if (!Account.load(account)) {
     createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)
@@ -50,7 +56,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     type = 'INVEST_CANCEL'
   }
 
-  let symbol = Token.load(token) ? Token.load(token).symbol : '-'
+  let symbol: string = Token.load(token) ? ((Token.load(token) as Token).symbol as string) : '-'
 
   let id = call.transaction.hash
     .toHex()
@@ -67,7 +73,7 @@ export function handleSupplyOrder(call: SupplyOrderCall): void {
     ? tb.pendingSupplyCurrency.times(fixed27).div(tokenPrice)
     : tb.pendingSupplyCurrency
   investorTx.currencyAmount = tb.pendingSupplyCurrency
-  investorTx.gasUsed = call.transaction.gasUsed
+  investorTx.gasUsed = call.transaction.gasLimit
   investorTx.gasPrice = call.transaction.gasPrice
   investorTx.tokenPrice = tokenPrice
   investorTx.symbol = symbol
@@ -92,7 +98,13 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
     account,
   ])
   let pool = Pool.load(poolId)
+  if (!pool) {
+    return
+  }
   let poolAddresses = PoolAddresses.load(poolId)
+  if (!poolAddresses) {
+    return
+  }
   let token = poolAddresses.juniorToken
   let trancheString = 'JUNIOR'
   let tokenPrice = pool.juniorTokenPrice
@@ -106,7 +118,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   if (isSystemAccount(poolId, account)) {
     return
   }
-  if (Account.load(account) == null) {
+  if (!Account.load(account)) {
     createAccount(account)
   }
   ensureSavedInGlobalAccounts(account)
@@ -124,7 +136,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
     type = 'REDEEM_CANCEL'
   }
 
-  let symbol = Token.load(token) ? Token.load(token).symbol : '-'
+  let symbol: string = Token.load(token) ? ((Token.load(token) as Token).symbol as string) : '-'
 
   let id = call.transaction.hash
     .toHex()
@@ -141,7 +153,7 @@ export function handleRedeemOrder(call: RedeemOrderCall): void {
   investorTx.currencyAmount = tokenPrice.gt(BigInt.fromI32(0))
     ? tb.pendingRedeemToken.times(tokenPrice).div(fixed27)
     : tb.pendingRedeemToken
-  investorTx.gasUsed = call.transaction.gasUsed
+  investorTx.gasUsed = call.transaction.gasLimit
   investorTx.gasPrice = call.transaction.gasPrice
   investorTx.tokenPrice = tokenPrice
   investorTx.symbol = symbol
