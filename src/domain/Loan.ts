@@ -25,7 +25,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     if (debt.reverted) {
       log.critical('updateLoans: pile.debt() call reverted for loanId', [loanId])
     }
-    log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.toString()])
+    log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.value.toString()])
 
     // update loan
     let loan = Loan.load(loanId)
