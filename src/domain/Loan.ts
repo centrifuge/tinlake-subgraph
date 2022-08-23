@@ -24,6 +24,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let debt = pile.try_debt(loanIndexFromLoanId(loanId))
     if (debt.reverted) {
       log.critical('updateLoans: pile.debt() call reverted for loanId', [loanId])
+      return [new BigInt(0), new BigInt(0)]
     }
     log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.value.toString()])
 
