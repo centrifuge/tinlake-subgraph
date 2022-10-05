@@ -40,7 +40,7 @@ export function getToday(block: ethereum.Block): Day {
 }
 
 // if the difference between days since nonzerobalance
-// and today's timestamp are greater than or equal to sixty days in seconds
+// and today's timestamp are greater than or equal to thirty days in seconds
 // if kovan, we want to make rewards claimable after 1 day
 export function rewardsAreClaimable(today: BigInt, nonZeroSince: BigInt | null): boolean {
   if (!nonZeroSince) return false
