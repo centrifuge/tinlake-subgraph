@@ -21,25 +21,36 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
       loanIndexFromLoanId(loanId).toString(),
     ])
 
-    let debt = pile.debt(loanIndexFromLoanId(loanId))
-    log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.toString()])
+    let debt = pile.try_debt(loanIndexFromLoanId(loanId))
+    // log.info('trying to call CfgRewardRate contract for AO at {}, reverted {}', [
+    //   pile.toString(),
+    //   debt.reverted ? 'true' : 'false',
+    // ])
+    if (debt.reverted) {
+      log.error('updateLoans: pile.debt reverted for loanId {}, loanIndex {}', [
+        loanId,
+        loanIndexFromLoanId(loanId).toString(),
+      ])
+      return [new BigInt(0), new BigInt(0)]
+    }
+    log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.value.toString()])
 
     // update loan
     let loan = Loan.load(loanId)
     if (!loan) {
-      log.critical('updateLoans: loan {} not found', [loanId])
+      log.error('updateLoans: loan {} not found', [loanId])
       return [new BigInt(0), new BigInt(0)]
     }
 
-    loan.debt = debt
+    loan.debt = debt.value
     loan.save()
 
-    totalDebt = totalDebt.plus(debt)
+    totalDebt = totalDebt.plus(debt.value)
     if (!loan.interestRatePerSecond) {
       log.warning('updateLoans: interestRatePerSecond on loan {} is null', [loanId])
       continue
     }
-    totalWeightedDebt = totalWeightedDebt.plus(debt.times(loan.interestRatePerSecond as BigInt))
+    totalWeightedDebt = totalWeightedDebt.plus(debt.value.times(loan.interestRatePerSecond as BigInt))
   }
 
   // Weighted interest rate - sum(interest * debt) / sum(debt) (block handler)

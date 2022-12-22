@@ -32,7 +32,8 @@ export function loanIdFromPoolIdAndIndex(poolId: string, loanIndex: BigInt): str
 export function loanIndexFromLoanId(loanId: string): BigInt {
   let parts = loanId.split('-')
   if (parts.length != 2) {
-    log.critical('loanId did not have to parts: {}', [loanId])
+    log.error('loanId did not have two parts: {}', [loanId])
+    return BigInt.fromI32(0)
   }
 
   return hexToBigInt(parts[1])

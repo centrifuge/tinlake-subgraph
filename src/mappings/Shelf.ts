@@ -63,13 +63,13 @@ export function handleShelfIssue(call: IssueCall): void {
   // generate hash from nftId & registry
   let nftHash = navFeed.try_nftID(loanIndex)
   if (nftHash.reverted) {
-    log.critical('handleShelfIssue: failed to find nft hash for loan idx {}', [loanIndex.toString()])
+    log.error('handleShelfIssue: failed to find nft hash for loan idx {}', [loanIndex.toString()])
     return
   }
 
   let riskGroup = navFeed.try_risk(nftHash.value)
   if (riskGroup.reverted) {
-    log.critical('handleShelfIssue: failed to find risk group for nft hash {}', [nftHash.value.toString()])
+    log.error('handleShelfIssue: failed to find risk group for nft hash {}', [nftHash.value.toString()])
     return
   }
 
@@ -79,14 +79,14 @@ export function handleShelfIssue(call: IssueCall): void {
   // get maturity date
   let maturityDate = navFeed.try_maturityDate(nftHash.value)
   if (maturityDate.reverted) {
-    log.critical('handleShelfIssue: failed to find maturity date for nft hash {}', [nftHash.value.toString()])
+    log.error('handleShelfIssue: failed to find maturity date for nft hash {}', [nftHash.value.toString()])
     return
   }
 
   // get ratePerSecond for riskgroup
   let ratePerSecond = pile.try_rates(riskGroup.value)
   if (ratePerSecond.reverted) {
-    log.critical('handleShelfIssue: failed to find rates for risk group {}', [riskGroup.value.toString()])
+    log.error('handleShelfIssue: failed to find rates for risk group {}', [riskGroup.value.toString()])
     return
   }
   loan.interestRatePerSecond = ratePerSecond.value.value2
