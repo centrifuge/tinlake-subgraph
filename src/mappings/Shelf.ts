@@ -80,7 +80,6 @@ export function handleShelfIssue(call: IssueCall): void {
   let maturityDate = navFeed.try_maturityDate(nftHash.value)
   if (maturityDate.reverted) {
     log.error('handleShelfIssue: failed to find maturity date for nft hash {}', [nftHash.value.toString()])
-    return
   }
 
   // get ratePerSecond for riskgroup
@@ -93,7 +92,7 @@ export function handleShelfIssue(call: IssueCall): void {
   // set ceiling & threshold based on collateral value
   loan.ceiling = navFeed.ceiling(loanIndex)
   loan.threshold = navFeed.threshold(loanIndex)
-  loan.maturityDate = maturityDate.value
+  loan.maturityDate = maturityDate.reverted ? null : maturityDate.value
 
   log.info('handleShelfIssue: will save loan {} (pool: {}, index: {}, owner: {}, opened {})', [
     loan.id,
@@ -169,7 +168,8 @@ export function handleShelfBorrow(call: BorrowCall): void {
   let navFeed = NavFeed.bind(Address.fromString(addresses.feed))
   loan.ceiling = navFeed.ceiling(loanIndex)
   let nftID = navFeed.nftID(loanIndex)
-  loan.maturityDate = navFeed.maturityDate(nftID)
+  let maturityDate = navFeed.try_maturityDate(nftID)
+  loan.maturityDate = maturityDate.reverted ? null : maturityDate.value
   loan.financingDate = call.block.timestamp
   loan.save()
 

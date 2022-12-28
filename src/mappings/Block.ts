@@ -21,7 +21,6 @@ export function handleBlock(block: ethereum.Block): void {
   if (
     block.number.mod(BigInt.fromI32((handleBlockFrequencyMinutes * 60) / blockTimeSeconds)).notEqual(BigInt.fromI32(0))
   ) {
-    log.info('handleBlock: skip block {}', [block.number.toString()])
     return
   }
 
