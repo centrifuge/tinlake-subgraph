@@ -23,7 +23,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     }
 
     // Ignore closed loans
-    if (loan.closed != null) {
+    if (loan.closed === 0) {
       log.info('updateLoans: loan {} is closed. Will not proceed with update', [loanId])
       return [new BigInt(0), new BigInt(0)]
     }
