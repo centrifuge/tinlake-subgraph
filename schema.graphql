@@ -72,7 +72,7 @@ type Loan @entity {
   nftRegistry: Bytes!
   owner: Bytes!
   opened: Int!
-  closed: Int
+  closed: Int! # type Int is non-nullable, so a value of 0 indicates that the loan is still open
   debt: BigInt!
   interestRatePerSecond: BigInt
   ceiling: BigInt

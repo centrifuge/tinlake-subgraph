@@ -44,6 +44,7 @@ export function handleShelfIssue(call: IssueCall): void {
   loan.index = loanIndex.toI32()
   loan.owner = loanOwner
   loan.opened = call.block.timestamp.toI32()
+  loan.closed = 0
   loan.debt = BigInt.fromI32(0)
   loan.borrowsCount = 0
   loan.borrowsAggregatedAmount = BigInt.fromI32(0)

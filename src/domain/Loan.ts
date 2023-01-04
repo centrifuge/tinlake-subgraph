@@ -16,16 +16,30 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let loans = pool.loans
     let loanId = loans[j]
 
+    let loan = Loan.load(loanId)
+    if (!loan) {
+      log.error('updateLoans: loan {} not found', [loanId])
+      continue
+    }
+
+    // Ignore closed loans
+    if (loan.closed !== 0) {
+      log.info('updateLoans: loan {} is closed. Will not proceed with update', [loanId])
+      continue
+    }
+
+    // Ignore 0 amount loans
+    if (loan.borrowsAggregatedAmount === BigInt.fromI32(0)) {
+      log.info('updateLoans: loan {} has 0 amount. Will not proceed with update', [loanId])
+      continue
+    }
+
     log.info('updateLoans: will query debt for loanId {}, loanIndex {}', [
       loanId,
       loanIndexFromLoanId(loanId).toString(),
     ])
 
     let debt = pile.try_debt(loanIndexFromLoanId(loanId))
-    // log.info('trying to call CfgRewardRate contract for AO at {}, reverted {}', [
-    //   pile.toString(),
-    //   debt.reverted ? 'true' : 'false',
-    // ])
     if (debt.reverted) {
       log.error('updateLoans: pile.debt reverted for loanId {}, loanIndex {}', [
         loanId,
@@ -34,13 +48,6 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
       return [new BigInt(0), new BigInt(0)]
     }
     log.info('updateLoans: will update loan {}: debt {}', [loanId, debt.value.toString()])
-
-    // update loan
-    let loan = Loan.load(loanId)
-    if (!loan) {
-      log.error('updateLoans: loan {} not found', [loanId])
-      return [new BigInt(0), new BigInt(0)]
-    }
 
     loan.debt = debt.value
     loan.save()
