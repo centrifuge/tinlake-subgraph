@@ -19,7 +19,7 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
     let loan = Loan.load(loanId)
     if (!loan) {
       log.error('updateLoans: loan {} not found', [loanId])
-      return [new BigInt(0), new BigInt(0)]
+      continue
     }
 
     // Ignore closed loans
