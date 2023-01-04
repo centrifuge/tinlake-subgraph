@@ -28,6 +28,12 @@ export function updateLoans(pool: Pool, pileAddress: string): BigInt[] {
       continue
     }
 
+    // Ignore 0 amount loans
+    if (loan.borrowsAggregatedAmount === BigInt.fromI32(0)) {
+      log.info('updateLoans: loan {} has 0 amount. Will not proceed with update', [loanId])
+      continue
+    }
+
     log.info('updateLoans: will query debt for loanId {}, loanIndex {}', [
       loanId,
       loanIndexFromLoanId(loanId).toString(),
