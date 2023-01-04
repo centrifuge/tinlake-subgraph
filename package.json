@@ -6,14 +6,17 @@
     "codegen-mainnet": "rm -rf generated && graph codegen ./subgraph-mainnet-production.yaml",
     "build": "graph build",
     "test": "jest",
-    "deploy-prod": "rm -rf generated && graph codegen ./subgraph-mainnet-production.yaml && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $GRAPH_ENDPOINT ./subgraph-mainnet-production.yaml --access-token $GRAPH_ACCESS_TOKEN",
     "deploy-staging": "rm -rf generated && graph codegen ./subgraph-kovan-staging.yaml && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ $KOVAN_ENDPOINT ./subgraph-kovan-staging.yaml --access-token $GRAPH_ACCESS_TOKEN",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/",
     "create-local": "graph create --node http://localhost:8020/ centrifuge/tinlake",
     "remove-local": "graph remove --node http://localhost:8020/ centrifuge/tinlake",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 centrifuge/tinlake",
     "format": "prettier --write \"./src/**/*.{ts,tsx}\"",
-    "check-format": "prettier --check \"./src/**/*.{ts,tsx}\""
+    "check-format": "prettier --check \"./src/**/*.{ts,tsx}\"",
+    "_create": "sh -c 'graph create --node $GRAPH_NODE_URL --ipfs $IPFS_NODE_URL ${0} ./subgraph-mainnet-production.yaml -l v0.0.1'",
+    "_deploy": "sh -c 'graph deploy --node $GRAPH_NODE_URL --ipfs $IPFS_NODE_URL ${0} ./subgraph-mainnet-production.yaml -l v0.0.1'",
+    "_remove": "sh -c 'graph remove --node $GRAPH_NODE_URL --ipfs $IPFS_NODE_URL ${0} ./subgraph-mainnet-production.yaml -l v0.0.1'",
+    "deploy": "sh -c 'yarn run _create ${0}; yarn run _deploy ${0} | grep -E \"Build completed: Qm[a-zA-Z0-9]+\" | grep -oE \"Qm[a-zA-Z0-9]+\" | xargs -I{} sh -c \"echo $(date -u) NAME: ${0}, ACTION: DEPLOYED, IPFS_HASH: {}, COMMIT: $(git rev-parse HEAD)  >> results.txt\"'",
+    "delete": "sh -c 'yarn run _remove ${0}; sh -c \"echo $(date -u) NAME: ${0}, ACTION: REMOVED  >> results.txt\"'"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.29.2",

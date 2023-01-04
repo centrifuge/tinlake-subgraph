@@ -1,6 +1,7 @@
 node_modules
 build
 SECRET.md
+.env
 generated
 env
 .DS_Store
