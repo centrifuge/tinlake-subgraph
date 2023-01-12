@@ -2,7 +2,15 @@ import { log, BigInt, Address, ethereum, dataSource } from '@graphprotocol/graph
 import { Assessor } from '../../generated/Block/Assessor'
 import { NavFeed } from '../../generated/Block/NavFeed'
 import { Reserve } from '../../generated/Block/Reserve'
-import { Pool, PoolAddresses, Day, DailyPoolData, InvestorTransaction, Token } from '../../generated/schema'
+import {
+  Pool,
+  PoolAddresses,
+  Day,
+  DailyPoolData,
+  InvestorTransaction,
+  Token,
+  PrevInvestorTransactionByToken,
+} from '../../generated/schema'
 import { ExecuteEpochCall, CloseEpochCall, Coordinator } from '../../generated/templates/Coordinator/Coordinator'
 import { seniorToJuniorRatio } from '../util/pool'
 import { updateLoans } from '../domain/Loan'
@@ -30,184 +38,164 @@ export function addInvestorTransactions(
   let seniorTokenPrice = coordinator.try_epochSeniorTokenPrice()
   let juniorTokenPrice = coordinator.try_epochJuniorTokenPrice()
 
-  log.info('trying to call Coordinator at {}, seniorTokenPrice reverted: {}, juniorTokenPrice reverted: {}', [
-    to.toHexString(),
-    seniorTokenPrice.reverted ? 'true' : 'false',
-    juniorTokenPrice.reverted ? 'true' : 'false',
-  ])
+  log.info(
+    'AddInvestorTransactions: trying to call Coordinator at {}, seniorTokenPrice reverted: {}, juniorTokenPrice reverted: {}',
+    [to.toHexString(), seniorTokenPrice.reverted ? 'true' : 'false', juniorTokenPrice.reverted ? 'true' : 'false']
+  )
 
+  let poolAddresses = PoolAddresses.load(poolId)
+  if (!poolAddresses) {
+    return
+  }
   for (let i = 0; i < investors.accounts.length; i++) {
     let accounts = investors.accounts
     let address = accounts[i]
-    let poolAddresses = PoolAddresses.load(poolId)
-    if (poolAddresses) {
-      let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken)
-      if (
-        tb.pendingSupplyCurrency
-          .plus(tb.pendingRedeemToken)
-          .plus(tb.supplyAmount)
-          .plus(tb.redeemAmount)
-          .gt(BigInt.fromI32(0))
-      ) {
-        calculateDisburse(tb, poolAddresses as PoolAddresses)
-
-        let token = tb.token
-        let symbol: string = Token.load(token) ? ((Token.load(token) as Token).symbol as string) : '-'
-
-        let previousTokenTransaction = loadOrCreatePreviousTransaction(address.concat(token))
-        let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction as string)
-
-        if (tb.supplyAmount > BigInt.fromI32(0)) {
-          if (
-            (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-            !prevTx ||
-            prevTx.type != 'INVEST_EXECUTION'
-          ) {
-            let id = txHash
-              .concat(address)
-              .concat('SENIOR')
-              .concat('INVEST_EXECUTION')
-            log.info('AddInvestorTransaction: id {}, block{}', [id, block.number.toString()])
-            let investorSupplyTx = new InvestorTransaction(id)
-            let tokenPrice = seniorTokenPrice.reverted ? pool.seniorTokenPrice : seniorTokenPrice.value
-            investorSupplyTx.owner = address
-            investorSupplyTx.pool = poolId
-            investorSupplyTx.timestamp = block.timestamp
-            investorSupplyTx.type = 'INVEST_EXECUTION'
-            investorSupplyTx.currencyAmount = tb.supplyAmount.times(tokenPrice).div(fixed27)
-            investorSupplyTx.tokenAmount = tb.supplyAmount
-            investorSupplyTx.gasUsed = tx.gasLimit
-            investorSupplyTx.gasPrice = tx.gasPrice
-            investorSupplyTx.tokenPrice = tokenPrice
-            investorSupplyTx.symbol = symbol
-            investorSupplyTx.newBalance = tb.totalAmount
-            investorSupplyTx.newBalanceValue = tb.totalValue
-            investorSupplyTx.transaction = txHash
-            investorSupplyTx.save()
-            previousTokenTransaction.prevTransaction = id
-            previousTokenTransaction.pendingExecution = tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) ? true : false
-            previousTokenTransaction.save()
-          }
-        }
-
-        if (tb.redeemAmount > BigInt.fromI32(0)) {
-          if (
-            (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-            !prevTx ||
-            prevTx.type != 'REDEEM_EXECUTION'
-          ) {
-            let id = txHash
-              .concat(address)
-              .concat('SENIOR')
-              .concat('REDEEM_EXECUTION')
-            log.info('AddInvestorTransaction: id {}, block{}', [id, block.number.toString()])
-            let investorRedeemTx = new InvestorTransaction(id)
-            let tokenPrice = seniorTokenPrice.reverted ? pool.seniorTokenPrice : seniorTokenPrice.value
-            investorRedeemTx.owner = address
-            investorRedeemTx.pool = poolId
-            investorRedeemTx.timestamp = block.timestamp
-            investorRedeemTx.type = 'REDEEM_EXECUTION'
-            investorRedeemTx.currencyAmount = tb.redeemAmount
-            investorRedeemTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
-              ? tb.redeemAmount.times(fixed27).div(tokenPrice)
-              : tb.redeemAmount
-            investorRedeemTx.gasUsed = tx.gasLimit
-            investorRedeemTx.gasPrice = tx.gasPrice
-            investorRedeemTx.tokenPrice = tokenPrice
-            investorRedeemTx.symbol = symbol
-            investorRedeemTx.newBalance = tb.totalAmount
-            investorRedeemTx.newBalanceValue = tb.totalValue
-            investorRedeemTx.transaction = txHash
-            investorRedeemTx.save()
-            previousTokenTransaction.prevTransaction = id
-            previousTokenTransaction.pendingExecution = tb.pendingRedeemToken.gt(BigInt.fromI32(0)) ? true : false
-            previousTokenTransaction.save()
-          }
-        }
+    let tb = loadOrCreateTokenBalance(address, poolAddresses.seniorToken)
+    let seniorToken = tb.token
+    let seniorSymbol: string = Token.load(seniorToken) ? ((Token.load(seniorToken) as Token).symbol as string) : '-'
+    let previousSeniorTokenTransaction = PrevInvestorTransactionByToken.load(address.concat(seniorToken))
+    if (previousSeniorTokenTransaction) {
+      let prevTx = InvestorTransaction.load(previousSeniorTokenTransaction.prevTransaction as string)
+      if (!prevTx) {
+        return
       }
-      tb = loadOrCreateTokenBalance(address, poolAddresses.juniorToken)
-      if (
-        tb.pendingSupplyCurrency
-          .plus(tb.pendingRedeemToken)
-          .plus(tb.supplyAmount)
-          .plus(tb.redeemAmount)
-          .gt(BigInt.fromI32(0))
-      ) {
-        calculateDisburse(tb, poolAddresses as PoolAddresses)
+      log.info('AddInvestorTransactions: previous TX found', [])
+      calculateDisburse(tb, poolAddresses as PoolAddresses)
+      if (prevTx.type == 'INVEST_ORDER' || prevTx.type == 'INVEST_EXECUTION') {
+        let id = txHash
+          .concat(address)
+          .concat('SENIOR')
+          .concat('INVEST_EXECUTION')
+        log.info('AddInvestorTransactions: id {}, block{}', [id, block.number.toString()])
+        let investorSupplyTx = new InvestorTransaction(id)
+        let tokenPrice = seniorTokenPrice.reverted ? pool.seniorTokenPrice : seniorTokenPrice.value
+        let tokenAmount =
+          prevTx.type == 'INVEST_EXECUTION' ? tb.supplyAmount.minus(prevTx.tokenAmount) : tb.supplyAmount
+        investorSupplyTx.owner = address
+        investorSupplyTx.pool = poolId
+        investorSupplyTx.timestamp = block.timestamp
+        investorSupplyTx.type = 'INVEST_EXECUTION'
+        investorSupplyTx.currencyAmount = tokenAmount.times(tokenPrice).div(fixed27)
+        investorSupplyTx.tokenAmount = tokenAmount
+        investorSupplyTx.gasUsed = tx.gasLimit
+        investorSupplyTx.gasPrice = tx.gasPrice
+        investorSupplyTx.tokenPrice = tokenPrice
+        investorSupplyTx.symbol = seniorSymbol
+        // TODO: Are totalAmount and totalValue correct despite subtracting the previous execution transaction's amounts?
+        investorSupplyTx.newBalance = tb.totalAmount
+        investorSupplyTx.newBalanceValue = tb.totalValue
+        investorSupplyTx.transaction = txHash
+        investorSupplyTx.save()
+        log.info('AddInvestorTransaction: Add prevTransaction', [id])
+        previousSeniorTokenTransaction.prevTransaction = id
+        previousSeniorTokenTransaction.pendingExecution = tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) ? true : false
+        previousSeniorTokenTransaction.save()
+      }
 
-        let token = tb.token
-        let symbol: string = Token.load(token) ? ((Token.load(token) as Token).symbol as string) : '-'
-
-        let previousTokenTransaction = loadOrCreatePreviousTransaction(address.concat(token))
-        let prevTx = InvestorTransaction.load(previousTokenTransaction.prevTransaction as string)
-
-        if (tb.supplyAmount > new BigInt(0)) {
-          if (
-            (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-            !prevTx ||
-            prevTx.type != 'INVEST_EXECUTION'
-          ) {
-            let id = txHash
-              .concat(address)
-              .concat('JUNIOR')
-              .concat('INVEST_EXECUTION')
-            log.info('AddInvestorTransaction: id {}, block {}', [id, block.number.toString()])
-            let investorSupplyTx = new InvestorTransaction(id)
-            let tokenPrice = juniorTokenPrice.reverted ? pool.juniorTokenPrice : juniorTokenPrice.value
-            investorSupplyTx.owner = address
-            investorSupplyTx.pool = poolId
-            investorSupplyTx.timestamp = block.timestamp
-            investorSupplyTx.type = 'INVEST_EXECUTION'
-            investorSupplyTx.currencyAmount = tb.supplyAmount.times(tokenPrice).div(fixed27)
-            investorSupplyTx.tokenAmount = tb.supplyAmount
-            investorSupplyTx.gasUsed = tx.gasLimit
-            investorSupplyTx.gasPrice = tx.gasPrice
-            investorSupplyTx.tokenPrice = tokenPrice
-            investorSupplyTx.symbol = symbol
-            investorSupplyTx.newBalance = tb.totalAmount
-            investorSupplyTx.newBalanceValue = tb.totalValue
-            investorSupplyTx.transaction = txHash
-            investorSupplyTx.save()
-            previousTokenTransaction.prevTransaction = id
-            previousTokenTransaction.pendingExecution = tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) ? true : false
-            previousTokenTransaction.save()
-          }
-        }
-
-        if (tb.redeemAmount > new BigInt(0)) {
-          if (
-            (previousTokenTransaction != null && previousTokenTransaction.pendingExecution) ||
-            !prevTx ||
-            prevTx.type != 'REDEEM_EXECUTION'
-          ) {
-            let id = txHash
-              .concat(address)
-              .concat('JUNIOR')
-              .concat('REDEEM_EXECUTION')
-            log.info('AddInvestorTransaction: id {}, block {}', [id, block.number.toString()])
-            let investorRedeemTx = new InvestorTransaction(id)
-            let tokenPrice = juniorTokenPrice.reverted ? pool.juniorTokenPrice : juniorTokenPrice.value
-            investorRedeemTx.owner = address
-            investorRedeemTx.pool = poolId
-            investorRedeemTx.timestamp = block.timestamp
-            investorRedeemTx.type = 'REDEEM_EXECUTION'
-            investorRedeemTx.currencyAmount = tb.redeemAmount
-            investorRedeemTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
-              ? tb.redeemAmount.times(fixed27).div(tokenPrice)
-              : tb.redeemAmount
-            investorRedeemTx.gasUsed = tx.gasLimit
-            investorRedeemTx.gasPrice = tx.gasPrice
-            investorRedeemTx.tokenPrice = tokenPrice
-            investorRedeemTx.symbol = symbol
-            investorRedeemTx.newBalance = tb.totalAmount
-            investorRedeemTx.newBalanceValue = tb.totalValue
-            investorRedeemTx.transaction = txHash
-            investorRedeemTx.save()
-            previousTokenTransaction.prevTransaction = id
-            previousTokenTransaction.pendingExecution = tb.pendingRedeemToken.gt(BigInt.fromI32(0)) ? true : false
-            previousTokenTransaction.save()
-          }
-        }
+      if (prevTx.type == 'REDEEM_ORDER' || prevTx.type == 'REDEEM_EXECUTION') {
+        let id = txHash
+          .concat(address)
+          .concat('SENIOR')
+          .concat('REDEEM_EXECUTION')
+        log.info('AddInvestorTransaction: id {}, block{}', [id, block.number.toString()])
+        let investorRedeemTx = new InvestorTransaction(id)
+        let tokenPrice = seniorTokenPrice.reverted ? pool.seniorTokenPrice : seniorTokenPrice.value
+        let currencyAmount =
+          prevTx.type == 'REDEEM_EXECUTION' ? tb.redeemAmount.minus(prevTx.currencyAmount) : tb.redeemAmount
+        investorRedeemTx.owner = address
+        investorRedeemTx.pool = poolId
+        investorRedeemTx.timestamp = block.timestamp
+        investorRedeemTx.type = 'REDEEM_EXECUTION'
+        investorRedeemTx.currencyAmount = currencyAmount
+        investorRedeemTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
+          ? currencyAmount.times(fixed27).div(tokenPrice)
+          : currencyAmount
+        investorRedeemTx.gasUsed = tx.gasLimit
+        investorRedeemTx.gasPrice = tx.gasPrice
+        investorRedeemTx.tokenPrice = tokenPrice
+        investorRedeemTx.symbol = seniorSymbol
+        // TODO: Are totalAmount and totalValue correct despite subtracting the previous execution transaction's amounts?
+        investorRedeemTx.newBalance = tb.totalAmount
+        investorRedeemTx.newBalanceValue = tb.totalValue
+        investorRedeemTx.transaction = txHash
+        investorRedeemTx.save()
+        log.info('AddInvestorTransaction: Add prevTransaction', [id])
+        previousSeniorTokenTransaction.prevTransaction = id
+        previousSeniorTokenTransaction.pendingExecution = tb.pendingRedeemToken.gt(BigInt.fromI32(0)) ? true : false
+        previousSeniorTokenTransaction.save()
+      }
+    }
+    tb = loadOrCreateTokenBalance(address, poolAddresses.juniorToken)
+    calculateDisburse(tb, poolAddresses as PoolAddresses)
+    let juniorToken = tb.token
+    let juniorSymbol: string = Token.load(juniorToken) ? ((Token.load(juniorToken) as Token).symbol as string) : '-'
+    let previousJuniorTokenTransaction = PrevInvestorTransactionByToken.load(address.concat(juniorToken))
+    if (previousJuniorTokenTransaction) {
+      let prevTx = InvestorTransaction.load(previousJuniorTokenTransaction.prevTransaction as string)
+      if (!prevTx) {
+        return
+      }
+      log.info('AddInvestorTransactions: previous TX found', [])
+      calculateDisburse(tb, poolAddresses as PoolAddresses)
+      if (prevTx.type == 'INVEST_ORDER' || prevTx.type == 'INVEST_EXECUTION') {
+        let id = txHash
+          .concat(address)
+          .concat('JUNIOR')
+          .concat('INVEST_EXECUTION')
+        log.info('AddInvestorTransaction: adding transaction id {}, block {}', [id, block.number.toString()])
+        let investorSupplyTx = new InvestorTransaction(id)
+        let tokenPrice = juniorTokenPrice.reverted ? pool.juniorTokenPrice : juniorTokenPrice.value
+        let tokenAmount =
+          prevTx.type == 'INVEST_EXECUTION' ? tb.supplyAmount.minus(prevTx.tokenAmount) : tb.supplyAmount
+        investorSupplyTx.owner = address
+        investorSupplyTx.pool = poolId
+        investorSupplyTx.timestamp = block.timestamp
+        investorSupplyTx.type = 'INVEST_EXECUTION'
+        investorSupplyTx.currencyAmount = tokenAmount.times(tokenPrice).div(fixed27)
+        investorSupplyTx.tokenAmount = tokenAmount
+        investorSupplyTx.gasUsed = tx.gasLimit
+        investorSupplyTx.gasPrice = tx.gasPrice
+        investorSupplyTx.tokenPrice = tokenPrice
+        investorSupplyTx.symbol = juniorSymbol
+        investorSupplyTx.newBalance = tb.totalAmount
+        investorSupplyTx.newBalanceValue = tb.totalValue
+        investorSupplyTx.transaction = txHash
+        investorSupplyTx.save()
+        log.info('AddInvestorTransaction: Add prevTransaction', [id])
+        previousJuniorTokenTransaction.prevTransaction = id
+        previousJuniorTokenTransaction.pendingExecution = tb.pendingSupplyCurrency.gt(BigInt.fromI32(0)) ? true : false
+        previousJuniorTokenTransaction.save()
+      }
+      if (prevTx.type == 'REDEEM_ORDER' || prevTx.type == 'REDEEM_EXECUTION') {
+        let id = txHash
+          .concat(address)
+          .concat('JUNIOR')
+          .concat('REDEEM_EXECUTION')
+        log.info('AddInvestorTransaction: id {}, block {}', [id, block.number.toString()])
+        let investorRedeemTx = new InvestorTransaction(id)
+        let tokenPrice = juniorTokenPrice.reverted ? pool.juniorTokenPrice : juniorTokenPrice.value
+        let currencyAmount =
+          prevTx.type == 'REDEEM_EXECUTION' ? tb.redeemAmount.minus(prevTx.currencyAmount) : tb.redeemAmount
+        investorRedeemTx.owner = address
+        investorRedeemTx.pool = poolId
+        investorRedeemTx.timestamp = block.timestamp
+        investorRedeemTx.type = 'REDEEM_EXECUTION'
+        investorRedeemTx.currencyAmount = currencyAmount
+        investorRedeemTx.tokenAmount = tokenPrice.gt(BigInt.fromI32(0))
+          ? currencyAmount.times(fixed27).div(tokenPrice)
+          : currencyAmount
+        investorRedeemTx.gasUsed = tx.gasLimit
+        investorRedeemTx.gasPrice = tx.gasPrice
+        investorRedeemTx.tokenPrice = tokenPrice
+        investorRedeemTx.symbol = juniorSymbol
+        investorRedeemTx.newBalance = tb.totalAmount
+        investorRedeemTx.newBalanceValue = tb.totalValue
+        investorRedeemTx.transaction = txHash
+        investorRedeemTx.save()
+        log.info('AddInvestorTransaction: Add prevTransaction', [id])
+        previousJuniorTokenTransaction.prevTransaction = id
+        previousJuniorTokenTransaction.pendingExecution = tb.pendingRedeemToken.gt(BigInt.fromI32(0)) ? true : false
+        previousJuniorTokenTransaction.save()
       }
     }
   }
