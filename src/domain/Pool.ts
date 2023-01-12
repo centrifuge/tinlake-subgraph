@@ -7,6 +7,7 @@ import {
   NftFeed as NftFeedTemplate,
   Token as TokenTemplate,
   Tranche as TrancheTemplate,
+  Operator as OperatorTemplate,
 } from '../../generated/templates'
 import { Pool, PoolAddresses } from '../../generated/schema'
 import { seniorToJuniorRatio } from '../util/pool'
@@ -65,6 +66,8 @@ export function createPoolHandlers(addresses: PoolAddresses): void {
   NftFeedTemplate.createWithContext(Address.fromString(addresses.feed), context)
   TrancheTemplate.createWithContext(Address.fromString(addresses.seniorTranche), context)
   TrancheTemplate.createWithContext(Address.fromString(addresses.juniorTranche), context)
+  OperatorTemplate.createWithContext(Address.fromString(addresses.seniorOperator), context)
+  OperatorTemplate.createWithContext(Address.fromString(addresses.juniorOperator), context)
 
   let seniorTokenContext = new DataSourceContext()
   seniorTokenContext.setString('id', addresses.id)
@@ -151,5 +154,21 @@ export function createUpdatedPoolHandlers(prevAddresses: PoolAddresses, newAddre
       newAddresses.juniorTranche,
     ])
     TrancheTemplate.createWithContext(Address.fromString(newAddresses.juniorTranche), context)
+  }
+
+  if (prevAddresses.seniorOperator != newAddresses.seniorOperator) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed seniorOperator {} => {}', [
+      prevAddresses.seniorOperator,
+      newAddresses.seniorOperator,
+    ])
+    OperatorTemplate.createWithContext(Address.fromString(newAddresses.seniorOperator), context)
+  }
+
+  if (prevAddresses.juniorOperator != newAddresses.juniorOperator) {
+    log.info('createUpdatedPoolHandlers: creating handler for changed juniorOperator {} => {}', [
+      prevAddresses.juniorOperator,
+      newAddresses.juniorOperator,
+    ])
+    OperatorTemplate.createWithContext(Address.fromString(newAddresses.juniorOperator), context)
   }
 }

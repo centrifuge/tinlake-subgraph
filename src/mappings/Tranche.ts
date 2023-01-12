@@ -1,4 +1,4 @@
-import { log, BigInt, dataSource } from '@graphprotocol/graph-ts'
+import { log, BigInt, dataSource, ethereum } from '@graphprotocol/graph-ts'
 import { SupplyOrderCall, RedeemOrderCall, DisburseCall } from '../../generated/templates/Tranche/Tranche'
 import { Account, PoolAddresses, InvestorTransaction, Pool, Token } from '../../generated/schema'
 import { ensureSavedInGlobalAccounts, createAccount, isSystemAccount } from '../domain/Account'
@@ -7,6 +7,7 @@ import { loadOrCreateToken } from '../domain/Token'
 import { pushUnique } from '../util/array'
 import { fixed27 } from '../config'
 import { loadOrCreatePreviousTransaction } from '../domain/PrevInvestorTransactionByToken'
+import { addInvestorTransactions } from './Coordinator'
 
 // the supply order is the first contact an investor has with tinlake
 export function handleSupplyOrder(call: SupplyOrderCall): void {

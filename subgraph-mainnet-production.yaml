@@ -1,5 +1,8 @@
 specVersion: 0.0.2
 description: Tinlake Mainnet Production
+graft:
+  base: QmT8F4CwfpnmzUQgmhoq1XWSBZBpjtygqMRhivJNNZGcm1
+  block: 11092900
 schema:
   file: ./schema.graphql
 dataSources:
@@ -258,3 +261,25 @@ templates:
         - function: redeemOrder(address,uint256)
           handler: handleRedeemOrder
       file: ./src/mappings/Tranche.ts
+  - kind: ethereum/contract
+    name: Operator
+    network: mainnet
+    source:
+      abi: Operator
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - InvestorTransaction
+      abis:
+        - name: Operator
+          file: ./abis/Operator.json
+        - name: Tranche
+          file: ./abis/Tranche.json
+        - name: Coordinator
+          file: ./abis/Coordinator.json
+      callHandlers:
+        - function: disburse()
+          handler: handleDisburse
+      file: ./src/mappings/Operator.ts

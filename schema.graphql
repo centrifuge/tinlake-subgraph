@@ -38,6 +38,8 @@ type PoolAddresses @entity {
   juniorToken: ID!
   seniorTranche: ID!
   juniorTranche: ID!
+  seniorOperator: ID!
+  juniorOperator: ID!
   aoRewardRecipient: ID
   makerMgr: ID
 }
