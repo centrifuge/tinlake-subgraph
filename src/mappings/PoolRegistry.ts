@@ -8,6 +8,7 @@ import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../domain/PoolsByAORewardRecipient'
+import ipfsHashes from '../ipfs.json';
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.info('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -55,14 +56,15 @@ export function upsertPool(poolId: string, hash: string): void {
   }
 
   // Update pool addresses
-  let data = ipfs.cat(hash)
+  // let data = ipfs.cat(hash)
+  let data = ipfsHashes[hash]
   if (!data) {
     log.error('handlePoolUpdated: IPFS data is null - hash {}', [hash])
     return
   }
 
-  let obj = json.fromBytes(data as Bytes).toObject()
-  let addresses = (obj.get('addresses') as JSONValue).toObject()
+  // let obj = json.fromBytes(data as Bytes).toObject()
+  let addresses = (data.get('addresses') as JSONValue).toObject()
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed
@@ -79,15 +81,16 @@ export function loadPoolFromIPFS(hash: string): void {
     createPoolRegistry()
   }
 
-  let data = ipfs.cat(hash)
+  // let data = ipfs.cat(hash)
+  let data = ipfsHashes[hash]
   if (!data) {
     log.error('loadPoolFromIPFS: IPFS data is null - hash {}', [hash])
     return
   }
 
-  let obj = json.fromBytes(data as Bytes).toObject()
-  let metadata = (obj.get('metadata') as JSONValue).toObject()
-  let addresses = (obj.get('addresses') as JSONValue).toObject()
+  // let obj = json.fromBytes(data as Bytes).toObject()
+  let metadata = (data.get('metadata') as JSONValue).toObject()
+  let addresses = (data.get('addresses') as JSONValue).toObject()
 
   if (!metadata || !addresses) {
     log.error('loadPoolFromIPFS: metadata or addresses is null - hash {}', [hash])
@@ -104,3 +107,5 @@ export function loadPoolFromIPFS(hash: string): void {
 
   addPoolsByAORewardRecipient(poolAddresses)
 }
+
+function 
