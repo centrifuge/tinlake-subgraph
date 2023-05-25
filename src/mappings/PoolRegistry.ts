@@ -8,7 +8,7 @@ import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../domain/PoolsByAORewardRecipient'
-import ipfsHashes from '../ipfs.json';
+import { ipfsHashes } from '../ipfs'
 
 export function handlePoolCreated(call: PoolCreated): void {
   log.info('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
@@ -42,7 +42,7 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   let poolId = call.params.pool.toHexString()
   let hash = call.params.data
 
-  upsertPool(poolId, hash);
+  upsertPool(poolId, hash)
 }
 
 export function upsertPool(poolId: string, hash: string): void {
@@ -57,14 +57,18 @@ export function upsertPool(poolId: string, hash: string): void {
 
   // Update pool addresses
   // let data = ipfs.cat(hash)
-  let data = ipfsHashes[hash]
+  let data = json.fromString(ipfsHashes).toObject()
+  log.info('handlePoolUpdated: Getting IPFS data for hash {}', [hash])
+  // add new missing ipfs hash
   if (!data) {
     log.error('handlePoolUpdated: IPFS data is null - hash {}', [hash])
     return
   }
+  let obj = (data.get(hash) as JSONValue).toObject()
 
   // let obj = json.fromBytes(data as Bytes).toObject()
-  let addresses = (data.get('addresses') as JSONValue).toObject()
+  let addresses = (obj.get('addresses') as JSONValue).toObject()
+  // let addresses = data['addresses']
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed
@@ -82,15 +86,15 @@ export function loadPoolFromIPFS(hash: string): void {
   }
 
   // let data = ipfs.cat(hash)
-  let data = ipfsHashes[hash]
+  let data = json.fromString(ipfsHashes).toObject()
   if (!data) {
     log.error('loadPoolFromIPFS: IPFS data is null - hash {}', [hash])
     return
   }
 
-  // let obj = json.fromBytes(data as Bytes).toObject()
-  let metadata = (data.get('metadata') as JSONValue).toObject()
-  let addresses = (data.get('addresses') as JSONValue).toObject()
+  let obj = (data.get(hash) as JSONValue).toObject()
+  let metadata = (obj.get('metadata') as JSONValue).toObject()
+  let addresses = (obj.get('addresses') as JSONValue).toObject()
 
   if (!metadata || !addresses) {
     log.error('loadPoolFromIPFS: metadata or addresses is null - hash {}', [hash])
@@ -107,5 +111,3 @@ export function loadPoolFromIPFS(hash: string): void {
 
   addPoolsByAORewardRecipient(poolAddresses)
 }
-
-function 
