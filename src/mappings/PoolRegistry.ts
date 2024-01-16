@@ -1,4 +1,4 @@
-import { log, Bytes, JSONValue, ipfs, json } from '@graphprotocol/graph-ts'
+import { log, Bytes, JSONValue, ipfs, json, BigInt } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers, createUpdatedPoolHandlers } from '../domain/Pool'
 import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
@@ -11,6 +11,7 @@ import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../
 import { ipfsHashes } from '../ipfs'
 
 export function handlePoolCreated(call: PoolCreated): void {
+  if (call.block.number.gt(new BigInt(18586920))) { return }
   log.info('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
@@ -33,6 +34,7 @@ export function handlePoolCreated(call: PoolCreated): void {
 }
 
 export function handlePoolUpdated(call: PoolUpdated): void {
+  if (call.block.number.gt(new BigInt(18586920))) { return }
   log.info('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
