@@ -1,4 +1,4 @@
-import { log, Bytes, JSONValue, ipfs, json } from '@graphprotocol/graph-ts'
+import { log, Bytes, JSONValue, ipfs, json, BigInt } from '@graphprotocol/graph-ts'
 import { PoolCreated, PoolUpdated } from '../../generated/PoolRegistry/PoolRegistry'
 import { createPool, createPoolHandlers, createUpdatedPoolHandlers } from '../domain/Pool'
 import { addPoolToRegistry, createPoolRegistry } from '../domain/PoolRegistry'
@@ -8,8 +8,10 @@ import { PoolAddresses, PoolRegistry } from '../../generated/schema'
 import { registryAddress } from '../config'
 import { toLowerCaseAddress } from '../util/toLowerCaseAddress'
 import { addPoolsByAORewardRecipient, updatePoolsByAORewardRecipient } from '../domain/PoolsByAORewardRecipient'
+import { ipfsHashes } from '../ipfs'
 
 export function handlePoolCreated(call: PoolCreated): void {
+  if (call.block.number.gt(new BigInt(18586920))) { return }
   log.info('handlePoolCreated: pool: {}, live: {}, name: {},  data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
@@ -32,6 +34,7 @@ export function handlePoolCreated(call: PoolCreated): void {
 }
 
 export function handlePoolUpdated(call: PoolUpdated): void {
+  if (call.block.number.gt(new BigInt(18586920))) { return }
   log.info('handlePoolUpdated: pool: {}, live: {}, name: {}, data: {}', [
     call.params.pool.toHexString(),
     call.params.live ? 'true' : 'false',
@@ -41,7 +44,7 @@ export function handlePoolUpdated(call: PoolUpdated): void {
   let poolId = call.params.pool.toHexString()
   let hash = call.params.data
 
-  upsertPool(poolId, hash);
+  upsertPool(poolId, hash)
 }
 
 export function upsertPool(poolId: string, hash: string): void {
@@ -55,14 +58,19 @@ export function upsertPool(poolId: string, hash: string): void {
   }
 
   // Update pool addresses
-  let data = ipfs.cat(hash)
+  // let data = ipfs.cat(hash)
+  let data = json.fromString(ipfsHashes).toObject()
+  log.info('handlePoolUpdated: Getting IPFS data for hash {}', [hash])
+  // add new missing ipfs hash
   if (!data) {
     log.error('handlePoolUpdated: IPFS data is null - hash {}', [hash])
     return
   }
+  let obj = (data.get(hash) as JSONValue).toObject()
 
-  let obj = json.fromBytes(data as Bytes).toObject()
+  // let obj = json.fromBytes(data as Bytes).toObject()
   let addresses = (obj.get('addresses') as JSONValue).toObject()
+  // let addresses = data['addresses']
   let newPoolAddresses = updatePoolAddresses(poolId, addresses)
 
   // Create new pool handlers for the addresses that changed
@@ -79,13 +87,14 @@ export function loadPoolFromIPFS(hash: string): void {
     createPoolRegistry()
   }
 
-  let data = ipfs.cat(hash)
+  // let data = ipfs.cat(hash)
+  let data = json.fromString(ipfsHashes).toObject()
   if (!data) {
     log.error('loadPoolFromIPFS: IPFS data is null - hash {}', [hash])
     return
   }
 
-  let obj = json.fromBytes(data as Bytes).toObject()
+  let obj = (data.get(hash) as JSONValue).toObject()
   let metadata = (obj.get('metadata') as JSONValue).toObject()
   let addresses = (obj.get('addresses') as JSONValue).toObject()
 

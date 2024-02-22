@@ -1,5 +1,9 @@
 specVersion: 0.0.2
 description: Tinlake Mainnet Production
+graft:
+  base: QmaHP3LoSoFnACbhfYGipt7rjGRXs6NmANkQayT7ujWEce
+  block: 18715726
+
 schema:
   file: ./schema.graphql
 dataSources:
